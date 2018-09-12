@@ -2,6 +2,7 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 #include <limits>
 #include <chrono>
@@ -29,20 +30,19 @@ int main()
 
 	float rMax = 0.;
 
-	SynthStream synth(sampleRate, 512, [&](double t) -> double {
+	SynthStream synth(sampleRate, 512, [&](double& t) -> double {
 		float result = 0.;
 		unsigned notesNumber = 0;
 		for (int i=0; i<12; i++){
 			if (pressed[i]) {
                 const auto& f = notes[i].getFreq();
 				result += waves::sine(t, 1.0, f);
+				t = std::fmod(t, 2*M_PI*f);
                 ++notesNumber;
 			}
 		}
 
 		result = result / double(notesNumber) * amp;
-
-//		result = result *amp /2;
 
 		rMax = std::max(rMax, result);
 

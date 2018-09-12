@@ -9,7 +9,7 @@ class SynthStream : public sf::SoundStream
 {
 public:
 
-    SynthStream(unsigned sampleRate, const unsigned bufferSize, std::function<double(double)> generator);
+    SynthStream(unsigned sampleRate, const unsigned bufferSize, std::function<double(double&)> generator);
     void resetTime() {sampleTime = 0;}
 
 private:
@@ -21,7 +21,7 @@ private:
     const unsigned sampleRate, bufferSize;
     const double sampleTimeDif;
     std::vector<sf::Int16> buffer;
-    std::function<double(double)> generator;
+    std::function<double(double&)> generator;
 
 };
 

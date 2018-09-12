@@ -3,8 +3,8 @@
 
 namespace waves
 {
-    float sine(float time, float amp, float freq);
-    float square(float time, float amp, float freq);
+    double sine(double time, double amp, double freq);
+    double square(double time, double amp, double freq);
 }
 
 #endif // GENERATORS_H_INCLUDED

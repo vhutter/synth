@@ -5,12 +5,12 @@
 
 namespace waves
 {
-    float sine(float time, float amp, float freq)
+    double sine(double time, double amp, double freq)
     {
         return amp*::sin(time*freq*M_PI*2);
     }
 
-    float square(float time, float amp, float freq)
+    double square(double time, double amp, double freq)
     {
         return sine(time, amp, freq) > 0. ? 1. : 0.;
     }
