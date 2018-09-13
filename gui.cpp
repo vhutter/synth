@@ -23,6 +23,24 @@ SynthKey::SynthKey(Type t, float px, float py)
     setOutlineThickness(4.);
 }
 
+void SynthKey::setPressed(bool p)
+{
+    pressed = p;
+    if (type == Type::White) {
+        if (pressed) setFillColor(sf::Color(0xC0C0C0FF));
+        else setFillColor(sf::Color::White);
+    }
+    else {
+        if (pressed) setFillColor(sf::Color(0x404040FF));
+        else setFillColor(sf::Color::Black);
+    }
+}
+
+bool SynthKey::isPressed() const
+{
+    return pressed;
+}
+
 SynthKeyboard::SynthKeyboard(float px, float py)
     : pos(px, py)
 {

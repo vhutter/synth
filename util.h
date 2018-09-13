@@ -14,6 +14,7 @@ class Note
     public:
         Note(float freq);
         float getFreq() const {return freq;}
+        float getFifth() const {return freq*3/2;}
 
     private:
         float freq;

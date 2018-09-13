@@ -12,6 +12,9 @@ public:
 
     SynthKey(Type t, float px=0, float py=0);
     Type getType() const {return type;};
+    void setPressed(bool pressed);
+    bool isPressed() const;
+
 
     static const sf::Vector2f whiteSize, blackSize;
 
@@ -30,6 +33,8 @@ public:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     void setPosition(const sf::Vector2f& p);
     sf::Vector2f getPosition() const {return pos;};
+
+    SynthKey& operator[] (std::size_t i) {return keys[i];}
 
 
 private:

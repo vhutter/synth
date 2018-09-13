@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-SynthStream::SynthStream(unsigned sr, unsigned bs, std::function<double(double&)> gen)
+SynthStream::SynthStream(unsigned sr, unsigned bs, std::function<double(double)> gen)
     :sampleRate(sr),
      bufferSize(bs),
      sampleTimeDif(double(1)/sr),
