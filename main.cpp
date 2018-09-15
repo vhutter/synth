@@ -7,6 +7,7 @@
 #include <limits>
 #include <chrono>
 #include <atomic>
+#include <mutex>
 #include <iostream>
 #include <iomanip>
 #include <memory>
@@ -22,13 +23,20 @@ const std::vector<Note> notes = {A, Ais, B, C, Cis, D, Dis, E, F, Fis, G, Gis};
 
 int main()
 {
+
+    const unsigned sampleRate(44100);
+    const unsigned maxNotes = 4;
+
+    /// TODO:
+    /// should handle data between threads with one mutex instead of multiple atomics
+
 	std::atomic<unsigned> amp(std::numeric_limits<sf::Int16>::max());
 	std::atomic<double> octave(1.);
-	const unsigned sampleRate(44100);
-	std::array<bool, 12> pressed = {0};
-	std::vector<ADSREnvelope> envelopes(12, ADSREnvelope(0.01, 0.1, 1, .2, sampleRate));
 	std::atomic<double> lastTime(0);
-    const unsigned maxNotes = 4;
+	std::function<double(double,double,double)> waveGenerator = waves::sawtooth;
+
+	std::array<bool, 12> pressed = {0};
+	std::array<ADSREnvelope, 12> envelopes;
 
 	SynthStream synth(sampleRate, 512, [&](double t) -> double {
 		float result = 0.;
@@ -38,7 +46,7 @@ int main()
                 if (++notesNumber > maxNotes) break;
                 const auto& f = notes[i].getFreq() * octave;
                 double env = envelopes[i].getAmplitude(t);
-				result += waves::sine(t, 1., f) * env;
+				result += waveGenerator(t, 1., f) * env;
 			}
 		}
 
@@ -85,7 +93,7 @@ int main()
                             window.close();
                             break;
                         case sf::Keyboard::Space:
-                            synth.resetTime();
+                            waveGenerator = waves::triangle;
                             break;
                         default:
                             break;
