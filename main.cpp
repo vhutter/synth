@@ -6,7 +6,6 @@
 #include <cmath>
 #include <limits>
 #include <chrono>
-#include <atomic>
 #include <mutex>
 #include <iostream>
 #include <iomanip>
@@ -23,23 +22,22 @@ const std::vector<Note> notes = {A, Ais, B, C, Cis, D, Dis, E, F, Fis, G, Gis};
 
 int main()
 {
+    std::mutex mtx;
 
     const unsigned sampleRate(44100);
     const unsigned maxNotes = 4;
 
-    /// TODO:
-    /// should handle data between threads with one mutex instead of multiple atomics
-
-	std::atomic<unsigned> amp(std::numeric_limits<sf::Int16>::max());
-	std::atomic<double> octave(1.);
-	std::atomic<double> lastTime(0);
+	unsigned amp(std::numeric_limits<sf::Int16>::max());
+	double octave(1.);
+	double lastTime(0);
 	std::function<double(double,double,double)> waveGenerator = waves::sawtooth;
 
 	std::array<bool, 12> pressed = {0};
 	std::array<ADSREnvelope, 12> envelopes;
 
-	SynthStream synth(sampleRate, 512, [&](double t) -> double {
-		float result = 0.;
+	const auto& generateSample = [&](double t) -> double {
+        std::lock_guard<std::mutex> lock(mtx);
+		double result = 0.;
 		unsigned notesNumber = 0;
 		for (int i=0; i<12; i++){
 			if (pressed[i] || envelopes[i].isNonZero()) {
@@ -54,7 +52,9 @@ int main()
 		result = result / double(maxNotes) * amp;
 
 		return result;
-	});
+	};
+
+	SynthStream synth(sampleRate, 512, generateSample);
 	synth.play();
 	synth.setVolume(100);
 
@@ -71,14 +71,20 @@ int main()
 		while (window.pollEvent(event))
 		{
 		    switch (event.type) {
-                case sf::Event::Closed:
+                case sf::Event::Closed: {
                     window.close();
                     break;
+                }
                 case sf::Event::KeyPressed:
                 case sf::Event::KeyReleased: {
+                    std::unique_lock<std::mutex> lock(mtx);
+                    // ^ reason for locking is the modification of
+                    //      pressed
+                    //      envelopes
+                    //      waveGenerator
                     decltype(pressed) initiallyPressed(pressed);
                     updatePressed(pressed, event.key.code);
-                    for(unsigned i=0; i<12; ++i)
+                    for(unsigned i=0; i<12; ++i) {
                         if (!initiallyPressed[i] && pressed[i]) {
                             envelopes[i].start(lastTime);
                             kb[i].setPressed(true);
@@ -87,30 +93,41 @@ int main()
                             envelopes[i].stop(lastTime);
                             kb[i].setPressed(false);
                         }
+                    }
+                    lock.unlock();
 
                     switch (event.key.code) {
                         case sf::Keyboard::Escape:
                             window.close();
                             break;
                         case sf::Keyboard::Space:
+                            // re-lock: this section will run rarely
+                            // and its here only for testing anyway
+                            lock.lock();
                             waveGenerator = waves::triangle;
+                            lock.unlock();
                             break;
                         default:
                             break;
                     }
                     break;
                 }
-                case sf::Event::MouseMoved:
+                case sf::Event::MouseMoved: {
                     break;
-                case sf::Event::MouseWheelScrolled:
+                }
+                case sf::Event::MouseWheelScrolled: {
+                    std::lock_guard<std::mutex> lock(mtx);
                     if (event.mouseWheelScroll.delta > 0)
                         octave = octave * 2.;
                     else
                         octave = octave / 2.;
                     break;
-                case sf::Event::Resized:
-                    window.setSize(sf::Vector2u(800, 600));
+                }
+                case sf::Event::Resized: {
+                    sf::View view(sf::FloatRect(0, 0, event.size.width, event.size.height));
+                    window.setView(view);
                     break;
+                }
                 default:
                     break;
 		    }
@@ -126,6 +143,6 @@ int main()
 		window.display();
 	}
 
+	synth.stop();
 	return 0;
-
 }

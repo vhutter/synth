@@ -29,14 +29,14 @@ namespace waves
         if (t < rf_half)
             return t            * amp/rf - amp/2;
         else
-            return -(t-rf_half) * amp/rf + amp/2;
+            return (rf_half-t) * amp/rf + amp/2;
     }
 
     double sawtooth(double time, double amp, double freq)
     {
         const double rf = 1/freq;
         const double t = fmod(time, rf);
-        return t * amp * 2 / rf;
+        return t*amp*2/rf - amp;
     }
 }
 

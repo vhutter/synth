@@ -3,7 +3,6 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <memory>
 
 class SynthKey : public sf::RectangleShape
 {
