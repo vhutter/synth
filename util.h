@@ -4,9 +4,9 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Window.hpp>
 
-namespace utility
-{
 
+namespace util
+{
 
 
 class Note

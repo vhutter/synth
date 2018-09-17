@@ -1,7 +1,5 @@
 #include "synth.h"
 
-#include <iostream>
-
 SynthStream::SynthStream(unsigned sr, unsigned bs, std::function<double(double)> gen)
     :sampleRate(sr),
      bufferSize(bs),

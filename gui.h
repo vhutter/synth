@@ -7,7 +7,7 @@
 class SynthKey : public sf::RectangleShape
 {
 public:
-    enum class Type : bool {White = true, Black = false};
+    enum Type : bool {White = true, Black = false};
 
     SynthKey(Type t, float px=0, float py=0);
     Type getType() const {return type;};
@@ -41,6 +41,48 @@ private:
 
     sf::Vector2f pos;
     std::vector<SynthKey> keys;
+};
+
+
+class Slider : public sf::Drawable
+{
+public:
+    enum Orientation : bool {Vertical = true, Horizontal = false};
+
+    Slider(float px, float py, Orientation ori=Vertical);
+
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
+    sf::Vector2f getPosition() const {return mainRect.getPosition();}
+    bool containsPoint(const sf::Vector2f& p) const;
+    void moveSlider(const sf::Vector2f& p);
+    double getValue() const {return value;}
+
+private:
+    sf::RectangleShape mainRect, sliderRect;
+    double value = 0;
+    Orientation orientation;
+
+    static const sf::Vector2f size;
+    static const sf::Vector2f sliderRectSize;
+};
+
+class Oscilloscope : public sf::Drawable
+{
+public:
+    Oscilloscope(float px, float py, float sx, float sy, unsigned resolution, double speed);
+
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void setPosition(const sf::Vector2f& p) {window.setPosition(p);}
+    sf::Vector2f getPosition() const {return window.getPosition();}
+    void newSamples(const std::vector<double>& samples);
+
+private:
+    sf::RectangleShape window;
+    mutable std::vector<sf::Vertex> vArray;
+    unsigned resolution;
+    double speed;
+    double currTime = 0;
 };
 
 #endif // GUI_H_INCLUDED

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace utility
+namespace util
 {
 
 Note::Note(float f)
