@@ -18,8 +18,8 @@ namespace waves
 
     double square(double time, double amp, double freq)
     {
-        const double rf = 1/freq;
-        if (fmod(time, rf) < rf/2)
+        const double period = 1/freq;
+        if (fmod(time, period) < period/2)
             return amp;
         else
             return -amp;
@@ -27,20 +27,21 @@ namespace waves
 
     double triangle(double time, double amp, double freq)
     {
-        const double rf = 1/freq;
-        const double rf_half = rf/2;
-        const double t = fmod(time, rf);
-        if (t < rf_half)
-            return t            * amp/rf - amp/2;
+        const double period = 1/freq;
+        const double half_period = period/2;
+        const double quarter_period = half_period/2;
+        const double t = fmod(time, period);
+        if (t < half_period)
+            return -t*amp*2/half_period + amp;
         else
-            return (rf_half-t) * amp/rf + amp/2;
+            return (t-half_period)*amp*2/half_period - amp;
     }
 
     double sawtooth(double time, double amp, double freq)
     {
-        const double rf = 1/freq;
-        const double t = fmod(time, rf);
-        return -(t*amp*2/rf - amp);
+        const double period = 1/freq;
+        const double t = fmod(time, period);
+        return -(t*amp*2/period - amp);
     }
 }
 

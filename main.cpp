@@ -118,6 +118,7 @@ int main()
                             window.close();
                             break;
                         case sf::Keyboard::Space:
+                            if (event.type == sf::Event::KeyReleased) break;
                             static unsigned generatorIdx = 0;
                             // re-lock: this section will run rarely
                             // and its here only for testing anyway
