@@ -22,25 +22,36 @@ const std::vector<Note> notes = {A, Ais, B, C, Cis, D, Dis, E, F, Fis, G, Gis};
 
 int main()
 {
+    // Sound synthesis will be performed in a separate thread internally
+    // The generateSample lambda function is created below for that reason
     std::mutex mtx;
 
-    const unsigned sampleRate(48000);
-    const unsigned maxNotes = 4;
-
-	unsigned amp(std::numeric_limits<sf::Int16>::max());
-	double octave(1.);
+	double amp(1);
+	double octave(1);
 	double lastTime(0);
-	std::function<double(double,double,double)> waveGenerator = waves::sine;
+
+	waves::wave_t waveGenerator = waves::sawtooth;
+	std::array<waves::wave_t, 4> waveGenerators = {waves::sawtooth, waves::square, waves::triangle, waves::sine};
 
 	std::array<bool, 12> pressed = {0};
 	std::array<ADSREnvelope, 12> envelopes;
 
 	bool isSliderClicked = false;
-	auto slider1 = std::make_shared<Slider>(Slider(100,300, Slider::Vertical));
-	auto oscope1 = std::make_shared<Oscilloscope>(Oscilloscope(200, 300, 500, 200, 1000, 1));
+	auto sliderVolume = std::make_shared<Slider>("Volume", 100,300, Slider::Vertical);
+	auto oscope = std::make_shared<Oscilloscope>(200, 300, 500, 200, 1000, 1);
+	auto synthKeyboard = std::make_shared<SynthKeyboard>(50, 700);
+//    auto text1 = std::make_shared<TextDisplay>("", 200, 150, 150, 30);
 	std::deque<double> lastSamples;
 
+    std::vector< std::shared_ptr<sf::Drawable> > objects = {
+        sliderVolume,
+        oscope,
+        synthKeyboard,
+//        text1,
+    };
 
+
+    const unsigned maxNotes = 4;
 	const auto& generateSample = [&](double t) -> double {
         std::lock_guard<std::mutex> lock(mtx);
 		double result = 0.;
@@ -50,7 +61,7 @@ int main()
                 if (++notesNumber > maxNotes) break;
                 const auto& f = notes[i].getFreq() * octave;
                 double env = envelopes[i].getAmplitude(t);
-				result += waveGenerator(t, 1, f+slider1->getValue()) * env;
+				result += waveGenerator(t, 1, f) * env;
 			}
 		}
 
@@ -58,25 +69,19 @@ int main()
 		result = result / double(maxNotes);
         lastSamples.push_back(result*150);
 
-		return result  * amp;
+        amp = (1+sliderVolume->getValue())/2;
+//        text1->setText(std::to_string(amp));
+
+		return result  * amp * std::numeric_limits<sf::Int16>::max();
 	};
 
-	std::vector<double> samples(sampleRate);
-
+    const unsigned sampleRate(48000);
 	SynthStream synth(sampleRate, 512, generateSample);
 	synth.play();
-	synth.setVolume(100);
 
 	sf::RenderWindow window(sf::VideoMode(1000, 1000), "Basic synth");
 	window.setKeyRepeatEnabled(false);
 	window.setVerticalSyncEnabled(true);
-
-    std::vector< std::shared_ptr<sf::Drawable> > objects = {
-        slider1,
-        oscope1
-    };
-    SynthKeyboard kb(50, 700);
-
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -99,11 +104,11 @@ int main()
                     for(unsigned i=0; i<12; ++i) {
                         if (!initiallyPressed[i] && pressed[i]) {
                             envelopes[i].start(lastTime);
-                            kb[i].setPressed(true);
+                            (*synthKeyboard)[i].setPressed(true);
                         }
                         else if (initiallyPressed[i] && !pressed[i]) {
                             envelopes[i].stop(lastTime);
-                            kb[i].setPressed(false);
+                            (*synthKeyboard)[i].setPressed(false);
                         }
                     }
                     lock.unlock();
@@ -113,10 +118,12 @@ int main()
                             window.close();
                             break;
                         case sf::Keyboard::Space:
+                            static unsigned generatorIdx = 0;
                             // re-lock: this section will run rarely
                             // and its here only for testing anyway
+                            generatorIdx = (generatorIdx+1) % 4;
                             lock.lock();
-                            waveGenerator = waves::triangle;
+                            waveGenerator = waveGenerators[generatorIdx];
                             lock.unlock();
                             break;
                         default:
@@ -126,7 +133,7 @@ int main()
                 }
                 case sf::Event::MouseButtonPressed: {
                     const auto& mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
-                    if (slider1->containsPoint(mousePos)) {
+                    if (sliderVolume->containsPoint(mousePos)) {
                         isSliderClicked = true;
                     }
                     break;
@@ -138,8 +145,7 @@ int main()
                 case sf::Event::MouseMoved: {
                     const auto& mousePos = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
                     if (isSliderClicked) {
-                        slider1->moveSlider(mousePos);
-//                        std::cout << slider1->getValue() << "\n";
+                        sliderVolume->moveSlider(mousePos);
                     }
                     break;
                 }
@@ -165,13 +171,12 @@ int main()
 
 		std::unique_lock<std::mutex> lock(mtx);
 		std::vector<double> ls(lastSamples.begin(), lastSamples.end());
-		oscope1->newSamples(ls);
+		oscope->newSamples(ls);
 		lastSamples.clear();
 		lock.unlock();
+
         for (auto& object: objects)
             window.draw(*object);
-
-        window.draw(kb);
 
 		window.display();
 	}

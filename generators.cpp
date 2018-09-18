@@ -3,10 +3,14 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 
-namespace waves
+
+namespace
 {
     static const double TAU = M_PI*2;
+}
 
+namespace waves
+{
     double sine(double time, double amp, double freq)
     {
         return amp*::sin(time*freq*TAU);
@@ -36,7 +40,7 @@ namespace waves
     {
         const double rf = 1/freq;
         const double t = fmod(time, rf);
-        return t*amp*2/rf - amp;
+        return -(t*amp*2/rf - amp);
     }
 }
 

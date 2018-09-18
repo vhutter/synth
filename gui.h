@@ -43,13 +43,32 @@ private:
     std::vector<SynthKey> keys;
 };
 
+class TextDisplay : public sf::Drawable
+{
+public:
+    TextDisplay(const std::string& initialText, float px, float py, unsigned int charSize=24, float sx=0, float sy=0);
+
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void setPosition(const sf::Vector2f& p) {window.setPosition(p);}
+    sf::Vector2f getPosition() const {return window.getPosition();}
+    const std::string& getText() {return content;}
+    void setText(const std::string& text);
+    const sf::Text& getText() const {return text;}
+
+private:
+    sf::RectangleShape window;
+    sf::Text text;
+    std::string content;
+
+    static sf::Font font;
+};
 
 class Slider : public sf::Drawable
 {
 public:
     enum Orientation : bool {Vertical = true, Horizontal = false};
 
-    Slider(float px, float py, Orientation ori=Vertical);
+    Slider(const std::string& name, float px, float py, Orientation ori=Vertical);
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
@@ -59,6 +78,8 @@ public:
     double getValue() const {return value;}
 
 private:
+    TextDisplay title;
+    const std::string name;
     sf::RectangleShape mainRect, sliderRect;
     double value = 0;
     Orientation orientation;

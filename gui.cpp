@@ -2,11 +2,26 @@
 
 #include <deque>
 #include <algorithm>
+#include <sstream>
+#include <iomanip>
+
+namespace
+{
+    sf::Font loadCourierNew()
+    {
+        sf::Font tmpFont;
+        if (!tmpFont.loadFromFile("fonts/cour.ttf")) {
+            throw std::runtime_error("fonts/cour.ttf not found");
+        }
+        return tmpFont;
+    }
+}
 
 const sf::Vector2f SynthKey::whiteSize(100, 200);
 const sf::Vector2f SynthKey::blackSize(40, 150);
 const sf::Vector2f Slider::size(80, 300);
 const sf::Vector2f Slider::sliderRectSize(40, 40);
+sf::Font TextDisplay::font = loadCourierNew();
 
 SynthKey::SynthKey(Type t, float px, float py)
     :type(t)
@@ -90,8 +105,8 @@ void SynthKeyboard::repositionKeys()
 }
 
 
-Slider::Slider(float px, float py, Orientation ori)
-    :orientation(ori)
+Slider::Slider(const std::string& str, float px, float py, Orientation ori)
+    :title(str, px, py-80), name(str), orientation(ori)
 {
     if (orientation == Vertical) {
         mainRect.setSize(size);
@@ -115,6 +130,10 @@ Slider::Slider(float px, float py, Orientation ori)
 
 void Slider::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+    std::ostringstream oss;
+    oss << std::setprecision(2) << std::fixed << value;
+    const_cast<TextDisplay*>(&title)->setText(name+"\n["+oss.str()+"]");
+    target.draw(title, states);
     target.draw(mainRect, states);
     target.draw(sliderRect, states);
 }
@@ -191,4 +210,31 @@ void Oscilloscope::newSamples(const std::vector<double>& samples)
         for (unsigned i=0; i<vArray.size(); ++i)
             vArray[i].position.y = window.getPosition().y + window.getSize().y/2 + samples[i];
     }
+}
+
+TextDisplay::TextDisplay(const std::string& initialText, float px, float py, unsigned int size, float sx, float sy)
+    : text()
+{
+    window.setPosition(sf::Vector2f(px, py));
+    window.setSize(sf::Vector2f(sx, sy));
+    window.setOutlineColor(sf::Color::White);
+    window.setFillColor(sf::Color::Black);
+    window.setOutlineThickness(1.);
+
+    text.setFont(font);
+    text.setCharacterSize(size);
+    text.setString(initialText);
+    text.setPosition(sf::Vector2f(px, py));
+    text.setFillColor(sf::Color::Green);
+}
+
+void TextDisplay::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+    target.draw(window, states);
+    target.draw(text, states);
+}
+
+void TextDisplay::setText(const std::string& content)
+{
+    text.setString(content);
 }

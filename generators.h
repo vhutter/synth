@@ -2,10 +2,12 @@
 #define GENERATORS_H_INCLUDED
 
 #include <chrono>
-#include <iostream>
+#include <functional>
 
 namespace waves
 {
+    typedef std::function<double(double,double,double)> wave_t;
+
     double sine(double time, double amp, double freq);
     double square(double time, double amp, double freq);
     double triangle(double time, double amp, double freq);

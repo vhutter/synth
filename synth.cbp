@@ -11,7 +11,6 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
@@ -31,7 +30,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add option="-std=c++0x" />
+			<Add option="-std=c++17" />
 			<Add directory="D:/SDKs/SFML-2.5.0/include" />
 		</Compiler>
 		<Linker>
@@ -42,6 +41,8 @@
 			<Add library="sfml-audio" />
 			<Add directory="D:/SDKs/SFML-2.5.0/lib" />
 		</Linker>
+		<Unit filename="eventHandlers.cpp" />
+		<Unit filename="eventHandlers.h" />
 		<Unit filename="generators.cpp" />
 		<Unit filename="generators.h" />
 		<Unit filename="gui.cpp" />
