@@ -30,8 +30,8 @@ int main()
 	double octave(1);
 	double lastTime(0);
 
-	waves::wave_t waveGenerator = waves::sawtooth;
 	std::array<waves::wave_t, 4> waveGenerators = {waves::sawtooth, waves::square, waves::triangle, waves::sine};
+    static unsigned generatorIdx = 3;
 
 	std::array<bool, 12> pressed = {0};
 	std::array<ADSREnvelope, 12> envelopes;
@@ -40,14 +40,12 @@ int main()
 	auto sliderVolume = std::make_shared<Slider>("Volume", 100,300, Slider::Vertical);
 	auto oscope = std::make_shared<Oscilloscope>(200, 300, 500, 200, 1000, 1);
 	auto synthKeyboard = std::make_shared<SynthKeyboard>(50, 700);
-//    auto text1 = std::make_shared<TextDisplay>("", 200, 150, 150, 30);
 	std::deque<double> lastSamples;
 
     std::vector< std::shared_ptr<sf::Drawable> > objects = {
         sliderVolume,
         oscope,
         synthKeyboard,
-//        text1,
     };
 
 
@@ -59,18 +57,16 @@ int main()
 		for (int i=0; i<12; i++){
 			if (pressed[i] || envelopes[i].isNonZero()) {
                 if (++notesNumber > maxNotes) break;
-                const auto& f = notes[i].getFreq() * octave;
+                const auto& f = notes[i].getFreq();
                 double env = envelopes[i].getAmplitude(t);
-				result += waveGenerator(t, 1, f) * env;
+				result += waveGenerators[generatorIdx](t, 1, f* octave) * env;
 			}
 		}
 
 		lastTime = t;
 		result = result / double(maxNotes);
         lastSamples.push_back(result*150);
-
         amp = (1+sliderVolume->getValue())/2;
-//        text1->setText(std::to_string(amp));
 
 		return result  * amp * std::numeric_limits<sf::Int16>::max();
 	};
@@ -119,12 +115,10 @@ int main()
                             break;
                         case sf::Keyboard::Space:
                             if (event.type == sf::Event::KeyReleased) break;
-                            static unsigned generatorIdx = 0;
                             // re-lock: this section will run rarely
                             // and its here only for testing anyway
-                            generatorIdx = (generatorIdx+1) % 4;
                             lock.lock();
-                            waveGenerator = waveGenerators[generatorIdx];
+                            generatorIdx = (generatorIdx+1) % 4;
                             lock.unlock();
                             break;
                         default:

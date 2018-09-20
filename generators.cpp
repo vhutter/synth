@@ -29,7 +29,6 @@ namespace waves
     {
         const double period = 1/freq;
         const double half_period = period/2;
-        const double quarter_period = half_period/2;
         const double t = fmod(time, period);
         if (t < half_period)
             return -t*amp*2/half_period + amp;
