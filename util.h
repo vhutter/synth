@@ -12,12 +12,13 @@ namespace util
 class Note
 {
     public:
-        Note(float freq);
-        float getFreq() const {return freq;}
-        float getFifth() const {return freq*3/2;}
+        Note(double freq);
+        double getFreq() const {return freq;}
+        double getFifth() const {return freq*3/2;}
+        operator double() const {return freq;}
 
     private:
-        float freq;
+        double freq;
 };
 
 

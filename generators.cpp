@@ -1,8 +1,5 @@
 #include "generators.h"
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 
 namespace
 {
@@ -11,12 +8,12 @@ namespace
 
 namespace waves
 {
-    double sine(double time, double amp, double freq)
+    double sine(double time, double amp, double freq, double phase)
     {
-        return amp*::sin(time*freq*TAU);
+        return amp*::sin((time+phase)*freq*TAU);
     }
 
-    double square(double time, double amp, double freq)
+    double square(double time, double amp, double freq, double phase)
     {
         const double period = 1/freq;
         if (fmod(time, period) < period/2)
@@ -25,7 +22,7 @@ namespace waves
             return -amp;
     }
 
-    double triangle(double time, double amp, double freq)
+    double triangle(double time, double amp, double freq, double phase)
     {
         const double period = 1/freq;
         const double half_period = period/2;
@@ -36,7 +33,7 @@ namespace waves
             return (t-half_period)*amp*2/half_period - amp;
     }
 
-    double sawtooth(double time, double amp, double freq)
+    double sawtooth(double time, double amp, double freq, double phase)
     {
         const double period = 1/freq;
         const double t = fmod(time, period);
@@ -85,4 +82,31 @@ double ADSREnvelope::getAmplitude(double t) const
     }
 
     return 0;
+}
+
+
+ContinuousFunction::ContinuousFunction(double initConst)
+    : value(initConst), m(0) {}
+
+double ContinuousFunction::getValue(double t)
+{
+    if (m != 0 && t >= startTime) {
+        value = startValue + m * (t-startTime);
+
+        if (t >= endTime)
+        {
+            value = endValue;
+            m = 0;
+        }
+    }
+    return value;
+}
+
+void ContinuousFunction::setValueLinear(double newVal, double btime, double duration)
+{
+    startValue = value;
+    endValue = newVal;
+    startTime = btime;
+    endTime = btime + duration;
+    m = (endValue - startValue) / (endTime - startTime);
 }

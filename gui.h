@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <functional>
 
 class SynthKey : public sf::RectangleShape
 {
@@ -68,9 +69,10 @@ class Slider : public sf::Drawable
 public:
     enum Orientation : bool {Vertical = true, Horizontal = false};
 
-    Slider(const std::string& name, float px, float py, Orientation ori=Vertical);
+    Slider(const std::string& name, float px, float py, Orientation ori);
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+
     void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
     sf::Vector2f getPosition() const {return mainRect.getPosition();}
     bool containsPoint(const sf::Vector2f& p) const;

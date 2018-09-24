@@ -1,17 +1,20 @@
 #ifndef GENERATORS_H_INCLUDED
 #define GENERATORS_H_INCLUDED
 
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <chrono>
 #include <functional>
 
 namespace waves
 {
-    typedef std::function<double(double,double,double)> wave_t;
+    typedef std::function<double(double,double,double,double)> wave_t;
 
-    double sine(double time, double amp, double freq);
-    double square(double time, double amp, double freq);
-    double triangle(double time, double amp, double freq);
-    double sawtooth(double time, double amp, double freq);
+    double sine(double time, double amp, double freq, double phase=0);
+    double square(double time, double amp, double freq, double phase);
+    double triangle(double time, double amp, double freq, double phase);
+    double sawtooth(double time, double amp, double freq, double phase);
 }
 
 class ADSREnvelope
@@ -32,6 +35,19 @@ private:
     bool isHeld = false;
     mutable bool nonzero = false;
 
+};
+
+class ContinuousFunction
+{
+public:
+    ContinuousFunction(double initConst=0);
+    void setValueLinear(double newVal, double begin, double duration);
+    double getValue(double t);
+
+private:
+    double value;
+    double startTime, endTime, startValue, endValue;
+    double m;
 };
 
 #endif // GENERATORS_H_INCLUDED

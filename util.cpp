@@ -7,7 +7,7 @@
 namespace util
 {
 
-Note::Note(float f)
+Note::Note(double f)
     :freq(f)
 {
 

@@ -7,10 +7,12 @@
 #include <limits>
 #include <chrono>
 #include <mutex>
-#include <iostream>
 #include <memory>
 #include <utility>
 #include <deque>
+
+#include <iostream>
+#include <iomanip>
 
 #include "util.h"
 #include "synth.h"
@@ -22,6 +24,8 @@ const std::vector<Note> notes = {A, Ais, B, C, Cis, D, Dis, E, F, Fis, G, Gis};
 
 int main()
 {
+    std::cout << std::fixed << std::setprecision(2);
+
     // Sound synthesis will be performed in a separate thread internally
     // The generateSample lambda function is created below for that reason
     std::mutex mtx;
@@ -31,14 +35,21 @@ int main()
 	double lastTime(0);
 
 	std::array<waves::wave_t, 4> waveGenerators = {waves::sawtooth, waves::square, waves::triangle, waves::sine};
-    static unsigned generatorIdx = 3;
+    unsigned generatorIdx = 3;
 
 	std::array<bool, 12> pressed = {0};
 	std::array<ADSREnvelope, 12> envelopes;
+	std::array<ContinuousFunction, 12> freqs;
+	std::array<double, 12> phases = {0};
+	std::transform(notes.begin(), notes.end(), freqs.begin(), [](const Note& note){
+        return ContinuousFunction(note);
+    });
 
 	bool isSliderClicked = false;
+	bool isPitchClicked = false;
 	auto sliderVolume = std::make_shared<Slider>("Volume", 100,300, Slider::Vertical);
-	auto oscope = std::make_shared<Oscilloscope>(200, 300, 500, 200, 1000, 1);
+	auto sliderPitch  = std::make_shared<Slider>("Pitch", 200,300, Slider::Vertical);
+	auto oscope = std::make_shared<Oscilloscope>(300, 300, 500, 200, 1000, 1);
 	auto synthKeyboard = std::make_shared<SynthKeyboard>(50, 700);
 	std::deque<double> lastSamples;
 
@@ -46,22 +57,23 @@ int main()
         sliderVolume,
         oscope,
         synthKeyboard,
+        sliderPitch,
     };
-
 
     const unsigned maxNotes = 4;
 	const auto& generateSample = [&](double t) -> double {
         std::lock_guard<std::mutex> lock(mtx);
 		double result = 0.;
 		unsigned notesNumber = 0;
-		for (int i=0; i<12; i++){
+		for (unsigned i=0; i<pressed.size(); i++){
 			if (pressed[i] || envelopes[i].isNonZero()) {
                 if (++notesNumber > maxNotes) break;
-                const auto& f = notes[i].getFreq();
+                const auto& f = freqs[i].getValue(t);
                 double env = envelopes[i].getAmplitude(t);
-				result += waveGenerators[generatorIdx](t, 1, f* octave) * env;
+				result += waveGenerators[generatorIdx](t, 1, f * octave, phases[i]) * env;
 			}
 		}
+
 
 		lastTime = t;
 		result = result / double(maxNotes);
@@ -71,11 +83,12 @@ int main()
 		return result  * amp * std::numeric_limits<sf::Int16>::max();
 	};
 
+
     const unsigned sampleRate(48000);
 	SynthStream synth(sampleRate, 512, generateSample);
 	synth.play();
 
-	sf::RenderWindow window(sf::VideoMode(1000, 1000), "Basic synth");
+	sf::RenderWindow window(sf::VideoMode(1400, 1000), "Basic synth");
 	window.setKeyRepeatEnabled(false);
 	window.setVerticalSyncEnabled(true);
 	while (window.isOpen())
@@ -131,16 +144,36 @@ int main()
                     if (sliderVolume->containsPoint(mousePos)) {
                         isSliderClicked = true;
                     }
+                    if (sliderPitch->containsPoint(mousePos)) {
+                        isPitchClicked = true;
+                    }
                     break;
                 }
                 case sf::Event::MouseButtonReleased: {
                     isSliderClicked = false;
+                    isPitchClicked = false;
                     break;
                 }
                 case sf::Event::MouseMoved: {
+                    std::lock_guard<std::mutex> lock(mtx);
                     const auto& mousePos = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
                     if (isSliderClicked) {
                         sliderVolume->moveSlider(mousePos);
+                    }
+                    if (isPitchClicked) {
+                        sliderPitch->moveSlider(mousePos);
+                        for (unsigned i=0; i<notes.size(); ++i) {
+                            if (pressed[i])
+                            {
+                                double f1 = freqs[i].getValue(lastTime);
+                                double f2 = notes[i] + sliderPitch->getValue()*400;
+                                const auto& t = lastTime;
+
+                                double p = (t+phases[i]) * f1 / f2 - t;
+                                phases[i] = p;
+                                freqs[i].setValueLinear(notes[i] + sliderPitch->getValue()*400, lastTime, 0);
+                            }
+                        }
                     }
                     break;
                 }
@@ -161,6 +194,8 @@ int main()
                     break;
 		    }
 		}
+
+//        std::cout << lastTime << " " << freqs[0].getValue(lastTime) <<"\n";
 
 		window.clear(sf::Color::Black);
 

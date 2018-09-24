@@ -127,7 +127,6 @@ Slider::Slider(const std::string& str, float px, float py, Orientation ori)
     sliderRect.setOutlineThickness(4.);
 }
 
-
 void Slider::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     std::ostringstream oss;
