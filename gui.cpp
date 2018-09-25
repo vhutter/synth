@@ -105,8 +105,8 @@ void SynthKeyboard::repositionKeys()
 }
 
 
-Slider::Slider(const std::string& str, float px, float py, Orientation ori)
-    :title(str, px, py-80), name(str), orientation(ori)
+Slider::Slider(const std::string& str, float px, float py, Orientation ori, std::function<void()> callback)
+    :title(str, px, py-80), name(str), orientation(ori), onMove(callback)
 {
     if (orientation == Vertical) {
         mainRect.setSize(size);
@@ -125,6 +125,40 @@ Slider::Slider(const std::string& str, float px, float py, Orientation ori)
     sliderRect.setOutlineColor(sf::Color(0x757575FF));
     sliderRect.setFillColor(sf::Color(0x003366FF));
     sliderRect.setOutlineThickness(4.);
+}
+
+void Slider::forwardEvent(const sf::Event& event)
+{
+    switch(event.type)
+    {
+        case sf::Event::MouseButtonPressed: {
+            const auto& mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+            if(containsPoint(mousePos))
+                clicked = true;
+            break;
+        }
+        case sf::Event::MouseButtonReleased: {
+            clicked = false;
+            if (fixed) {
+                auto [px, py] = mainRect.getPosition();
+                sliderRect.setPosition(sf::Vector2f(px + mainRect.getSize().x/2 - sliderRectSize.x/2, py + mainRect.getSize().y/2 - sliderRectSize.y/2));
+                moveSlider(sf::Vector2f(px+mainRect.getSize().x/2, py+mainRect.getSize().y/2));
+                onMove();
+            }
+            break;
+        }
+        case sf::Event::MouseMoved: {
+            if (clicked) {
+                const auto& mousePos = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
+                moveSlider(mousePos);
+                onMove();
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
 }
 
 void Slider::draw(sf::RenderTarget& target, sf::RenderStates states) const

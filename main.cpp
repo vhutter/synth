@@ -35,7 +35,7 @@ int main()
 	double lastTime(0);
 
 	std::array<waves::wave_t, 4> waveGenerators = {waves::sawtooth, waves::square, waves::triangle, waves::sine};
-    unsigned generatorIdx = 3;
+    unsigned generatorIdx = 3; // sine
 
 	std::array<bool, 12> pressed = {0};
 	std::array<ADSREnvelope, 12> envelopes;
@@ -45,15 +45,26 @@ int main()
         return ContinuousFunction(note);
     });
 
-	bool isSliderClicked = false;
-	bool isPitchClicked = false;
-	auto sliderVolume = std::make_shared<Slider>("Volume", 100,300, Slider::Vertical);
-	auto sliderPitch  = std::make_shared<Slider>("Pitch", 200,300, Slider::Vertical);
+	std::shared_ptr<Slider> sliderVolume = std::make_shared<Slider>("Volume", 100,300, Slider::Vertical, [](){});
+	std::shared_ptr<Slider> sliderPitch  = std::make_shared<Slider>("Pitch", 200,300, Slider::Vertical, [&](){
+        for (unsigned i=0; i<notes.size(); ++i) {
+            {
+                double f1 = freqs[i].getValue(lastTime);
+                double f2 = notes[i] + notes[i]/8*sliderPitch->getValue(); // major second
+                const auto& t = lastTime;
+
+                double p = (t+phases[i]) * f1 / f2 - t;
+                phases[i] = p;
+                freqs[i].setValueLinear(f2, lastTime, 0);
+            }
+        }
+    });
+    sliderPitch->setFixed(true);
 	auto oscope = std::make_shared<Oscilloscope>(300, 300, 500, 200, 1000, 1);
 	auto synthKeyboard = std::make_shared<SynthKeyboard>(50, 700);
 	std::deque<double> lastSamples;
 
-    std::vector< std::shared_ptr<sf::Drawable> > objects = {
+    std::vector< std::shared_ptr<GuiElement> > objects = {
         sliderVolume,
         oscope,
         synthKeyboard,
@@ -96,32 +107,25 @@ int main()
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
+            for (auto& object: objects)
+                object->forwardEvent(event);
+
 		    switch (event.type) {
                 case sf::Event::Closed: {
                     window.close();
                     break;
                 }
-                case sf::Event::KeyPressed:
-                case sf::Event::KeyReleased: {
+                case sf::Event::KeyPressed: {
                     std::unique_lock<std::mutex> lock(mtx);
-                    // ^ reason for locking is the modification of
-                    //      pressed
-                    //      envelopes
-                    //      waveGenerator
-                    decltype(pressed) initiallyPressed(pressed);
-                    updatePressed(pressed, event.key.code);
+                    updatePressed(pressed, event.key.code, true);
                     for(unsigned i=0; i<12; ++i) {
-                        if (!initiallyPressed[i] && pressed[i]) {
+                        if (pressed[i]) {
                             envelopes[i].start(lastTime);
                             (*synthKeyboard)[i].setPressed(true);
                         }
-                        else if (initiallyPressed[i] && !pressed[i]) {
-                            envelopes[i].stop(lastTime);
-                            (*synthKeyboard)[i].setPressed(false);
-                        }
                     }
-                    lock.unlock();
 
+                    lock.unlock();
                     switch (event.key.code) {
                         case sf::Keyboard::Escape:
                             window.close();
@@ -139,40 +143,13 @@ int main()
                     }
                     break;
                 }
-                case sf::Event::MouseButtonPressed: {
-                    const auto& mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
-                    if (sliderVolume->containsPoint(mousePos)) {
-                        isSliderClicked = true;
-                    }
-                    if (sliderPitch->containsPoint(mousePos)) {
-                        isPitchClicked = true;
-                    }
-                    break;
-                }
-                case sf::Event::MouseButtonReleased: {
-                    isSliderClicked = false;
-                    isPitchClicked = false;
-                    break;
-                }
-                case sf::Event::MouseMoved: {
-                    std::lock_guard<std::mutex> lock(mtx);
-                    const auto& mousePos = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
-                    if (isSliderClicked) {
-                        sliderVolume->moveSlider(mousePos);
-                    }
-                    if (isPitchClicked) {
-                        sliderPitch->moveSlider(mousePos);
-                        for (unsigned i=0; i<notes.size(); ++i) {
-                            if (pressed[i])
-                            {
-                                double f1 = freqs[i].getValue(lastTime);
-                                double f2 = notes[i] + sliderPitch->getValue()*400;
-                                const auto& t = lastTime;
-
-                                double p = (t+phases[i]) * f1 / f2 - t;
-                                phases[i] = p;
-                                freqs[i].setValueLinear(notes[i] + sliderPitch->getValue()*400, lastTime, 0);
-                            }
+                case sf::Event::KeyReleased: {
+                    std::unique_lock<std::mutex> lock(mtx);
+                    updatePressed(pressed, event.key.code, false);
+                    for(unsigned i=0; i<12; ++i) {
+                        if (!pressed[i]) {
+                            envelopes[i].stop(lastTime);
+                            (*synthKeyboard)[i].setPressed(false);
                         }
                     }
                     break;
@@ -194,8 +171,6 @@ int main()
                     break;
 		    }
 		}
-
-//        std::cout << lastTime << " " << freqs[0].getValue(lastTime) <<"\n";
 
 		window.clear(sf::Color::Black);
 

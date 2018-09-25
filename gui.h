@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <functional>
+#include <atomic>
 
 class SynthKey : public sf::RectangleShape
 {
@@ -24,8 +25,14 @@ private:
 
 };
 
+class GuiElement: public sf::Drawable
+{
+public:
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const = 0;
+    virtual void forwardEvent(const sf::Event& event) {}
+};
 
-class SynthKeyboard : public sf::Drawable
+class SynthKeyboard : public GuiElement
 {
 public:
     SynthKeyboard(float px, float py);
@@ -44,7 +51,7 @@ private:
     std::vector<SynthKey> keys;
 };
 
-class TextDisplay : public sf::Drawable
+class TextDisplay : public GuiElement
 {
 public:
     TextDisplay(const std::string& initialText, float px, float py, unsigned int charSize=24, float sx=0, float sy=0);
@@ -56,6 +63,7 @@ public:
     void setText(const std::string& text);
     const sf::Text& getText() const {return text;}
 
+
 private:
     sf::RectangleShape window;
     sf::Text text;
@@ -64,14 +72,16 @@ private:
     static sf::Font font;
 };
 
-class Slider : public sf::Drawable
+class Slider : public GuiElement
 {
 public:
     enum Orientation : bool {Vertical = true, Horizontal = false};
 
-    Slider(const std::string& name, float px, float py, Orientation ori);
+    Slider(const std::string& name, float px, float py, Orientation ori, std::function<void()> onMove);
+    Slider& setFixed(bool val) {fixed = val; return *this;}
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    virtual void forwardEvent(const sf::Event& event) override;
 
     void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
     sf::Vector2f getPosition() const {return mainRect.getPosition();}
@@ -83,14 +93,18 @@ private:
     TextDisplay title;
     const std::string name;
     sf::RectangleShape mainRect, sliderRect;
-    double value = 0;
+    std::atomic<double> value = 0;
     Orientation orientation;
+    bool fixed = false;
+
+    bool clicked;
+    std::function<void()> onMove;
 
     static const sf::Vector2f size;
     static const sf::Vector2f sliderRectSize;
 };
 
-class Oscilloscope : public sf::Drawable
+class Oscilloscope : public GuiElement
 {
 public:
     Oscilloscope(float px, float py, float sx, float sy, unsigned resolution, double speed);

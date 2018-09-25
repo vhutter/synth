@@ -30,46 +30,46 @@ void flip(T& b)
 }
 
 template<typename T>
-void updatePressed(T& pressed, const sf::Keyboard::Key& key)
+void updatePressed(T& pressed, const sf::Keyboard::Key& key, bool value)
 {
     using namespace sf;
     switch (key)
     {
     case sf::Keyboard::Z:
-        flip(pressed[0]);
+        pressed[0] = value;
         break;
     case sf::Keyboard::S:
-        flip(pressed[1]);
+        pressed[1] = value;
         break;
     case sf::Keyboard::X:
-        flip(pressed[2]);
+        pressed[2] = value;
         break;
     case sf::Keyboard::D:
-        flip(pressed[3]);
+        pressed[3] = value;
         break;
     case sf::Keyboard::C:
-        flip(pressed[4]);
+        pressed[4] = value;
         break;
     case sf::Keyboard::V:
-        flip(pressed[5]);
+        pressed[5] = value;
         break;
     case sf::Keyboard::G:
-        flip(pressed[6]);
+        pressed[6] = value;
         break;
     case sf::Keyboard::B:
-        flip(pressed[7]);
+        pressed[7] = value;
         break;
     case sf::Keyboard::H:
-        flip(pressed[8]);
+        pressed[8] = value;
         break;
     case sf::Keyboard::N:
-        flip(pressed[9]);
+        pressed[9] = value;
         break;
     case sf::Keyboard::J:
-        flip(pressed[10]);
+        pressed[10] = value;
         break;
     case sf::Keyboard::M:
-        flip(pressed[11]);
+        pressed[11] = value;
         break;
     default:
         break;
