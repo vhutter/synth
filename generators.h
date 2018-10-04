@@ -6,6 +6,7 @@
 #include <cmath>
 #include <chrono>
 #include <functional>
+#include <SFML/System.hpp>
 
 namespace waves
 {
@@ -48,6 +49,8 @@ private:
     double value;
     double startTime, endTime, startValue, endValue;
     double m;
+
+    sf::Vector2f reach;
 };
 
 #endif // GENERATORS_H_INCLUDED

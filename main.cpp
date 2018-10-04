@@ -20,7 +20,7 @@
 #include "gui.h"
 
 using namespace util;
-const std::vector<Note> notes = {A, Ais, B, C, Cis, D, Dis, E, F, Fis, G, Gis};
+const std::vector<Note> notes = {C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B};
 
 int main()
 {
@@ -39,29 +39,39 @@ int main()
 
 	std::array<bool, 12> pressed = {0};
 	std::array<ADSREnvelope, 12> envelopes;
-	std::array<ContinuousFunction, 12> freqs;
+	std::array<double, 12> freqs;
 	std::array<double, 12> phases = {0};
-	std::transform(notes.begin(), notes.end(), freqs.begin(), [](const Note& note){
-        return ContinuousFunction(note);
-    });
+	std::copy(notes.begin(), notes.end(), freqs.begin());
 
 	std::shared_ptr<Slider> sliderVolume = std::make_shared<Slider>("Volume", 100,300, Slider::Vertical, [](){});
 	std::shared_ptr<Slider> sliderPitch  = std::make_shared<Slider>("Pitch", 200,300, Slider::Vertical, [&](){
+        std::unique_lock<std::mutex> lock(mtx);
         for (unsigned i=0; i<notes.size(); ++i) {
             {
-                double f1 = freqs[i].getValue(lastTime);
+                double f1 = freqs[i];
                 double f2 = notes[i] + notes[i]/8*sliderPitch->getValue(); // major second
                 const auto& t = lastTime;
 
                 double p = (t+phases[i]) * f1 / f2 - t;
                 phases[i] = p;
-                freqs[i].setValueLinear(f2, lastTime, 0);
+                freqs[i] = f2;
             }
         }
     });
     sliderPitch->setFixed(true);
 	auto oscope = std::make_shared<Oscilloscope>(300, 300, 500, 200, 1000, 1);
-	auto synthKeyboard = std::make_shared<SynthKeyboard>(50, 700);
+	std::shared_ptr<SynthKeyboard> synthKeyboard = std::make_shared<SynthKeyboard>(50, 700, [&](unsigned keyIdx){
+        const auto& synth = synthKeyboard;
+        std::lock_guard<std::mutex> lock(mtx);
+        if (synth->isLastEventKeypress()) {
+            envelopes[keyIdx].start(lastTime);
+            (*synth)[keyIdx].setPressed(true);
+        }
+        else {
+            envelopes[keyIdx].stop(lastTime);
+            (*synth)[keyIdx].setPressed(false);
+        }
+    });
 	std::deque<double> lastSamples;
 
     std::vector< std::shared_ptr<GuiElement> > objects = {
@@ -73,30 +83,30 @@ int main()
 
     const unsigned maxNotes = 4;
 	const auto& generateSample = [&](double t) -> double {
+
         std::lock_guard<std::mutex> lock(mtx);
 		double result = 0.;
 		unsigned notesNumber = 0;
 		for (unsigned i=0; i<pressed.size(); i++){
-			if (pressed[i] || envelopes[i].isNonZero()) {
+			if ((*synthKeyboard)[i].isPressed() || envelopes[i].isNonZero()) {
                 if (++notesNumber > maxNotes) break;
-                const auto& f = freqs[i].getValue(t);
+                const auto& f = freqs[i];
                 double env = envelopes[i].getAmplitude(t);
 				result += waveGenerators[generatorIdx](t, 1, f * octave, phases[i]) * env;
 			}
 		}
-
 
 		lastTime = t;
 		result = result / double(maxNotes);
         lastSamples.push_back(result*150);
         amp = (1+sliderVolume->getValue())/2;
 
-		return result  * amp * std::numeric_limits<sf::Int16>::max();
+		return result  * amp;
 	};
 
 
-    const unsigned sampleRate(48000);
-	SynthStream synth(sampleRate, 512, generateSample);
+    const unsigned sampleRate(42100);
+	SynthStream synth(sampleRate, 32, generateSample);
 	synth.play();
 
 	sf::RenderWindow window(sf::VideoMode(1400, 1000), "Basic synth");
@@ -116,41 +126,18 @@ int main()
                     break;
                 }
                 case sf::Event::KeyPressed: {
-                    std::unique_lock<std::mutex> lock(mtx);
-                    updatePressed(pressed, event.key.code, true);
-                    for(unsigned i=0; i<12; ++i) {
-                        if (pressed[i]) {
-                            envelopes[i].start(lastTime);
-                            (*synthKeyboard)[i].setPressed(true);
-                        }
-                    }
-
-                    lock.unlock();
                     switch (event.key.code) {
-                        case sf::Keyboard::Escape:
+                        case sf::Keyboard::Escape: {
                             window.close();
                             break;
-                        case sf::Keyboard::Space:
-                            if (event.type == sf::Event::KeyReleased) break;
-                            // re-lock: this section will run rarely
-                            // and its here only for testing anyway
-                            lock.lock();
+                        }
+                        case sf::Keyboard::Space: {
+                            std::lock_guard<std::mutex> lock(mtx);
                             generatorIdx = (generatorIdx+1) % 4;
-                            lock.unlock();
                             break;
+                        }
                         default:
                             break;
-                    }
-                    break;
-                }
-                case sf::Event::KeyReleased: {
-                    std::unique_lock<std::mutex> lock(mtx);
-                    updatePressed(pressed, event.key.code, false);
-                    for(unsigned i=0; i<12; ++i) {
-                        if (!pressed[i]) {
-                            envelopes[i].stop(lastTime);
-                            (*synthKeyboard)[i].setPressed(false);
-                        }
                     }
                     break;
                 }
@@ -171,6 +158,8 @@ int main()
                     break;
 		    }
 		}
+
+		std::cout << freqs[0] * octave << "       \r";
 
 		window.clear(sf::Color::Black);
 

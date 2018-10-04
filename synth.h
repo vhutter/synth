@@ -1,28 +1,44 @@
 #ifndef SYNTH_H_INCLUDED
 #define SYNTH_H_INCLUDED
 
-#include <SFML/Audio.hpp>
 #include <functional>
+#include <portaudio.h>
 
 
-class SynthStream : public sf::SoundStream
+class SynthStream final
 {
 public:
 
     SynthStream(unsigned sampleRate, const unsigned bufferSize, std::function<double(double)> generator);
-    void resetTime() {sampleTime = 0;}
+    ~SynthStream();
+    void play();
+    void stop();
 
 private:
 
-    virtual bool onGetData(Chunk& data) override;
-    virtual void onSeek(sf::Time timeOffset) override;
+    struct PaStreamCallbackData
+    {
+        std::function<double(double)> generator;
+        double sampleTime = 0;
+        const double sampleTimeDif;
 
-    double sampleTime = 0;
-    const unsigned sampleRate, bufferSize;
-    const double sampleTimeDif;
-    std::vector<sf::Int16> buffer;
-    std::function<double(double)> generator;
+        explicit PaStreamCallbackData(decltype(generator) g, decltype(sampleTimeDif) s)
+            :generator(g), sampleTimeDif(s) {}
 
+        static int callbackFunction(
+            const void*                     inputBuffer,
+            void*                           outputBuffer,
+            unsigned long                   framesPerBuffer,
+            const PaStreamCallbackTimeInfo* timeInfo,
+            PaStreamCallbackFlags           statusFlags,
+            void*                           userData);
+    };
+
+    PaStreamCallbackData callbackData;
+
+    PaStreamParameters outputParameters;
+    PaStream *stream;
+    PaError err;
 };
 
 #endif // SYNTH_H_INCLUDED

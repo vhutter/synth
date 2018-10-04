@@ -29,53 +29,6 @@ void flip(T& b)
     b = !b;
 }
 
-template<typename T>
-void updatePressed(T& pressed, const sf::Keyboard::Key& key, bool value)
-{
-    using namespace sf;
-    switch (key)
-    {
-    case sf::Keyboard::Z:
-        pressed[0] = value;
-        break;
-    case sf::Keyboard::S:
-        pressed[1] = value;
-        break;
-    case sf::Keyboard::X:
-        pressed[2] = value;
-        break;
-    case sf::Keyboard::D:
-        pressed[3] = value;
-        break;
-    case sf::Keyboard::C:
-        pressed[4] = value;
-        break;
-    case sf::Keyboard::V:
-        pressed[5] = value;
-        break;
-    case sf::Keyboard::G:
-        pressed[6] = value;
-        break;
-    case sf::Keyboard::B:
-        pressed[7] = value;
-        break;
-    case sf::Keyboard::H:
-        pressed[8] = value;
-        break;
-    case sf::Keyboard::N:
-        pressed[9] = value;
-        break;
-    case sf::Keyboard::J:
-        pressed[10] = value;
-        break;
-    case sf::Keyboard::M:
-        pressed[11] = value;
-        break;
-    default:
-        break;
-    }
-}
-
 
 extern const Note A  ;
 extern const Note Ais;

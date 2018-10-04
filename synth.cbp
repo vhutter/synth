@@ -32,6 +32,7 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++17" />
 			<Add directory="D:/SDKs/SFML-2.5.0/include" />
+			<Add directory="D:/SDKs/portaudio/include" />
 		</Compiler>
 		<Linker>
 			<Add library="sfml-graphics" />
@@ -39,10 +40,10 @@
 			<Add library="sfml-system" />
 			<Add library="sfml-network" />
 			<Add library="sfml-audio" />
+			<Add library="libportaudio.dll.a" />
 			<Add directory="D:/SDKs/SFML-2.5.0/lib" />
+			<Add directory="D:/SDKs/portaudio" />
 		</Linker>
-		<Unit filename="eventHandlers.cpp" />
-		<Unit filename="eventHandlers.h" />
 		<Unit filename="generators.cpp" />
 		<Unit filename="generators.h" />
 		<Unit filename="gui.cpp" />

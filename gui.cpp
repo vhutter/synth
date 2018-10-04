@@ -59,14 +59,15 @@ bool SynthKey::isPressed() const
     return pressed;
 }
 
-SynthKeyboard::SynthKeyboard(float px, float py)
-    : pos(px, py)
+SynthKeyboard::SynthKeyboard(float px, float py, std::function<void(unsigned)> eventCallback)
+    : pos(px, py), onKey(eventCallback)
 {
     const auto& w = SynthKey::White;
     const auto& b = SynthKey::Black;
 
+    keys.reserve(12);
     for (auto type: {w, b, w, b, w, w, b, w, b, w, b, w})
-        keys.emplace_back(SynthKey(type));
+        keys.push_back(SynthKey(type));
 
     repositionKeys();
 }
@@ -80,6 +81,74 @@ void SynthKeyboard::draw(sf::RenderTarget& target, sf::RenderStates states) cons
     for (const auto& key: keys)
         if (key.getType() == SynthKey::Black)
             target.draw(key);
+}
+
+void SynthKeyboard::forwardEvent(const sf::Event& event)
+{
+    const auto& key = event.key.code;
+    int value = -1;
+    switch (key)
+    {
+    case sf::Keyboard::Z:
+        value = 0;
+        break;
+    case sf::Keyboard::S:
+        value = 1;
+        break;
+    case sf::Keyboard::X:
+        value = 2;
+        break;
+    case sf::Keyboard::D:
+        value = 3;
+        break;
+    case sf::Keyboard::C:
+        value = 4;
+        break;
+    case sf::Keyboard::V:
+        value = 5;
+        break;
+    case sf::Keyboard::G:
+        value = 6;
+        break;
+    case sf::Keyboard::B:
+        value = 7;
+        break;
+    case sf::Keyboard::H:
+        value = 8;
+        break;
+    case sf::Keyboard::N:
+        value = 9;
+        break;
+    case sf::Keyboard::J:
+        value = 10;
+        break;
+    case sf::Keyboard::M:
+        value = 11;
+        break;
+    default:
+        break;
+    }
+
+
+    lastPressed = false;
+
+    if (value == -1)
+        return;
+
+    switch(event.type)
+    {
+        case sf::Event::KeyPressed: {
+            lastPressed = true;
+            onKey(value);
+            break;
+        }
+        case sf::Event::KeyReleased: {
+            onKey(value);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void SynthKeyboard::setPosition(const sf::Vector2f& newPos)

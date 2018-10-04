@@ -20,7 +20,7 @@ public:
     static const sf::Vector2f whiteSize, blackSize;
 
 private:
-    bool pressed = false;
+    bool pressed = std::atomic<bool>(false);
     Type type;
 
 };
@@ -35,11 +35,14 @@ public:
 class SynthKeyboard : public GuiElement
 {
 public:
-    SynthKeyboard(float px, float py);
+    SynthKeyboard(float px, float py, std::function<void(unsigned)> eventCallback);
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    virtual void forwardEvent(const sf::Event& event) override;
+
     void setPosition(const sf::Vector2f& p);
     sf::Vector2f getPosition() const {return pos;};
+    bool isLastEventKeypress() const {return lastPressed;}
 
     SynthKey& operator[] (std::size_t i) {return keys[i];}
 
@@ -49,6 +52,8 @@ private:
 
     sf::Vector2f pos;
     std::vector<SynthKey> keys;
+    std::function<void(unsigned)> onKey;
+    bool lastPressed = false;
 };
 
 class TextDisplay : public GuiElement

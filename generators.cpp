@@ -86,7 +86,7 @@ double ADSREnvelope::getAmplitude(double t) const
 
 
 ContinuousFunction::ContinuousFunction(double initConst)
-    : value(initConst), m(0) {}
+    : value(initConst), m(0), reach(0,0) {}
 
 double ContinuousFunction::getValue(double t)
 {
@@ -109,4 +109,5 @@ void ContinuousFunction::setValueLinear(double newVal, double btime, double dura
     startTime = btime;
     endTime = btime + duration;
     m = (endValue - startValue) / (endTime - startTime);
+    reach = sf::Vector2f(endTime, endValue);
 }
