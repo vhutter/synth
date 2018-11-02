@@ -16,7 +16,7 @@ namespace waves
     double square(double time, double amp, double freq, double phase)
     {
         const double period = 1/freq;
-        if (fmod(time, period) < period/2)
+        if (fmod(time+phase, period) < period/2)
             return amp;
         else
             return -amp;
@@ -26,7 +26,7 @@ namespace waves
     {
         const double period = 1/freq;
         const double half_period = period/2;
-        const double t = fmod(time, period);
+        const double t = fmod(time+phase, period);
         if (t < half_period)
             return -t*amp*2/half_period + amp;
         else
@@ -36,7 +36,7 @@ namespace waves
     double sawtooth(double time, double amp, double freq, double phase)
     {
         const double period = 1/freq;
-        const double t = fmod(time, period);
+        const double t = fmod(time+phase, period);
         return -(t*amp*2/period - amp);
     }
 }
@@ -66,22 +66,25 @@ double ADSREnvelope::getAmplitude(double t) const
     t = t - beginTime;
     if (isHeld) {
         if (t <= attack)
-            return t*(1-startAmp)/attack + startAmp;
+            currentAmp = t*(1-startAmp)/attack + startAmp;
         else if (t < attack+decay)
-            return 1 - (t-attack) * (1 - sustain) / decay;
+            currentAmp = 1 - (t-attack) * (1 - sustain) / decay;
         else
-            return sustain;
+            currentAmp = sustain;
     }
     else {
         if (t < release)
-            return sustain - t * sustain/release;
+            // we saved currentAmp for this case:
+            // the key may have been released before reaching the sustain level,
+            // in which case we have to calculate the appropiate decay level by
+            // considering the last available amplitude
+            return currentAmp - t * currentAmp/release;
         else {
             nonzero = false;
-            return 0;
+            currentAmp = 0;
         }
     }
-
-    return 0;
+    return currentAmp;
 }
 
 

@@ -19,8 +19,6 @@ namespace
 
 const sf::Vector2f SynthKey::whiteSize(100, 200);
 const sf::Vector2f SynthKey::blackSize(40, 150);
-const sf::Vector2f Slider::size(80, 300);
-const sf::Vector2f Slider::sliderRectSize(40, 40);
 sf::Font TextDisplay::font = loadCourierNew();
 
 SynthKey::SynthKey(Type t, float px, float py)
@@ -174,9 +172,12 @@ void SynthKeyboard::repositionKeys()
 }
 
 
-Slider::Slider(const std::string& str, float px, float py, Orientation ori, std::function<void()> callback)
-    :title(str, px, py-80), name(str), orientation(ori), onMove(callback)
+Slider::Slider(const std::string& str, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::function<void()> callback)
+    :title(TextDisplay::AroundPoint(str, px+sx/2, py-40, 0,0,titleSize)), from(from), to(to), name(str), orientation(ori), value((from+to)/2.), onMove(callback), size(sx, sy)
 {
+    const auto& minDim = std::min(sx, sy)/2;
+    sliderRectSize = sf::Vector2(minDim, minDim);
+
     if (orientation == Vertical) {
         mainRect.setSize(size);
     }
@@ -187,13 +188,18 @@ Slider::Slider(const std::string& str, float px, float py, Orientation ori, std:
     mainRect.setPosition(sf::Vector2f(px, py));
     mainRect.setOutlineColor(sf::Color(0x757575FF));
     mainRect.setFillColor(sf::Color(0x660000FF));
-    mainRect.setOutlineThickness(4.);
+    mainRect.setOutlineThickness(2.);
 
     sliderRect.setSize(sliderRectSize);
     sliderRect.setPosition(sf::Vector2f(px + mainRect.getSize().x/2 - sliderRectSize.x/2, py + mainRect.getSize().y/2 - sliderRectSize.y/2));
     sliderRect.setOutlineColor(sf::Color(0x757575FF));
     sliderRect.setFillColor(sf::Color(0x003366FF));
-    sliderRect.setOutlineThickness(4.);
+    sliderRect.setOutlineThickness(2.);
+}
+
+Slider::Slider(const std::string& str, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
+    : Slider(str, from, to, px+sx/2, py, sx, sy, titleSize, ori, [&](){val=getValue();})
+{
 }
 
 void Slider::forwardEvent(const sf::Event& event)
@@ -259,18 +265,18 @@ void Slider::moveSlider(const sf::Vector2f& p)
     const auto& sliderSize = sliderRect.getSize();
     const auto& midPos = minPos + rectSize / 2.f;
 
-    double newValue;
+    double newValueNormalized;
 
     if (orientation == Vertical) {
         sliderRect.setPosition(currentPos.x, std::clamp(p.y-sliderSize.y/2, minPos.y, maxPos.y));
-        newValue = (midPos.y - sliderRect.getPosition().y) / rectSize.y*2;
+        newValueNormalized = (midPos.y - sliderRect.getPosition().y) / rectSize.y*2;
     }
     else {
         sliderRect.setPosition(std::clamp(p.x-sliderSize.x/2, minPos.x, maxPos.x), currentPos.y);
-        newValue = (sliderRect.getPosition().x - midPos.x) / rectSize.x*2;
+        newValueNormalized = (sliderRect.getPosition().x - midPos.x) / rectSize.x*2;
     }
 
-    value = newValue;
+    value = from + (newValueNormalized+1) / 2. * (to-from);
 }
 
 Oscilloscope::Oscilloscope(float px, float py, float sx, float sy, unsigned res, double speed)
@@ -301,33 +307,55 @@ void Oscilloscope::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
 void Oscilloscope::newSamples(const std::vector<double>& samples)
 {
+    const auto& windowSize = window.getSize();
     unsigned dif = samples.size();
     if (dif < vArray.size()) {
         for (unsigned i=0; i<vArray.size()-dif; ++i)
             vArray[i].position.y = vArray[i+dif].position.y;
         for (unsigned i=vArray.size()-dif; i<vArray.size(); ++i)
-            vArray[i].position.y = window.getPosition().y + window.getSize().y/2 + samples[i-vArray.size()+dif];
+            vArray[i].position.y = window.getPosition().y + window.getSize().y/2 + samples[i-vArray.size()+dif] * windowSize.y/2;
     }
     else {
         for (unsigned i=0; i<vArray.size(); ++i)
-            vArray[i].position.y = window.getPosition().y + window.getSize().y/2 + samples[i];
+            vArray[i].position.y = window.getPosition().y + window.getSize().y/2 + samples[i] * windowSize.y/2;
     }
 }
 
-TextDisplay::TextDisplay(const std::string& initialText, float px, float py, unsigned int size, float sx, float sy)
+TextDisplay::TextDisplay(const std::string& initialText, float px, float py, float sx, float sy, unsigned int size)
     : text()
 {
-    window.setPosition(sf::Vector2f(px, py));
-    window.setSize(sf::Vector2f(sx, sy));
-    window.setOutlineColor(sf::Color::White);
-    window.setFillColor(sf::Color::Black);
-    window.setOutlineThickness(1.);
-
     text.setFont(font);
     text.setCharacterSize(size);
     text.setString(initialText);
     text.setPosition(sf::Vector2f(px, py));
     text.setFillColor(sf::Color::Green);
+
+    const auto& boundingBox = text.getGlobalBounds();
+    std::tie(sx, sy) = std::tie(std::max(sx, boundingBox.width), std::max(sy, boundingBox.height));
+    std::tie(px, py) = std::tie(boundingBox.left, boundingBox.top);
+
+    px = px - (sx-boundingBox.width)/2;
+    py = py - (sy-boundingBox.height)/2;
+
+    window.setPosition(sf::Vector2f(px, py));
+    window.setSize(sf::Vector2f(sx, sy));
+    window.setOutlineColor(sf::Color::Black);
+    window.setFillColor(sf::Color::Black);
+    window.setOutlineThickness(1.);
+}
+
+TextDisplay TextDisplay::AroundPoint(const std::string initialText, float px, float py, float sx, float sy, unsigned int charSize)
+{
+    TextDisplay ret(initialText, px, py, sx, sy, charSize);
+    const auto& dif = ret.window.getSize() / 2.f;
+    ret.window.setPosition(ret.window.getPosition()-dif);
+    ret.text.setPosition  (ret.text.getPosition()-dif);
+    return ret;
+}
+
+void TextDisplay::setBgColor(const sf::Color& color)
+{
+    window.setFillColor(color);
 }
 
 void TextDisplay::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -339,4 +367,21 @@ void TextDisplay::draw(sf::RenderTarget& target, sf::RenderStates states) const
 void TextDisplay::setText(const std::string& content)
 {
     text.setString(content);
+}
+
+Button::Button(const std::string& initialText, float px, float py, float sx, float sy, unsigned int charSize, std::function<void()> onClick)
+    :TextDisplay(initialText, px, py, sx, sy, charSize), clickCallback(onClick)
+{
+    window.setOutlineColor(sf::Color::White);
+}
+
+
+void Button::forwardEvent(const sf::Event& event)
+{
+    static bool black = true;
+    if (event.type == sf::Event::MouseButtonPressed && window.getGlobalBounds().contains(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+        black = !black;
+        window.setFillColor(black ? sf::Color::Black : sf::Color(0xaaaaaaaa));
+        clickCallback();
+    }
 }

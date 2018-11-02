@@ -1,8 +1,10 @@
 #ifndef UTIL_H_INCLUDED
 #define UTIL_H_INCLUDED
 
-#include <SFML/Audio.hpp>
-#include <SFML/Window.hpp>
+#include <initializer_list>
+#include <vector>
+#include <iostream>
+#include "generators.h"
 
 
 namespace util
@@ -13,12 +15,44 @@ class Note
 {
     public:
         Note(double freq);
-        double getFreq() const {return freq;}
         double getFifth() const {return freq*3/2;}
         operator double() const {return freq;}
 
     private:
         double freq;
+};
+
+
+struct Tone {
+    Note note;
+    double intensity;
+    waves::wave_t waveform;
+    double phase;
+
+    Tone(const Note& note, double intensity, waves::wave_t waveform, double phase=0)
+        :note(note), intensity(intensity), waveform(waveform), phase(phase) {}
+};
+
+class CompoundTone
+{
+    public:
+
+        CompoundTone();
+        CompoundTone(std::initializer_list<Tone>, const ADSREnvelope& env = ADSREnvelope());
+
+        void addComponent(const Tone& desc);
+        void normalize();
+        void modifyMainPitch(double t, double dest);
+        void shiftOctave(double time, double n);
+        double getSample(double t);
+        const Note& getMainNote() const {return mainNote;}
+
+        ADSREnvelope envelope;
+    private:
+        const std::vector<Tone> initialComponents;
+        std::vector<Tone> components;
+        double octave = 1.;
+        Note mainNote = 0;
 };
 
 

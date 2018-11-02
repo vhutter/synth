@@ -16,7 +16,6 @@ public:
     void setPressed(bool pressed);
     bool isPressed() const;
 
-
     static const sf::Vector2f whiteSize, blackSize;
 
 private:
@@ -46,7 +45,6 @@ public:
 
     SynthKey& operator[] (std::size_t i) {return keys[i];}
 
-
 private:
     void repositionKeys();
 
@@ -59,7 +57,8 @@ private:
 class TextDisplay : public GuiElement
 {
 public:
-    TextDisplay(const std::string& initialText, float px, float py, unsigned int charSize=24, float sx=0, float sy=0);
+    TextDisplay(const std::string& initialText, float px, float py, float sx=0, float sy=0, unsigned int charSize=24);
+    static TextDisplay AroundPoint(const std::string text, float px, float py, float sx=0, float sy=0, unsigned int charSize=24);
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     void setPosition(const sf::Vector2f& p) {window.setPosition(p);}
@@ -67,9 +66,10 @@ public:
     const std::string& getText() {return content;}
     void setText(const std::string& text);
     const sf::Text& getText() const {return text;}
+    void setBgColor(const sf::Color& color);
+    const sf::Color& getBgColor() {return window.getFillColor();}
 
-
-private:
+protected:
     sf::RectangleShape window;
     sf::Text text;
     std::string content;
@@ -77,36 +77,66 @@ private:
     static sf::Font font;
 };
 
+class Button : public TextDisplay
+{
+public:
+    Button(const std::string& initialText, float px, float py, float sx, float sy, unsigned int charSize, std::function<void()> onClick);
+
+    static Button DefaultButton(const std::string& s, float px, float py, std::function<void()> onClick) {
+        return Button(s, px, py, 100, 30, 16, onClick);
+    }
+    static Button DefaultButton(const std::string& s, float px, float py, std::atomic<bool>& val) {
+        return Button(s, px, py, 100, 30, 16, [&](){val = !val;});
+    }
+
+    virtual void forwardEvent(const sf::Event& event) override;
+
+private:
+    std::function<void()> clickCallback;
+};
+
+
+
 class Slider : public GuiElement
 {
 public:
     enum Orientation : bool {Vertical = true, Horizontal = false};
 
-    Slider(const std::string& name, float px, float py, Orientation ori, std::function<void()> onMove);
+    Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::function<void()> onMove);
+    Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::atomic<double>& val);
     Slider& setFixed(bool val) {fixed = val; return *this;}
+
+    template<class T>
+    static Slider DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal)
+    {
+        return Slider(name, from, to, px, py, 30,100, 16, Slider::Vertical, onMoveVal);
+    }
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     virtual void forwardEvent(const sf::Event& event) override;
-
-    void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
     sf::Vector2f getPosition() const {return mainRect.getPosition();}
-    bool containsPoint(const sf::Vector2f& p) const;
-    void moveSlider(const sf::Vector2f& p);
+    void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
+
     double getValue() const {return value;}
 
 private:
+    void moveSlider(const sf::Vector2f& p);
+    bool containsPoint(const sf::Vector2f& p) const;
+
+
     TextDisplay title;
+    const double from, to;
     const std::string name;
     sf::RectangleShape mainRect, sliderRect;
-    std::atomic<double> value = 0;
     Orientation orientation;
     bool fixed = false;
 
+    std::atomic<double> value;
     bool clicked;
     std::function<void()> onMove;
 
-    static const sf::Vector2f size;
-    static const sf::Vector2f sliderRectSize;
+    sf::Vector2f size;
+    sf::Vector2f sliderRectSize;
 };
 
 class Oscilloscope : public GuiElement

@@ -39,7 +39,6 @@
 			<Add library="sfml-window" />
 			<Add library="sfml-system" />
 			<Add library="sfml-network" />
-			<Add library="sfml-audio" />
 			<Add library="libportaudio.dll.a" />
 			<Add directory="D:/SDKs/SFML-2.5.0/lib" />
 			<Add directory="D:/SDKs/portaudio" />

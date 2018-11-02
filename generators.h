@@ -21,7 +21,7 @@ namespace waves
 class ADSREnvelope
 {
 public:
-    ADSREnvelope(double a=.01, double d=0.01, double s=1, double r=.01);
+    ADSREnvelope(double a=.005, double d=0.01, double s=1., double r=.01);
     ADSREnvelope(const ADSREnvelope& rhs);
     ~ADSREnvelope() = default;
 
@@ -35,6 +35,7 @@ private:
     double beginTime = 0, startAmp = 0;
     bool isHeld = false;
     mutable bool nonzero = false;
+    mutable double currentAmp = 0;
 
 };
 

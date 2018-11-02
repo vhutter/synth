@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <iostream>
+#include <ctime>
 
 namespace {
     void ErrorCheck(const PaError& err)
@@ -11,7 +12,7 @@ namespace {
     }
 }
 
-int SynthStream::PaStreamCallbackData::callbackFunction(
+int __stdcall SynthStream::PaStreamCallbackData::callbackFunction(
     const void*                     inputBuffer,
     void*                           outputBuffer,
     unsigned long                   framesPerBuffer,
@@ -23,16 +24,17 @@ int SynthStream::PaStreamCallbackData::callbackFunction(
     auto* out = static_cast<float*>( outputBuffer );
 
     for (unsigned i=0; i<framesPerBuffer; i++) {
-        *out++ = (float)data->generator(data->sampleTime);
-        *out++ = (float)data->generator(data->sampleTime);
+        float sample = data->generator2(data->sampleTime);
+        *out++ = sample;
+        *out++ = sample;
         data->sampleTime += data->sampleTimeDif;
     }
 
     return 0;
 }
 
-SynthStream::SynthStream(unsigned sampleRate, unsigned bufferSize, std::function<double(double)> gen)
-    :callbackData(gen, double(1)/sampleRate)
+SynthStream::SynthStream(unsigned sampleRate, unsigned bufferSize, CallbackFunction g1, CallbackFunction g2)
+    :callbackData(g1, g2, double(1)/sampleRate)
 {
     ErrorCheck(Pa_Initialize());
     outputParameters.device = Pa_GetDefaultOutputDevice();
