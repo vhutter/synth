@@ -132,7 +132,7 @@ private:
     bool fixed = false;
 
     std::atomic<double> value;
-    bool clicked;
+    bool clicked = false;
     std::function<void()> onMove;
 
     sf::Vector2f size;

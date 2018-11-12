@@ -50,8 +50,6 @@
 		<Unit filename="main.cpp" />
 		<Unit filename="synth.cpp" />
 		<Unit filename="synth.h" />
-		<Unit filename="util.cpp" />
-		<Unit filename="util.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

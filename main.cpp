@@ -13,17 +13,16 @@
 #include <iostream>
 #include <iomanip>
 
-#include "util.h"
 #include "synth.h"
 #include "generators.h"
 #include "gui.h"
 
-using namespace util;
-const std::vector<Note> notes = {C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B};
 
 int main()
 {
     std::cout << std::fixed << std::setprecision(2);
+
+    const std::vector<Note> notes = {C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B};
 
     // Sound synthesis will be performed in a separate thread internally
     // The generateSample lambda function is created below for that reason
@@ -33,17 +32,24 @@ int main()
 	ContinuousFunction currentPitch(0);
 	std::atomic<bool> glide(false);
 	std::atomic<double> glideSpeed(.3);
+	std::atomic<double> octave(1.);
 	double lastTime(0);
+
+	const auto& toneEffect = [&](double t, Tone& tone) {
+	    tone.phase += sin(t*200) * .9 / tone.note / M_PI/2;
+	    tone.note = tone.note * octave;
+    };
 
 	std::vector<CompoundTone> tones;
 	tones.reserve(12);
 	for (unsigned i=0; i<12; ++i) {
-        tones.emplace_back(CompoundTone
+        tones.emplace_back(CompoundTone(
             {
-                Tone(notes[i], 1., waves::sawtooth),
-                Tone(notes[i]*3, 0.3, waves::sine)
+                Tone(notes[i], 1., waves::sawtooth, {toneEffect}),
+                Tone(notes[i]*3, 0.3, waves::sine, {toneEffect})
             }
-        );
+//            ADSREnvelope(.005, 0.35, 0.00, 0.2)
+        ));
 	}
 
 	auto oscope = std::make_shared<Oscilloscope>(600, 50, 500, 200, 1000, 1);
@@ -146,9 +152,9 @@ int main()
                 case sf::Event::MouseWheelScrolled: {
                     std::lock_guard<std::mutex> lock(mtx);
                     if (event.mouseWheelScroll.delta > 0)
-                        for(auto& tone: tones) tone.shiftOctave(lastTime, 1);
+                        octave = octave*2.;
                     else
-                        for(auto& tone: tones) tone.shiftOctave(lastTime, -1);
+                        octave = octave*0.5;
                     break;
                 }
                 case sf::Event::Resized: {
