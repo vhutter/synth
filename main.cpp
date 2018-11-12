@@ -33,11 +33,19 @@ int main()
 	std::atomic<bool> glide(false);
 	std::atomic<double> glideSpeed(.3);
 	std::atomic<double> octave(1.);
+	std::atomic<double> beta(0.);
 	double lastTime(0);
 
 	const auto& toneEffect = [&](double t, Tone& tone) {
-	    tone.phase += sin(t*200) * .9 / tone.note / M_PI/2;
+	    tone.intensity = tone.intensity * amp.getValue(t);
+	    tone.phase += sin(t*200) * 2 / tone.note / M_PI/2;
 	    tone.note = tone.note * octave;
+    };
+
+    const auto& filter = [&](double t, double& sample) {
+	    static double lastSample = 0;
+	    sample = beta * sample + (1-beta) * lastSample;
+	    lastSample = sample;
     };
 
 	std::vector<CompoundTone> tones;
@@ -45,8 +53,8 @@ int main()
 	for (unsigned i=0; i<12; ++i) {
         tones.emplace_back(CompoundTone(
             {
-                Tone(notes[i], 1., waves::sawtooth, {toneEffect}),
-                Tone(notes[i]*3, 0.3, waves::sine, {toneEffect})
+                Tone(notes[i], 1., waves::sawtooth, {toneEffect}, {filter}),
+                Tone(notes[i]*3, 0.3, waves::sine,  {toneEffect}, {filter})
             }
 //            ADSREnvelope(.005, 0.35, 0.00, 0.2)
         ));
@@ -66,6 +74,7 @@ int main()
             tone.modifyMainPitch(lastTime, tone.getMainNote() + sliderPitch->getValue() * 1/9 * tone.getMainNote());
     })));
     sliderPitch->setFixed(true);
+    std::shared_ptr<Slider> betaSlider(new Slider(Slider::DefaultSlider("Beta", 0,1, 30,200, beta)));
     std::shared_ptr<Slider> glideSpeedSlider(new Slider(Slider::DefaultSlider("Glide", 0,.5, 160, 50, glideSpeed)));
     std::shared_ptr<Button> glideButton(new Button(Button::DefaultButton("Glide", 180, 180, glide)));
 	std::shared_ptr<SynthKeyboard> synthKeyboard = std::make_shared<SynthKeyboard>(50, 700, [&](unsigned keyIdx){
@@ -93,6 +102,7 @@ int main()
         sliderPitch,
         glideButton,
         glideSpeedSlider,
+        betaSlider,
     };
 
 	std::deque<double> lastSamples;
@@ -115,7 +125,7 @@ int main()
 		result = result / double(maxNotes);
         lastSamples.push_back(result);
 
-		return result  * amp.getValue(t);
+		return result;
 	};
 
     const unsigned sampleRate(44100);
