@@ -12,17 +12,24 @@
 
 #include <iostream>
 #include <iomanip>
+#include <queue>
 
 #include "synth.h"
 #include "generators.h"
 #include "gui.h"
-
+#include "RtMidi.h"
 
 int main()
 {
     std::cout << std::fixed << std::setprecision(2);
 
-    const std::vector<Note> notes = {C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B};
+    const std::vector<Note> baseNotes = {C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B};
+    std::vector<Note> notes;
+    const unsigned octaves = 2;
+    for(unsigned i=1; i<=octaves; ++i)
+        for(auto note: baseNotes) notes.push_back(note*i);
+    notes.push_back(C*octaves*2);
+    std::cout << notes.size();
 
     // Sound synthesis will be performed in a separate thread internally
     // The generateSample lambda function is created below for that reason
@@ -38,19 +45,19 @@ int main()
 
 	const auto& toneEffect = [&](double t, Tone& tone) {
 	    tone.intensity = tone.intensity * amp.getValue(t);
-	    tone.phase += sin(t*200) * 2 / tone.note / M_PI/2;
+//	    tone.phase += sin(t*200) * 2 / tone.note / M_PI/2;
 	    tone.note = tone.note * octave;
     };
 
     const auto& filter = [&](double t, double& sample) {
-	    static double lastSample = 0;
-	    sample = beta * sample + (1-beta) * lastSample;
-	    lastSample = sample;
+//	    static double lastSample = 0;
+//	    sample = beta * sample + (1-beta) * lastSample;
+//	    lastSample = sample;
     };
 
 	std::vector<CompoundTone> tones;
-	tones.reserve(12);
-	for (unsigned i=0; i<12; ++i) {
+	tones.reserve(notes.size());
+	for (unsigned i=0; i<notes.size(); ++i) {
         tones.emplace_back(CompoundTone(
             {
                 Tone(notes[i], 1., waves::sawtooth, {toneEffect}, {filter}),
@@ -132,12 +139,44 @@ int main()
 	SynthStream synth(sampleRate, 16, generateSample, generateSample);
 	synth.play();
 
-	sf::RenderWindow window(sf::VideoMode(1400, 1000), "Basic synth");
+    RtMidiIn midiInput = RtMidiIn();
+    std::queue<std::vector<unsigned char>> midiMsgQueue;
+    std::mutex midiMutex;
+    if ( midiInput.getPortCount() == 0 ) {
+        std::cout << "No midi controller available!\n";
+    }
+    else {
+        midiInput.openPort(0);
+        midiInput.ignoreTypes( false, false, false );
+        static void* userData[] = {&midiMsgQueue, &midiMutex};
+        midiInput.setCallback( [](double dt, std::vector<unsigned char>* msg, void* userData){
+            if (msg->size() > 0) {
+                auto data = static_cast<void**>(userData);
+                auto& q = *static_cast<decltype(midiMsgQueue)*>(data[0]);
+                auto& m = *static_cast<decltype(midiMutex)*>(data[1]);
+                std::lock_guard<std::mutex> lock(m);
+                q.push(*msg);
+            }
+        }, userData);
+    }
+
+
+	sf::RenderWindow window(sf::VideoMode(1600, 1000), "Basic synth");
 	window.setKeyRepeatEnabled(false);
 	window.setVerticalSyncEnabled(true);
 	while (window.isOpen())
 	{
-		sf::Event event;
+		static sf::Event event;
+
+        std::unique_lock<std::mutex> midiLock(midiMutex);
+        while(midiMsgQueue.size() > 0)
+        {
+            auto& msg = midiMsgQueue.front();
+            midiMsgQueue.pop();
+            synthKeyboard->forwardEvent(msg);
+        }
+        midiLock.unlock();
+
 		while (window.pollEvent(event))
 		{
             for (auto& object: objects)

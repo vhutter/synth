@@ -38,6 +38,7 @@ public:
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     virtual void forwardEvent(const sf::Event& event) override;
+    void forwardEvent(const std::vector<unsigned char>& midiMessage);
 
     void setPosition(const sf::Vector2f& p);
     sf::Vector2f getPosition() const {return pos;};

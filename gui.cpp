@@ -63,8 +63,10 @@ SynthKeyboard::SynthKeyboard(float px, float py, std::function<void(unsigned)> e
     const auto& w = SynthKey::White;
     const auto& b = SynthKey::Black;
 
-    keys.reserve(12);
-    for (auto type: {w, b, w, b, w, w, b, w, b, w, b, w})
+    keys.reserve(24);
+    std::basic_string<SynthKey::Type> orderedKeys = {w, b, w, b, w, w, b, w, b, w, b, w};
+    orderedKeys = orderedKeys+orderedKeys+orderedKeys[0];
+    for (auto type: orderedKeys)
         keys.push_back(SynthKey(type));
 
     repositionKeys();
@@ -144,6 +146,38 @@ void SynthKeyboard::forwardEvent(const sf::Event& event)
             onKey(value);
             break;
         }
+        default:
+            break;
+    }
+}
+void SynthKeyboard::forwardEvent(const std::vector<unsigned char>& msg)
+{
+    unsigned char eventType = msg[0];
+    unsigned char keyCode   = msg[1];
+
+    enum class MsgType : unsigned char {
+        KEYDOWN=144,
+        KEYUP  =128,
+        PADDOWN=153,
+        PADUP  =137,
+        KNOB   =176,
+        WHEEL  =224,
+    };
+
+    unsigned char value = keyCode - 48;
+    lastPressed = false;
+    if (value >= keys.size())
+        return;
+
+    switch(static_cast<MsgType>(eventType))
+    {
+        case MsgType::KEYDOWN:
+            lastPressed = true;
+            onKey(value);
+            break;
+        case MsgType::KEYUP:
+            onKey(value);
+            break;
         default:
             break;
     }
