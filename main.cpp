@@ -29,7 +29,6 @@ int main()
     for(unsigned i=1; i<=octaves; ++i)
         for(auto note: baseNotes) notes.push_back(note*i);
     notes.push_back(C*octaves*2);
-    std::cout << notes.size();
 
     // Sound synthesis will be performed in a separate thread internally
     // The generateSample lambda function is created below for that reason
