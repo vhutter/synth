@@ -9,6 +9,8 @@
 #include <memory>
 #include <utility>
 #include <deque>
+#include <thread>
+#include <chrono>
 
 #include <iostream>
 #include <iomanip>
@@ -135,7 +137,7 @@ int main()
 	};
 
     const unsigned sampleRate(44100);
-	SynthStream synth(sampleRate, 16, generateSample, generateSample);
+	SynthStream synth(sampleRate, 1, generateSample, generateSample);
 	synth.play();
 
     RtMidiIn midiInput = RtMidiIn();

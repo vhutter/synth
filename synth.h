@@ -37,7 +37,7 @@ private:
 
     PaStreamCallbackData callbackData;
 
-    PaStreamParameters outputParameters;
+
     PaStream *stream;
     PaError err;
 };

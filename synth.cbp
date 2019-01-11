@@ -26,6 +26,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add option="-static" />
 				</Linker>
 			</Target>
 		</Build>
@@ -41,8 +42,8 @@
 			<Add library="sfml-window" />
 			<Add library="sfml-system" />
 			<Add library="sfml-network" />
-			<Add library="libportaudio.dll.a" />
 			<Add library="winmm" />
+			<Add library="portaudio.dll" />
 			<Add directory="D:/SDKs/SFML-2.5.0/lib" />
 			<Add directory="D:/SDKs/portaudio" />
 		</Linker>

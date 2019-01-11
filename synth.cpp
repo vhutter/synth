@@ -22,11 +22,14 @@ int __stdcall SynthStream::PaStreamCallbackData::callbackFunction(
 {
     auto* data = static_cast<PaStreamCallbackData*>( userData );
     auto* out = static_cast<float*>( outputBuffer );
+//    auto* in = static_cast<const float*>( inputBuffer );
 
     for (unsigned i=0; i<framesPerBuffer; i++) {
         float sample = data->generator2(data->sampleTime);
         *out++ = sample;
         *out++ = sample;
+//        *out++ = *in++;
+//        *out++ = *in++;
         data->sampleTime += data->sampleTimeDif;
     }
 
@@ -37,17 +40,28 @@ SynthStream::SynthStream(unsigned sampleRate, unsigned bufferSize, CallbackFunct
     :callbackData(g1, g2, double(1)/sampleRate)
 {
     ErrorCheck(Pa_Initialize());
+    PaStreamParameters outputParameters, inputParameters;
+    inputParameters.device = Pa_GetDefaultInputDevice();
+    if (inputParameters.device == paNoDevice) {
+        throw std::runtime_error("PortAudio error: No default input device.\n");
+    }
     outputParameters.device = Pa_GetDefaultOutputDevice();
     if (outputParameters.device == paNoDevice) {
         throw std::runtime_error("PortAudio error: No default output device.\n");
     }
+
     outputParameters.channelCount = 2;                     /* stereo output */
     outputParameters.sampleFormat = paFloat32;             /* 32 bit floating point output */
     outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
 
+    inputParameters.channelCount = 1;                     /* stereo output */
+    inputParameters.sampleFormat = paFloat32;             /* 32 bit floating point output */
+    inputParameters.suggestedLatency = Pa_GetDeviceInfo( inputParameters.device )->defaultLowOutputLatency;
+    inputParameters.hostApiSpecificStreamInfo = NULL;
+
     err = Pa_OpenStream( &stream,
-                         NULL,              /* No input. */
+                         &inputParameters,              /* No input. */
                          &outputParameters, /* As above. */
                          sampleRate,
                          bufferSize,               /* Frames per buffer. */
