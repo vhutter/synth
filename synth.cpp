@@ -22,14 +22,16 @@ int __stdcall SynthStream::PaStreamCallbackData::callbackFunction(
 {
     auto* data = static_cast<PaStreamCallbackData*>( userData );
     auto* out = static_cast<float*>( outputBuffer );
-//    auto* in = static_cast<const float*>( inputBuffer );
+    auto* in = static_cast<const float*>( inputBuffer );
+//    if( *in > 0.01 ) std::cout << *in << "\n";
 
     for (unsigned i=0; i<framesPerBuffer; i++) {
-        float sample = data->generator2(data->sampleTime);
+//        float sample = data->generator2(data->sampleTime);
+//        *out++ = sample;
+//        *out++ = sample;
+        float sample = *in++;
         *out++ = sample;
         *out++ = sample;
-//        *out++ = *in++;
-//        *out++ = *in++;
         data->sampleTime += data->sampleTimeDif;
     }
 
@@ -61,7 +63,7 @@ SynthStream::SynthStream(unsigned sampleRate, unsigned bufferSize, CallbackFunct
     inputParameters.hostApiSpecificStreamInfo = NULL;
 
     err = Pa_OpenStream( &stream,
-                         &inputParameters,              /* No input. */
+                         &inputParameters,
                          &outputParameters, /* As above. */
                          sampleRate,
                          bufferSize,               /* Frames per buffer. */

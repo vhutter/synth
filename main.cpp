@@ -43,6 +43,7 @@ int main()
 	std::atomic<double> octave(1.);
 	std::atomic<double> beta(0.);
 	double lastTime(0);
+	std::deque<double> lastSamples;
 
 	const auto& toneEffect = [&](double t, Tone& tone) {
 	    tone.intensity = tone.intensity * amp.getValue(t);
@@ -54,6 +55,7 @@ int main()
 //	    static double lastSample = 0;
 //	    sample = beta * sample + (1-beta) * lastSample;
 //	    lastSample = sample;
+        lastSamples.push_back(sample);
     };
 
 	std::vector<CompoundTone> tones;
@@ -113,7 +115,6 @@ int main()
         betaSlider,
     };
 
-	std::deque<double> lastSamples;
     const unsigned maxNotes = 4;
 	const auto& generateSample = [&](double t) -> double {
 
@@ -139,6 +140,10 @@ int main()
     const unsigned sampleRate(44100);
 	SynthStream synth(sampleRate, 1, generateSample, generateSample);
 	synth.play();
+
+//	while(1) {
+//        std::this_thread::sleep_for(std::chrono::seconds(5));
+//	}
 
     RtMidiIn midiInput = RtMidiIn();
     std::queue<std::vector<unsigned char>> midiMsgQueue;
