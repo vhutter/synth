@@ -12,7 +12,7 @@ namespace {
     }
 }
 
-int __stdcall SynthStream::PaStreamCallbackData::callbackFunction(
+int SynthStream::PaStreamCallbackData::callbackFunction(
     const void*                     inputBuffer,
     void*                           outputBuffer,
     unsigned long                   framesPerBuffer,

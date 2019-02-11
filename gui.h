@@ -83,11 +83,11 @@ class Button : public TextDisplay
 public:
     Button(const std::string& initialText, float px, float py, float sx, float sy, unsigned int charSize, std::function<void()> onClick);
 
-    static Button DefaultButton(const std::string& s, float px, float py, std::function<void()> onClick) {
-        return Button(s, px, py, 100, 30, 16, onClick);
+    static std::unique_ptr<Button> DefaultButton(const std::string& s, float px, float py, std::function<void()> onClick) {
+        return std::make_unique<Button>(s, px, py, 100, 30, 16, onClick);
     }
-    static Button DefaultButton(const std::string& s, float px, float py, std::atomic<bool>& val) {
-        return Button(s, px, py, 100, 30, 16, [&](){val = !val;});
+    static std::unique_ptr<Button> DefaultButton(const std::string& s, float px, float py, std::atomic<bool>& val) {
+        return std::make_unique<Button>(s, px, py, 100, 30, 16, [&](){val = !val;});
     }
 
     virtual void forwardEvent(const sf::Event& event) override;
@@ -107,11 +107,26 @@ public:
     Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::atomic<double>& val);
     Slider& setFixed(bool val) {fixed = val; return *this;}
 
-    template<class T>
-    static Slider DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal)
-    {
-        return Slider(name, from, to, px, py, 30,100, 16, Slider::Vertical, onMoveVal);
-    }
+	template<class T> 
+	static std::shared_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal)
+	{
+		constexpr float width = 30;
+		constexpr float height = 100;
+		constexpr unsigned titleSize = 16;
+
+		std::shared_ptr<Slider> ptr;
+		if constexpr (std::is_constructible_v<std::function<void(const Slider&)>,T>)
+		{
+			ptr = std::make_shared<Slider>(name, from, to, px, py, width, height, titleSize, Slider::Vertical, [&]() {});
+			ptr->onMove = [=]() {
+				onMoveVal(*ptr);
+			};
+		}
+		else {
+			ptr = std::make_shared<Slider>(name, from, to, px, py, width, height, titleSize, Slider::Vertical, onMoveVal);
+		}
+		return ptr;
+	}
 
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
     virtual void forwardEvent(const sf::Event& event) override;

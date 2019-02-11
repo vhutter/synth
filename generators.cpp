@@ -173,6 +173,7 @@ void CompoundTone::normalize()
 
 void CompoundTone::modifyMainPitch(double t, double dest)
 {
+    if(mainNote == 0) throw "division by zero";
     const double changeRate = dest / mainNote;
     for(unsigned i=0; i<components.size(); ++i) {
         auto& component = components[i];
