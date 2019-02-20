@@ -1,12 +1,13 @@
 #ifndef GENERATORS_H_INCLUDED
 #define GENERATORS_H_INCLUDED
-
+ 
 
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <chrono>
 #include <functional>
 #include <vector>
+#include <algorithm>
 #include <SFML/System.hpp>
 
 namespace waves
@@ -51,7 +52,7 @@ class ContinuousFunction
         double startTime, endTime, startValue, endValue;
         double m;
 
-        sf::Vector2f reach;
+        sf::Vector2<double> reach;
 };
 
 class Note
@@ -61,13 +62,63 @@ class Note
         double getFifth() const {return freq*3/2;}
         operator double() const {return freq;}
 
+
+		static const Note A;
+		static const Note Ais;
+		static const Note B;
+		static const Note C;
+		static const Note Cis;
+		static const Note D;
+		static const Note Dis;
+		static const Note E;
+		static const Note F;
+		static const Note Fis;
+		static const Note G;
+		static const Note Gis;
+		
     private:
         double freq;
 };
 
-class Tone
+
+
+
+template<class T>
+class SampleGenerator
 {
+public:
+	using after_t = std::function<void(double, double&)>;
+
+	SampleGenerator(
+		std::function<void(double, T&)> before = {},
+		after_t after = {}
+	)
+		:beforeEffect(before),
+		afterEffect(after)
+	{}
+	double getSample(double t) const
+	{
+		T input = *static_cast<const T*>(this);
+ 		if (beforeEffect) {
+			beforeEffect(t, input);
+		}
+		double result = input.getSampleImpl(t);
+		if (afterEffect) {
+			afterEffect(t, result);
+		}
+		return result;
+	}
+protected:
+	std::function<void(double, T&)> beforeEffect;
+	after_t afterEffect;
+};
+
+class Tone : public SampleGenerator<Tone>
+{
+	friend class SampleGenerator<Tone>;
     public:
+		typedef std::function<void(double, Tone&)> before_t;
+
         Note note;
         double intensity;
         double phase = 0;
@@ -77,57 +128,80 @@ class Tone
             const Note& note,
             double intensity,
             waves::wave_t waveform,
-            std::initializer_list<std::function<void(double, Tone&)>> before = {},
-            std::initializer_list<std::function<void(double, double&)>> after = {}
+			before_t before = {},
+			after_t  after = {}
         )
-            :note(note),
+            :SampleGenerator<Tone>(before, after),
+			note(note),
             intensity(intensity),
-            waveform(waveform),
-            beforeEffects(before.begin(), before.end()),
-            afterEffects(after.begin(), after.end())
-        {}
-        double getSample(double t);
-    private:
+            waveform(waveform)
+		{
+		}
 
-        const std::vector<std::function<void(double, Tone&)>> beforeEffects;
-        const std::vector<std::function<void(double, double&)>> afterEffects;
+    private:
+        double getSampleImpl(double t) const;
 };
 
-class CompoundTone
+class CompoundTone: public SampleGenerator<CompoundTone>
 {
+	friend class SampleGenerator<CompoundTone>;
     public:
+		typedef std::function<void(double, CompoundTone&)> before_t;
 
         CompoundTone();
-        CompoundTone(std::initializer_list<Tone>, const ADSREnvelope& env = ADSREnvelope());
+        CompoundTone(
+			const std::vector<Tone>&,
+			const ADSREnvelope& env = ADSREnvelope(),
+			before_t before = {},
+			after_t  after = {}
+		);
 
         void addComponent(const Tone& desc);
         void normalize();
         void modifyMainPitch(double t, double dest);
-        void shiftOctave(double time, double n);
-        double getSample(double t);
         const Note& getMainNote() const {return mainNote;}
 
         ADSREnvelope envelope;
     private:
+        double getSampleImpl(double t) const;
+
         const std::vector<Tone> initialComponents;
         std::vector<Tone> components;
         Note mainNote = 0;
 };
 
+class CompoundToneModel
+{
+	public:
 
+		struct ToneSkeleton {
+			double relativeFreq;
+			double intensity;
+			waves::wave_t waveform;
+		};
 
+		CompoundToneModel(
+			std::initializer_list<ToneSkeleton> components,
+			const ADSREnvelope&    env,
+			Tone::before_t         beforeTone = {},
+			Tone::after_t          afterTone = {},
+			CompoundTone::before_t before = {},
+			CompoundTone::after_t  after = {}
+		)
+			:components(components),
+			beforeTone(beforeTone),
+			afterTone(afterTone),
+			before(before),
+			after(after)
+		{}
+		CompoundTone operator()(const double& baseFreq);
 
-extern const Note A  ;
-extern const Note Ais;
-extern const Note B  ;
-extern const Note C  ;
-extern const Note Cis;
-extern const Note D  ;
-extern const Note Dis;
-extern const Note E  ;
-extern const Note F  ;
-extern const Note Fis;
-extern const Note G  ;
-extern const Note Gis;
+		std::vector<ToneSkeleton> components;
+		ADSREnvelope envelope;
+		Tone::before_t         beforeTone;
+		Tone::after_t          afterTone;
+		CompoundTone::before_t before;
+		CompoundTone::after_t  after;
+};
 
 #endif // GENERATORS_H_INCLUDED

@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include <atomic>
+#include <memory>
 
 class SynthKey : public sf::RectangleShape
 {
@@ -107,7 +108,7 @@ public:
     Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::atomic<double>& val);
     Slider& setFixed(bool val) {fixed = val; return *this;}
 
-	template<class T> 
+	template<class T>
 	static std::shared_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal)
 	{
 		constexpr float width = 30;
@@ -115,10 +116,10 @@ public:
 		constexpr unsigned titleSize = 16;
 
 		std::shared_ptr<Slider> ptr;
-		if constexpr (std::is_constructible_v<std::function<void(const Slider&)>,T>)
+		if constexpr (std::is_constructible_v<std::function<void(Slider&)>,T>)
 		{
 			ptr = std::make_shared<Slider>(name, from, to, px, py, width, height, titleSize, Slider::Vertical, [&]() {});
-			ptr->onMove = [=]() {
+			ptr->onMove = [&onMoveVal, ptr]() {
 				onMoveVal(*ptr);
 			};
 		}

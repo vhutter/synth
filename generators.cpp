@@ -111,43 +111,41 @@ void ContinuousFunction::setValueLinear(double newVal, double btime, double dura
     startTime = btime;
     endTime = btime + duration;
     m = (endValue - startValue) / (endTime - startTime);
-    reach = sf::Vector2f(endTime, endValue);
+    reach = sf::Vector2<double>(endTime, endValue);
 }
 
 Note::Note(double f)
     :freq(f)
+{}
+
+const Note Note::C  (523.25);
+const Note Note::Cis(554.37);
+const Note Note::D  (587.33);
+const Note Note::E  (659.25);
+const Note Note::Dis(622.25);
+const Note Note::F  (698.46);
+const Note Note::Fis(739.99);
+const Note Note::G  (783.99);
+const Note Note::Gis(830.61);
+const Note Note::A  (880.00);
+const Note Note::Ais(932.33);
+const Note Note::B  (987.77);
+
+double Tone::getSampleImpl(double t) const
 {
-
-}
-
-const Note C  (523.25);
-const Note Cis(554.37);
-const Note D  (587.33);
-const Note E  (659.25);
-const Note Dis(622.25);
-const Note F  (698.46);
-const Note Fis(739.99);
-const Note G  (783.99);
-const Note Gis(830.61);
-const Note A  (880.00);
-const Note Ais(932.33);
-const Note B  (987.77);
-
-double Tone::getSample(double t)
-{
-    Tone input = *this;
-    for(auto& effect: beforeEffects)
-        effect(t, input);
-    double result = waveform(t, input.intensity, input.note, input.phase);
-    for(auto& effect: afterEffects)
-        effect(t, result);
+    double result = waveform(t, this->intensity, this->note, this->phase);
     return result;
 }
 
 CompoundTone::CompoundTone(){}
 
-CompoundTone::CompoundTone(std::initializer_list<Tone> comps, const ADSREnvelope& env)
-    : envelope(env),
+CompoundTone::CompoundTone(
+	const std::vector<Tone>& comps, 
+	const ADSREnvelope& env,
+	before_t before,
+	after_t  after)
+    : SampleGenerator<CompoundTone>(before, after),
+	  envelope(env),
       initialComponents(comps.begin(), comps.end()),
       components(initialComponents),
       mainNote(initialComponents.front().note)
@@ -163,6 +161,10 @@ void CompoundTone::addComponent(const Tone& td)
 
 void CompoundTone::normalize()
 {
+	// this function should be deleted
+	// getSampleImpl does the normalization by calculating a weighted average
+	return;
+
     double max = std::max_element(components.begin(), components.end(),
         [](const auto& d1, const auto& d2) {
             return d1.intensity < d2.intensity;
@@ -173,25 +175,48 @@ void CompoundTone::normalize()
 
 void CompoundTone::modifyMainPitch(double t, double dest)
 {
-    if(mainNote == 0) throw "division by zero";
     const double changeRate = dest / mainNote;
-    for(unsigned i=0; i<components.size(); ++i) {
-        auto& component = components[i];
-        double f1 = component.note;
-        double f2 = initialComponents[i].note * changeRate;
-        double p = (t+component.phase) * f1 / f2 - t;
-        component.phase = p;
-        component.note = f2;
-    }
+	for (unsigned i = 0; i < components.size(); ++i) {
+		auto& component = components[i];
+		double f1 = component.note;
+		double f2 = initialComponents[i].note * changeRate;
+		double p = (t + component.phase) * f1 / f2 - t;
+		p = fmod(p, 2 * M_PI*f2);
+		component.phase = p;
+		component.note = f2;
+	}
 }
 
-double CompoundTone::getSample(double t)
+double CompoundTone::getSampleImpl(double t) const
 {
     double result = 0.;
     double intensitySum = 0.;
+	auto& component = components[0];
     for(auto& c: components) {
-        result += c.getSample(t);
+		result += c.getSample(t);
         intensitySum += c.intensity;
     }
     return result / intensitySum;
+}
+
+
+CompoundTone CompoundToneModel::operator()(const double& baseFreq)
+{
+	std::vector<Tone> tones;
+	tones.reserve(components.size());
+	std::transform(
+		components.begin(),
+		components.end(),
+		std::back_inserter(tones),
+		[&baseFreq, this](const ToneSkeleton& component) {
+		return Tone(
+			baseFreq * component.relativeFreq,
+			component.intensity,
+			component.waveform,
+			beforeTone,
+			afterTone
+		);
+	}
+	);
+	return CompoundTone(tones, envelope, before, after);
 }

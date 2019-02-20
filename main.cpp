@@ -1,7 +1,8 @@
+#define _USE_MATH_DEFINES
+
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <limits>
 #include <chrono>
@@ -9,6 +10,7 @@
 #include <memory>
 #include <utility>
 #include <deque>
+#include <algorithm>
 
 #include <iostream>
 #include <iomanip>
@@ -19,34 +21,50 @@
 #include "gui.h"
 #include "RtMidi.h"
 
+const std::vector<Note> baseNotes = {
+	Note::C,
+	Note::Cis,
+	Note::D,
+	Note::Dis,
+	Note::E,
+	Note::F,
+	Note::Fis,
+	Note::G,
+	Note::Gis,
+	Note::A,
+	Note::Ais,
+	Note::B
+};
+
 int main()
 {
     std::cout << std::fixed << std::setprecision(2);
 
-    const std::vector<Note> baseNotes = {C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B};
     std::vector<Note> notes;
     const unsigned octaves = 2;
     for(unsigned i=1; i<=octaves; ++i)
         for(auto note: baseNotes) notes.push_back(note*i);
-    notes.push_back(C*octaves*2);
+    notes.push_back(Note::C*octaves*2);
 
     // Sound synthesis will be performed in a separate thread internally
     // The generateSample lambda function is created below for that reason
     std::mutex mtx;
 	ContinuousFunction amp(0.5);
-	ContinuousFunction glidePitch(0);
+	ContinuousFunction glidePitch(100);
 	std::atomic<bool> glide(false);
 	std::atomic<double> glideSpeed(.3);
 	std::atomic<double> octave(1.);
 	std::atomic<double> beta(0.);
+	std::deque<double> lastSamples;
+	int lastKeyIdx = -1;
 
 	beta = 1;
 
 	double lastTime(0);
 
-	const auto& toneEffect = [&](double t, Tone& tone) {
-	    tone.intensity = tone.intensity * amp.getValue(t);
-//	    tone.phase += sin(t*200) * 2 / tone.note / M_PI/2;
+	const auto& toneEffect = [&](double t, auto& tone) {
+//	    tone.intensity = tone.intensity * amp.getValue(t);
+//	    tone.phase += sin(t*60) * 2 / tone.note / M_PI/2;
 	    tone.note = tone.note * octave;
     };
 
@@ -56,90 +74,102 @@ int main()
 //	    lastSample = sample;
     };
 
+	std::unique_ptr<CompoundTone> glidingTone;
+	CompoundToneModel myToneModel(
+		{
+			CompoundToneModel::ToneSkeleton{1., 1., waves::sine},
+			CompoundToneModel::ToneSkeleton{3., 0.3, waves::sine}
+		},
+		ADSREnvelope(),
+		toneEffect, filter,
+		{},
+		[&amp, &glide, &glidingTone, &glidePitch](double t, double& sample) {
+			if (glide) {
+				glidingTone->modifyMainPitch(t, glidePitch.getValue(t));
+				sample = glidingTone->getSample(t);
+			}
+			sample *= amp.getValue(t);
+		}
+	);
+	CompoundToneModel glidingToneModel(myToneModel);
+	glidingToneModel.before = [&glidePitch](double t, CompoundTone& input) {
+		input.modifyMainPitch(t, glidePitch.getValue(t));
+	};
+	glidingToneModel.after = {};
+	glidingTone = std::make_unique<CompoundTone>(glidingToneModel(notes.front()));
+
 	std::vector<CompoundTone> tones;
 	tones.reserve(notes.size());
-	for (unsigned i=0; i<notes.size(); ++i) {
-        tones.emplace_back(CompoundTone(
-            {
-                Tone(notes[i], 1., waves::sawtooth, {toneEffect}, {filter}),
-                Tone(notes[i]*3, 0.3, waves::sine,  {toneEffect}, {filter})
-            }
-//            ADSREnvelope(.005, 0.35, 0.00, 0.2)
-        ));
+	for (auto& note : notes) {
+        tones.emplace_back(myToneModel(note));
 	}
 	 
-	auto oscope = std::make_shared<Oscilloscope>(600, 50, 500, 200, 1000, 1);
+	std::shared_ptr oscope = std::make_unique<Oscilloscope>(600, 50, 500, 200, 1000, 1);
 
 	std::shared_ptr sliderVolume(Slider::DefaultSlider("Volume", 0,1, 30,50, [&](const Slider& sliderVolume){
         std::lock_guard<std::mutex> lock(mtx);
         amp.setValueLinear(sliderVolume.getValue(), lastTime, 0.005);
     }));
-	std::shared_ptr sliderPitch = Slider::DefaultSlider("Pitch", -1,1, 100,50, [&](const Slider& sliderPitch){
+	std::shared_ptr sliderPitch(Slider::DefaultSlider("Pitch", -1,1, 100,50, [&](const Slider& sliderPitch){
         static double lastValue = 0;
         const double dif = sliderPitch.getValue() - lastValue;
         std::lock_guard<std::mutex> lock(mtx);
         lastValue = lastValue + dif;
         for(auto& tone: tones)
             tone.modifyMainPitch(lastTime, tone.getMainNote() + sliderPitch.getValue() * 1/9 * tone.getMainNote());
-    });
+    }));
     sliderPitch->setFixed(true);
     //auto betaSlider(Slider::DefaultSlider("Beta", 0,1, 30,200, beta));
 	std::shared_ptr glideSpeedSlider(Slider::DefaultSlider("Glide", 0,.5, 160, 50, glideSpeed));
-    std::shared_ptr glideButton(Button::DefaultButton("Glide", 180, 180, glide));
+	//std::shared_ptr glideButton(Button::DefaultButton("Glide", 180, 180, glide));
+	std::shared_ptr glideButton(Button::DefaultButton("Glide", 180, 180, [&]() {
+		glide = !glide;
+	}));
 	std::shared_ptr<SynthKeyboard> synthKeyboard;
-	synthKeyboard = std::make_shared<SynthKeyboard>(50, 700, [&](unsigned keyIdx) {
-        std::cout << keyIdx << "\n";
-        static int lastIdx = -1;
+	synthKeyboard = std::make_unique<SynthKeyboard>(50, 700, [&](unsigned keyIdx) {
         const auto& synth = synthKeyboard;
         std::lock_guard<std::mutex> lock(mtx);
         if (synth->isLastEventKeypress()) {
-            std::cout << "keypress\n";
-            if (glide && lastIdx != -1) {
-                std::cout << "keypress_2\n";
-                tones[lastIdx].envelope.stop(lastTime);
-                glidePitch.setValueLinear(tones[keyIdx].getMainNote(), lastTime, glideSpeed);
+            if (glide) {
+				glidePitch.setValueLinear(tones[keyIdx].getMainNote(), lastTime, glideSpeed);
+                if(lastKeyIdx != -1) tones[lastKeyIdx].envelope.stop(lastTime);
             }
             tones[keyIdx].envelope.start(lastTime);
             (*synth)[keyIdx].setPressed(true);
-            lastIdx = keyIdx;
+			lastKeyIdx = keyIdx;
         }
         else {
-            std::cout << "not keypress\n";
             tones[keyIdx].envelope.stop(lastTime);
             (*synth)[keyIdx].setPressed(false);
         }
     });
     std::vector< std::shared_ptr<GuiElement> > objects = {
-        std::move(sliderVolume),
-        oscope,
         synthKeyboard,
+        sliderVolume,
+        oscope,
         sliderPitch,
         glideButton,
         glideSpeedSlider,
         //betaSlider,
     };
 
-	std::deque<double> lastSamples;
     const unsigned maxNotes = 4;
 	const auto& generateSample = [&](double t) -> double {
 
         std::lock_guard<std::mutex> lock(mtx);
 		double result = 0.;
 		unsigned notesNumber = 0;
-		for (unsigned i=0; i<tones.size(); i++){
-			if (tones[i].envelope.isNonZero()) {
+		for(auto& tone: tones) {
+			if (tone.envelope.isNonZero()) {
                 if (++notesNumber > maxNotes) break;
-                if(glide) {
-                        tones[i].modifyMainPitch(t, glidePitch.getValue(t));
-                        //std::cout<<tones[i].getSample(t) <<"\n";
-                }
-                double env = tones[i].envelope.getAmplitude(t);
-				result += tones[i].getSample(t) * env;
+                double env = tone.envelope.getAmplitude(t);
+				double sample = tone.getSample(t);
+				result += sample * env;
 			}
 		}
 
-		lastTime = t;
 		result = result / double(maxNotes);
+		lastTime = t;
         lastSamples.push_back(result);
 
 		return result;
@@ -176,10 +206,11 @@ int main()
 	window.setVerticalSyncEnabled(true);
 	while (window.isOpen())
 	{
+		//std::cout << glidePitch.getValue(lastTime) << "\n";
 		static sf::Event event;
 
         std::unique_lock<std::mutex> midiLock(midiMutex);
-        while(midiMsgQueue.size() > 0)
+        while(!midiMsgQueue.empty())
         {
             auto& msg = midiMsgQueue.front();
             midiMsgQueue.pop();
