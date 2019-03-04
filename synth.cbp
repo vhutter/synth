@@ -57,8 +57,8 @@
 		</Unit>
 		<Unit filename="generators.cpp" />
 		<Unit filename="generators.h" />
-		<Unit filename="gui.cpp" />
-		<Unit filename="gui.h" />
+		<Unit filename="guiElements.cpp" />
+		<Unit filename="guiElements.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="synth.cpp" />
 		<Unit filename="synth.h" />

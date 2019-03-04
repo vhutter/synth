@@ -40,6 +40,7 @@ private:
     PaStreamParameters outputParameters;
     PaStream *stream;
     PaError err;
+	bool running{ false };
 };
 
 #endif // SYNTH_H_INCLUDED

@@ -59,15 +59,20 @@ SynthStream::SynthStream(unsigned sampleRate, unsigned bufferSize, CallbackFunct
 
 SynthStream::~SynthStream()
 {
+	if (running) {
+		stop();
+	}
     Pa_Terminate();
 }
 
 void SynthStream::play()
 {
     ErrorCheck(Pa_StartStream( stream ));
+	running = true;
 }
 
 void SynthStream::stop()
 {
     ErrorCheck(Pa_CloseStream( stream ));
+	running = false;
 }

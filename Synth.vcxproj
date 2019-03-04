@@ -116,17 +116,16 @@
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;D:\SDKs\frozen\frozen-master\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>
-      </PreprocessorDefinitions>
+      <PreprocessorDefinitions>__WINDOWS_MM__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;D:\SDKs\frozen\frozen-master\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
@@ -136,6 +135,7 @@
       <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <OmitFramePointers>false</OmitFramePointers>
+      <PreprocessorDefinitions>__WINDOWS_MM__</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:/SDKs/portaudio-msvc/Release;D:\SDKs\SFML-2.5.1-msvc\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -146,15 +146,21 @@
   <ItemGroup>
     <ClCompile Include="generators.cpp" />
     <ClCompile Include="gui.cpp" />
+    <ClCompile Include="guiElements.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RtMidi.cpp" />
     <ClCompile Include="synth.cpp" />
+    <ClCompile Include="events.cpp" />
+    <ClCompile Include="tones.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="generators.h" />
+    <ClInclude Include="guiElements.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="RtMidi.h" />
     <ClInclude Include="synth.h" />
+    <ClInclude Include="events.h" />
+    <ClInclude Include="tones.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
