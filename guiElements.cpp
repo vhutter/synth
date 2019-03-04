@@ -411,8 +411,10 @@ TextDisplay::TextDisplay(const std::string& initialText, float px, float py, flo
 
 TextDisplay TextDisplay::AroundPoint(const std::string initialText, float px, float py, float sx, float sy, unsigned int charSize)
 {
-    TextDisplay ret(initialText, px, py, sx, sy, charSize);
-    const auto& dif = ret.window.getSize() / 2.f;
+	TextDisplay ret(initialText, px, py, sx, sy, charSize);
+    auto dif = ret.window.getSize() / 2.f;
+	dif.x = floor(dif.x);
+	dif.y = floor(dif.y);
     ret.window.setPosition(ret.window.getPosition()-dif);
     ret.text.setPosition  (ret.text.getPosition()-dif);
     return ret;
