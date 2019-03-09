@@ -20,22 +20,29 @@
 
 #include "tones.h"
 #include "synth.h"
-#include "generators.h"
 #include "guiElements.h"
 #include "gui.h"
 #include "events.h"
+#include "effects.h"
 
 int main()
 {
+	const unsigned sampleRate(44100);
 	EmptyGuiElement gui{ {} };
-	auto generator = CustomTone1<5>(gui, DebugFilter(gui));
 
+	auto generator = CustomTone1<5>(gui, mergeEffects(
+		//TestFilter(gui),
+		EchoEffect(gui, sampleRate, 0.5, 0.4),
+		VolumeControl(gui),
+		DebugFilter(gui)
+	));
+	
 	const auto& generateSample = [&](double t) -> double {
         std::lock_guard lock(generator);
-		return generator.getSample(t);
+		double sample = generator.getSample(t);
+		return sample;
 	};
 
-    const unsigned sampleRate(44100);
 	SynthStream synth(sampleRate, 1, generateSample, generateSample);
 	synth.play();
 

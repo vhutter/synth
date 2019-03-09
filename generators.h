@@ -131,7 +131,8 @@ protected:
 
 class Tone : public SampleGenerator<Tone>
 {
-	friend class SampleGenerator<Tone>;
+		friend class SampleGenerator<Tone>;
+
     public:
 		typedef std::function<void(double, Tone&)> before_t;
 

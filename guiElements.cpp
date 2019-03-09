@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <variant>
+#include <bitset>
 
 namespace
 {
@@ -67,6 +68,19 @@ void GuiElement::forwardEvent(const SynthEvent& event)
 void GuiElement::addChildren(std::vector<std::shared_ptr<GuiElement>> newChildren)
 {
 	children.insert(children.end(), newChildren.begin(), newChildren.end());
+	for (auto child : children) {
+		child->parent = std::enable_shared_from_this<GuiElement>::weak_from_this();
+	}
+}
+
+void GuiElement::removeChild(std::shared_ptr<GuiElement> child)
+{
+	auto found = std::find(children.begin(), children.end(), child);
+	if (found != children.end()) {
+		child->parent.reset();
+		children.erase(found);
+	}
+
 }
 
 void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -90,6 +104,114 @@ SynthKeyboard::SynthKeyboard(float px, float py, std::function<void(unsigned)> e
     repositionKeys();
 }
 
+void SynthKeyboard::onMidiEvent(const MidiEvent & event)
+{
+	unsigned char eventType = event.getMessage()[0];
+	unsigned char keyCode = event.getMessage()[1];
+	unsigned char intensity = event.getMessage()[2];
+
+	static int msgId = 0;
+	std::cout << msgId++ << event.getMessage().size() << ": " <<
+		std::bitset<8>(eventType) << " " <<
+		std::bitset<8>(keyCode) << " " <<
+		std::bitset<8>(intensity) << "\n";
+
+	enum class MsgType : uint8_t {
+		KEYDOWN = 0b1001'0000,
+		KEYUP = 0b1000'0000,
+		KNOB = 0b1011'0000,
+		WHEEL = 0b1110'0000,
+	};
+
+	unsigned char value = keyCode - 48;
+	lastPressed = false;
+	if (value >= keys.size())
+		return;
+
+	eventType &= 0b1111'0000;
+	switch (static_cast<MsgType>(eventType))
+	{
+	case MsgType::KEYDOWN:
+		lastPressed = true;
+		onKey(value);
+		break;
+	case MsgType::KEYUP:
+		onKey(value);
+		break;
+	default:
+		break;
+	}
+}
+
+void SynthKeyboard::onSfmlEvent(const sf::Event & event)
+{
+	const auto& key = event.key.code;
+
+	int value = -1;
+	switch (key)
+	{
+	case sf::Keyboard::Z:
+		value = 0;
+		break;
+	case sf::Keyboard::S:
+		value = 1;
+		break;
+	case sf::Keyboard::X:
+		value = 2;
+		break;
+	case sf::Keyboard::D:
+		value = 3;
+		break;
+	case sf::Keyboard::C:
+		value = 4;
+		break;
+	case sf::Keyboard::V:
+		value = 5;
+		break;
+	case sf::Keyboard::G:
+		value = 6;
+		break;
+	case sf::Keyboard::B:
+		value = 7;
+		break;
+	case sf::Keyboard::H:
+		value = 8;
+		break;
+	case sf::Keyboard::N:
+		value = 9;
+		break;
+	case sf::Keyboard::J:
+		value = 10;
+		break;
+	case sf::Keyboard::M:
+		value = 11;
+		break;
+	default:
+		break;
+	}
+
+
+	lastPressed = false;
+
+	if (value == -1)
+		return;
+
+	switch (event.type)
+	{
+	case sf::Event::KeyPressed: {
+		lastPressed = true;
+		onKey(value);
+		break;
+	}
+	case sf::Event::KeyReleased: {
+		onKey(value);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
 void SynthKeyboard::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
     for (const auto& key: keys)
@@ -104,108 +226,10 @@ void SynthKeyboard::drawImpl(sf::RenderTarget& target, sf::RenderStates states) 
 void SynthKeyboard::onEvent(const SynthEvent& eventArg)
 {
 	if (std::holds_alternative<sf::Event>(eventArg)) {
-		const sf::Event& event = std::get<sf::Event>(eventArg);
-		const auto& key = event.key.code;
-
-		int value = -1;
-		switch (key)
-		{
-		case sf::Keyboard::Z:
-			value = 0;
-			break;
-		case sf::Keyboard::S:
-			value = 1;
-			break;
-		case sf::Keyboard::X:
-			value = 2;
-			break;
-		case sf::Keyboard::D:
-			value = 3;
-			break;
-		case sf::Keyboard::C:
-			value = 4;
-			break;
-		case sf::Keyboard::V:
-			value = 5;
-			break;
-		case sf::Keyboard::G:
-			value = 6;
-			break;
-		case sf::Keyboard::B:
-			value = 7;
-			break;
-		case sf::Keyboard::H:
-			value = 8;
-			break;
-		case sf::Keyboard::N:
-			value = 9;
-			break;
-		case sf::Keyboard::J:
-			value = 10;
-			break;
-		case sf::Keyboard::M:
-			value = 11;
-			break;
-		default:
-			break;
-		}
-
-
-		lastPressed = false;
-
-		if (value == -1)
-			return;
-
-		switch (event.type)
-		{
-		case sf::Event::KeyPressed: {
-			lastPressed = true;
-			onKey(value);
-			break;
-		}
-		case sf::Event::KeyReleased: {
-			onKey(value);
-			break;
-		}
-		default:
-			break;
-		}
+		onSfmlEvent(std::get<sf::Event>(eventArg));
 	}
 	else {
-		const MidiEvent& event = std::get<MidiEvent>(eventArg);
-		unsigned char eventType = event.getMessage()[0];
-		unsigned char keyCode = event.getMessage()[1];
-		unsigned char intensity = event.getMessage()[2];
-
-		static int msgId = 0;
-		std::cout << msgId++ << event.getMessage().size() << ": " << (int)eventType << " " << (int)keyCode << " " << (int)intensity << "\n";
-
-		enum class MsgType : unsigned char {
-			KEYDOWN = 144,
-			KEYUP = 128,
-			PADDOWN = 153,
-			PADUP = 137,
-			KNOB = 176,
-			WHEEL = 224,
-		};
-
-		unsigned char value = keyCode - 48;
-		lastPressed = false;
-		if (value >= keys.size())
-			return;
-
-		switch (static_cast<MsgType>(eventType))
-		{
-		case MsgType::KEYDOWN:
-			lastPressed = true;
-			onKey(value);
-			break;
-		case MsgType::KEYUP:
-			onKey(value);
-			break;
-		default:
-			break;
-		}
+		onMidiEvent(std::get<MidiEvent>(eventArg));
 	}
 }
 
@@ -417,7 +441,7 @@ TextDisplay TextDisplay::AroundPoint(const std::string initialText, float px, fl
 	dif.y = floor(dif.y);
     ret.window.setPosition(ret.window.getPosition()-dif);
     ret.text.setPosition  (ret.text.getPosition()-dif);
-    return ret;
+    return std::move(ret);
 }
 
 void TextDisplay::setBgColor(const sf::Color& color)

@@ -28,18 +28,20 @@ private:
 
 };
 
-class GuiElement: public sf::Drawable
+class GuiElement: public sf::Drawable, public std::enable_shared_from_this<GuiElement>
 {
 public:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const final override;
 	void forwardEvent(const SynthEvent& event);
 	void addChildren(std::vector<std::shared_ptr<GuiElement>> child);
+	void removeChild(std::shared_ptr<GuiElement> child);
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const = 0;
 	virtual void onEvent(const SynthEvent& event) {}
 
 	std::vector<std::shared_ptr<GuiElement>> children;
+	std::weak_ptr<GuiElement> parent;
 };
 
 class EmptyGuiElement : public GuiElement
@@ -72,6 +74,8 @@ public:
     SynthKey& operator[] (std::size_t i) {return keys[i];}
 
 private:
+	void onMidiEvent(const MidiEvent& event);
+	void onSfmlEvent(const sf::Event& event);
     virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
     void repositionKeys();
 
@@ -135,24 +139,23 @@ public:
     Slider& setFixed(bool val) {fixed = val; return *this;}
 
 	template<class T>
-	static std::shared_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal)
+	static std::unique_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal)
 	{
 		constexpr float width = 30;
 		constexpr float height = 100;
 		constexpr unsigned titleSize = 16;
 
-		std::shared_ptr<Slider> ptr;
 		if constexpr (std::is_constructible_v<std::function<void(Slider&)>,T>)
 		{
-			ptr = std::make_shared<Slider>(name, from, to, px, py, width, height, titleSize, Slider::Vertical, []() {});
-			ptr->onMove = [onMoveVal, ptr]() {
+			std::unique_ptr<Slider> ptr = std::make_unique<Slider>(name, from, to, px, py, width, height, titleSize, Slider::Vertical, []() {});
+			ptr->onMove = [onMoveVal, ptr=ptr.get()]() {
 				onMoveVal(*ptr);
 			};
+			return ptr;
 		}
 		else {
-			ptr = std::make_shared<Slider>(name, from, to, px, py, width, height, titleSize, Slider::Vertical, onMoveVal);
+			return std::make_unique<Slider>(name, from, to, px, py, width, height, titleSize, Slider::Vertical, onMoveVal);
 		}
-		return ptr;
 	}
 
     virtual void onEvent(const SynthEvent& event) override;

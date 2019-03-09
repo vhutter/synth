@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="effects.cpp" />
     <ClCompile Include="generators.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="guiElements.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="tones.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="effects.h" />
     <ClInclude Include="generators.h" />
     <ClInclude Include="guiElements.h" />
     <ClInclude Include="gui.h" />

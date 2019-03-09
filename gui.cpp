@@ -25,6 +25,10 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 					window.close();
 					break;
 				}
+				case sf::Keyboard::Space: {
+					// For testing
+					break;
+				}
 				default:
 					break;
 				}

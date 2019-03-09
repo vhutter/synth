@@ -41,7 +41,6 @@ private:
 
 	// Configuration
 	ContinuousFunction glidePitch{ 100 };
-	ContinuousFunction amp{0.5};
 	std::atomic<bool> glide{ false };
 	std::atomic<double> octave{ 1. };
 	std::atomic<double> glideSpeed{ .3 };
@@ -71,8 +70,8 @@ std::vector<typename CustomTone1<maxTones>::DynamicTone> CustomTone1<maxTones>::
 	const std::vector<Note>& notes{ generateNotes(0,2) };
 	TimbreModel myToneModel{
 		{
-			TimbreModel::ToneSkeleton{ 1., 1., waves::sawtooth },
-			TimbreModel::ToneSkeleton{ 3., 0.3, waves::triangle },
+			TimbreModel::ToneSkeleton{ 1., 1.,  waves::sine },
+			TimbreModel::ToneSkeleton{ 3., 0.3, waves::sine },
 		},
 		[this](double t, Tone& tone) {
 		//tone.phase += sin(t*60) * 2 / tone.note / M_PI/2;
@@ -90,7 +89,6 @@ std::vector<typename CustomTone1<maxTones>::DynamicTone> CustomTone1<maxTones>::
 			glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
 			sample = glidingTone.getSample(t);
 		}
-		sample *= amp.getValue(t);
 	};
 	std::vector<DynamicTone> tones;
 	tones.reserve(notes.size());
@@ -132,9 +130,9 @@ CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t aft
 	});
 
 	// Volume control
-	std::shared_ptr sliderVolume{ Slider::DefaultSlider("Volume", 0, 1, 30, 50, [this](const Slider& sliderVolume) {
-		amp.setValueLinear(sliderVolume.getValue(), this->time(), 0.005);
-	}) };
+	//std::shared_ptr sliderVolume{ Slider::DefaultSlider("Volume", 0, 1, 30, 50, [this](const Slider& sliderVolume) {
+	//	amp.setValueLinear(sliderVolume.getValue(), this->time(), 0.005);
+	//}) };
 
 	// Pitch slider
 	std::shared_ptr sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, 100, 50, [this](const Slider& sliderPitch) {
@@ -178,21 +176,8 @@ CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t aft
 		sliderPitch,
 		glideSpeedSlider,
 		glideButton,
-		sliderVolume,
 		mouseEvents,
 		});
 }
-
-
-class DebugFilter
-{
-public:
-	DebugFilter(GuiElement& gui);
-	void operator()(double t, double& sample);
-
-private:
-	std::shared_ptr<Oscilloscope> oscilloscope{ std::make_unique<Oscilloscope>(600, 50, 500, 200, 500, 1) };
-	double maxSamp{ -5 };
-};
 
 #endif //TONES_H_INCLUDED
