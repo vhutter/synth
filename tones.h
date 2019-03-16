@@ -43,22 +43,19 @@ class CustomTone1 : public DynamicToneSum<maxTones>
 public:
 
 	CustomTone1(GuiElement& gui, typename Base_t::after_t after = {});
+	void onKeyEvent(unsigned key, SynthKey::State keyState);
 
 private:
 
-	// Configuration
+	std::vector<Note> generateNotes(int from, int to);
+	std::vector<DynamicTone> generateTones();
+
 	ContinuousFunction glidePitch{ 100 };
 	std::atomic<bool> glide{ false };
 	std::atomic<double> octave{ 1. };
 	std::atomic<double> glideSpeed{ .3 };
+	int lastKeyIdx{ -1 };
 
-
-	// Gui
-	std::shared_ptr<SynthKeyboard> keyboard;
-
-	std::vector<Note> generateNotes(int from, int to);
-
-	std::vector<DynamicTone> generateTones();
 };
 
 template<std::size_t maxTones>
@@ -88,13 +85,13 @@ std::vector<typename CustomTone1<maxTones>::DynamicTone> CustomTone1<maxTones>::
 	glidingToneModel.before = [this](double t, CompoundGenerator<Tone>& input) {
 		input.modifyMainPitch(t, glidePitch.getValue(t));
 	};
-	static CompoundTone glidingTone{ glidingToneModel(notes.front()) };
-	myToneModel.after = [this](double t, double& sample) {
-		if (glide) {
-			glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
-			sample = glidingTone.getSample(t);
-		}
-	};
+	//static CompoundTone glidingTone{ glidingToneModel(notes.front()) };
+	//myToneModel.after = [this](double t, double& sample) {
+	//	if (glide) {
+	//		glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
+	//		sample = glidingTone.getSample(t);
+	//	}
+	//};
 	//Generation of the final tones
 	std::vector<DynamicTone> tones;
 	tones.reserve(notes.size());
@@ -114,27 +111,6 @@ CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t aft
 		}
 }
 {
-	// GUI
-
-	// Keyboard interaction
-	keyboard = std::make_unique<SynthKeyboard>(50, 700, [this](unsigned keyIdx) {
-		static int lastKeyIdx{ -1 };
-		const auto& kb = keyboard;
-		if (kb->isLastEventKeypress()) {
-			if (glide) {
-				glidePitch.setValueLinear(Base_t::components[keyIdx].getMainFreq(), this->time(), glideSpeed);
-				if (lastKeyIdx != -1) Base_t::components[lastKeyIdx].stop(this->time());
-			}
-			Base_t::components[keyIdx].start(this->time());
-			(*kb)[keyIdx].setPressed(true);
-			lastKeyIdx = keyIdx;
-		}
-		else {
-			Base_t::components[keyIdx].stop(this->time());
-			(*kb)[keyIdx].setPressed(false);
-		}
-	});
-
 	// Pitch slider
 	std::shared_ptr sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, 100, 50, [this](const Slider& this_slider) {
 		static double lastValue = 0;
@@ -173,12 +149,27 @@ CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t aft
 
 
 	gui.addChildren({
-		keyboard,
 		sliderPitch,
 		glideSpeedSlider,
 		glideButton,
 		mouseEvents,
 		});
+}
+
+template<std::size_t maxTones>
+void CustomTone1<maxTones>::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
+{
+	if (keyState == SynthKey::State::Pressed) {
+		if (glide) {
+			glidePitch.setValueLinear(Base_t::components[keyIdx].getMainFreq(), this->time(), glideSpeed);
+			if (lastKeyIdx != -1) Base_t::components[lastKeyIdx].stop(this->time());
+		}
+		Base_t::components[keyIdx].start(this->time());
+		lastKeyIdx = keyIdx;
+	}
+	else {
+		Base_t::components[keyIdx].stop(this->time());
+	}
 }
 
 #endif //TONES_H_INCLUDED

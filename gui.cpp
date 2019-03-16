@@ -6,11 +6,32 @@
 
 #include "generators.h"
 #include "guiElements.h"
+#include "gui.h"
 
+
+KeyboardOutput::KeyboardOutput()
+{
+	kb = std::make_unique<SynthKeyboard>(50, 700, [this](unsigned keyIdx, SynthKey::State keyState) {
+		if (keyState == SynthKey::State::Pressed) {
+			(*kb)[keyIdx].setPressed(true);
+		}
+		else {
+			(*kb)[keyIdx].setPressed(false);
+		}
+		for (auto callback : callbacks) {
+			callback(keyIdx, keyState);
+		}
+	});
+}
+
+std::shared_ptr<SynthKeyboard> KeyboardOutput::getGuiElement() const
+{
+	return kb;
+};
 
 void setupGui(GuiElement& gui, sf::RenderWindow& window)
 {
-	auto ptr = std::make_shared<EmptyGuiElement>([&](const SynthEvent& eventArg) {
+	auto setup = std::make_shared<EmptyGuiElement>([&](const SynthEvent& eventArg) {
 		if (std::holds_alternative<sf::Event>(eventArg)) {
 			const sf::Event& event = std::get<sf::Event>(eventArg);
 
@@ -45,5 +66,5 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 		}
 	});
 
-	gui.addChildren({ ptr });
+	gui.addChildren({ setup });
 }

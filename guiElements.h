@@ -13,7 +13,8 @@
 class SynthKey : public sf::RectangleShape
 {
 public:
-    enum Type : bool {White = true, Black = false};
+    enum Type : bool { White = true, Black = false };
+	enum State : bool { Pressed = true, Released = false };
 
     SynthKey(Type t, float px=0, float py=0);
     Type getType() const {return type;};
@@ -63,7 +64,9 @@ protected:
 class SynthKeyboard : public GuiElement
 {
 public:
-    SynthKeyboard(float px, float py, std::function<void(unsigned)> eventCallback);
+	using callback_t = std::function<void(unsigned, SynthKey::State)>;
+
+    SynthKeyboard(float px, float py, callback_t eventCallback);
 
     virtual void onEvent(const SynthEvent& event) override;
 
@@ -81,7 +84,7 @@ private:
 
     sf::Vector2f pos;
     std::vector<SynthKey> keys;
-    std::function<void(unsigned)> onKey;
+	callback_t onKey;
     bool lastPressed = false;
 };
 

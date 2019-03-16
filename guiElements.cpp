@@ -88,7 +88,7 @@ void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	for (auto& child : children) child->drawImpl(target, states);
 }
 
-SynthKeyboard::SynthKeyboard(float px, float py, std::function<void(unsigned)> eventCallback)
+SynthKeyboard::SynthKeyboard(float px, float py, callback_t eventCallback)
     : pos(px, py), onKey(eventCallback)
 {
     const auto& w = SynthKey::White;
@@ -132,10 +132,10 @@ void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 	{
 	case MsgType::KEYDOWN:
 		lastPressed = true;
-		onKey(value);
+		onKey(value, SynthKey::State::Pressed);
 		break;
 	case MsgType::KEYUP:
-		onKey(value);
+		onKey(value, SynthKey::State::Released);
 		break;
 	default:
 		break;
@@ -199,11 +199,11 @@ void SynthKeyboard::onSfmlEvent(const sf::Event & event)
 	{
 	case sf::Event::KeyPressed: {
 		lastPressed = true;
-		onKey(value);
+		onKey(value, SynthKey::State::Pressed);
 		break;
 	}
 	case sf::Event::KeyReleased: {
-		onKey(value);
+		onKey(value, SynthKey::State::Released);
 		break;
 	}
 	default:

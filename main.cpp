@@ -29,6 +29,8 @@ int main()
 {
 	const unsigned sampleRate(44100);
 	EmptyGuiElement gui{ {} };
+	auto keyboard = KeyboardOutput();
+	gui.addChildren({ keyboard.getGuiElement() });
 
 	auto generator = CustomTone1<5>(gui, mergeEffects(
 		//TestFilter(gui),
@@ -36,18 +38,20 @@ int main()
 		VolumeControl(gui),
 		DebugFilter(gui)
 	));
+
+	keyboard.outputTo(generator);
 	
 	const auto& generateSample = [&](double t) -> double {
         std::lock_guard lock(generator);
 		double sample = generator.getSample(t);
 		return sample;
 	};
-
+	
 	SynthStream synth(sampleRate, 1, generateSample, generateSample);
 	synth.play();
-
+	
 	MidiContext midiContext;
-
+	
 	sf::RenderWindow window(sf::VideoMode(1600, 1000), "Basic synth");
 	setupGui(gui, window);
 	window.setKeyRepeatEnabled(false);
@@ -55,14 +59,14 @@ int main()
 	while (window.isOpen()) {
 		static sf::Event event;
 		static MidiEvent midiEvent;
-
+	
 		while (midiContext.pollEvent(midiEvent)) {
 			gui.forwardEvent(midiEvent);
 		}
 		while (window.pollEvent(event)) {
 			gui.forwardEvent(event);
 		}
-
+	
 		window.clear(sf::Color::Black);
 		window.draw(gui);
 		window.display();
