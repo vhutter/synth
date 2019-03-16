@@ -48,17 +48,8 @@ void EchoEffect::effectImpl(double t, double & sample)
 	++sampleId;
 }
 
-VolumeControl::Impl::Impl(double lastTime, decltype(amp) amp, decltype(sliderVolume) sliderVolume)
-	:lastTime(lastTime),
-	amp(amp),
-	sliderVolume(sliderVolume)
-{
-}
-
 VolumeControl::VolumeControl(GuiElement & gui)
-	:impl(std::make_shared<Impl>(0., 0.5, Slider::DefaultSlider("Volume", 0, 1, 30, 50, [this](const Slider& sliderVolume) {
-		impl->amp.setValueLinear(sliderVolume.getValue(), impl->lastTime, 0.005);
-	})))
+	:impl{ std::make_shared<Impl>() }
 {
 	gui.addChildren({impl->sliderVolume});
 }
@@ -67,4 +58,29 @@ void VolumeControl::effectImpl(double t, double & sample)
 {
 	impl->lastTime = t;
 	sample *= impl->amp.getValue(t);
+}
+
+Glider::Glider(GuiElement & gui)
+	:impl{std::make_shared<Impl>()}
+{
+	//TimbreModel glidingToneModel{ myToneModel };
+	//glidingToneModel.before = [this](double t, CompoundGenerator<Tone>& input) {
+	//	input.modifyMainPitch(t, glidePitch.getValue(t));
+	//};
+	//static CompoundTone glidingTone{ glidingToneModel(notes.front()) };
+	//myToneModel.after = [this](double t, double& sample) {
+	//	if (glide) {
+	//		glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
+	//		sample = glidingTone.getSample(t);
+	//	}
+	//};
+	gui.addChildren({ impl->glideSpeedSlider, impl->glideButton });
+}
+
+void Glider::effectImpl(double t, double & sample)
+{
+	//if (impl->glide) {
+	//	impl->glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
+	//	sample = glidingTone.getSample(t);
+	//}
 }

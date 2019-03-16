@@ -32,7 +32,7 @@ int main()
 
 	auto generator = CustomTone1<5>(gui, mergeEffects(
 		//TestFilter(gui),
-		EchoEffect(gui, sampleRate, 0.5, 0.4),
+		//EchoEffect(gui, sampleRate, 0.03, 0.95),
 		VolumeControl(gui),
 		DebugFilter(gui)
 	));

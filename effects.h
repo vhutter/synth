@@ -27,10 +27,7 @@ public:
 	}
 	~EffectBase()
 	{
-		auto _this = static_cast<T*>(this);
-		if (_this->impl.unique()) {
-			// delete it from the gui
-		}
+		//auto _this = static_cast<T*>(this);
 	}
 };
 
@@ -47,6 +44,27 @@ private:
 	{
 		std::shared_ptr<Oscilloscope> oscilloscope{ std::make_shared<Oscilloscope>(600, 50, 500, 200, 500, 1) };
 		double maxSamp;
+	};
+
+	std::shared_ptr<Impl> impl;
+};
+
+class VolumeControl : public EffectBase<VolumeControl>
+{
+	friend class EffectBase<VolumeControl>;
+
+public:
+	VolumeControl(GuiElement& gui);
+	void effectImpl(double t, double& sample);
+
+private:
+	struct Impl
+	{
+		std::atomic<double> lastTime{ 0. };
+		ContinuousFunction amp{0.5};
+		std::shared_ptr<Slider> sliderVolume = Slider::DefaultSlider("Volume", 0, 1, 30, 50, [this](const Slider& sliderVolume) {
+			amp.setValueLinear(sliderVolume.getValue(), lastTime, 0.005);
+		});
 	};
 
 	std::shared_ptr<Impl> impl;
@@ -78,26 +96,49 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class VolumeControl : public EffectBase<VolumeControl>
+// to be continued...
+class Glider : public EffectBase<Glider>
 {
-	friend class EffectBase<VolumeControl>;
+	friend class EffectBase<Glider>;
 
 public:
-	VolumeControl(GuiElement& gui);
+	Glider(GuiElement& gui);
 	void effectImpl(double t, double& sample);
 
 protected:
 	struct Impl
 	{
-		std::atomic<double> lastTime;
-		ContinuousFunction amp;
-		std::shared_ptr<Slider> sliderVolume;
-
-		Impl(double lastTime, decltype(amp) amp, decltype(sliderVolume) slider);
+		std::atomic<double> lastTime, glideSpeed{ .5 };
+		std::atomic<bool> glide{ false };
+		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, 160, 50, glideSpeed) };
+		std::shared_ptr<Button> glideButton{ Button::DefaultButton("Glide", 180, 180, glide) };
 	};
 
 	std::shared_ptr<Impl> impl;
 };
+
+//class Flanger : public EffectBase<Flanger>
+//{
+//	friend class EffectBase<Flanger>;
+//
+//public:
+//	Flanger() {}
+//	void effectImpl(double t, double& sample)
+//	{
+//		const double speed{ 99 };
+//		const std::size_t bufSize{ 100 };
+//		static std::vector<double> samples(bufSize, 0.);
+//		static unsigned sampleId{ 0 };
+//		unsigned idx = sampleId % bufSize;
+//		samples[idx] = sample;
+//		idx = std::floor(std::fmod(t*speed, bufSize));
+//		sample = (sample + samples[idx]) / 2.;
+//		++sampleId;
+//	}
+//
+//protected:
+//
+//};
 
 class TestFilter : public EffectBase<TestFilter>
 {

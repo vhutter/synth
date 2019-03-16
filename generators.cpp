@@ -115,7 +115,7 @@ void ContinuousFunction::setValueLinear(double newVal, double btime, double dura
 }
 
 Note::Note(double f)
-    :freq(f)
+    :freq(f), initialFreq(freq)
 {}
 
 const Note Note::C  (523.25);
@@ -160,9 +160,9 @@ double Tone::getSampleImpl(double t) const
     return result;
 }
 
-const Note& Tone::getMainNoteImpl() const
+const double Tone::getMainFreqImpl() const
 {
-	return note;
+	return note.getInitialFreq();
 }
 
 

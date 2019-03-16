@@ -80,7 +80,6 @@ void GuiElement::removeChild(std::shared_ptr<GuiElement> child)
 		child->parent.reset();
 		children.erase(found);
 	}
-
 }
 
 void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const

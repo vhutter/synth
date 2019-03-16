@@ -61,8 +61,10 @@ class Note
 {
     public:
         Note(double freq);
+        double getInitialFreq() const {return initialFreq;}
         double getFifth() const {return freq*3/2;}
         operator double() const {return freq;}
+		Note& operator= (const Note& other) { freq = other.freq; return *this; }
 
 
 		static const Note A;
@@ -80,6 +82,7 @@ class Note
 		
     private:
         double freq;
+		const double initialFreq;
 };
 
 
@@ -120,9 +123,9 @@ public:
 		}
 	}
 	
-	const Note& getMainNote() const
+	const double getMainFreq() const
 	{
-		return static_cast<const T*>(this)->getMainNoteImpl();
+		return static_cast<const T*>(this)->getMainFreqImpl();
 	}
 protected:
 	std::function<void(double, T&)> beforeEffect;
@@ -153,7 +156,7 @@ class Tone : public SampleGenerator<Tone>
 
     private:
         double getSampleImpl(double t) const;
-		const Note& getMainNoteImpl() const;
+		const double getMainFreqImpl() const;
 };
 
 template<class T>
@@ -176,7 +179,7 @@ class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
 
     protected:
         double getSampleImpl(double t) const;
-		const Note& getMainNoteImpl() const;
+		const double getMainFreqImpl() const;
 
         const std::vector<T> initialComponents;
         std::vector<T> components;
@@ -201,11 +204,11 @@ void CompoundGenerator<T>::addComponent(const T& td)
 template<class T>
 void CompoundGenerator<T>::modifyMainPitch(double t, double dest)
 {
-	const double changeRate = dest / initialComponents.front().getMainNote();
+	const double changeRate = dest / initialComponents.front().getMainFreq();
 	for (unsigned i = 0; i < components.size(); ++i) {
 		auto& component = components[i];
-		double f1 = component.getMainNote();
-		double f2 = initialComponents[i].getMainNote() * changeRate;
+		double f1 = component.getMainFreq();
+		double f2 = initialComponents[i].getMainFreq() * changeRate;
 		component.modifyMainPitch(t, f2);
 	}
 }
@@ -232,9 +235,9 @@ const T& CompoundGenerator<T>::operator[](std::size_t idx) const
 }
 
 template<class T>
-const Note& CompoundGenerator<T>::getMainNoteImpl() const
+const double CompoundGenerator<T>::getMainFreqImpl() const
 {
-	return initialComponents.front().getMainNote();
+	return initialComponents.front().getMainFreq();
 }
 
 template<class T>
@@ -247,10 +250,6 @@ class DynamicCompoundGenerator: public CompoundGenerator<T>
 		);
 		void start(double t) const;
 		void stop(double t) const;
-		//using CompoundGenerator<T>::modifyMainPitch;
-		//using CompoundGenerator<T>::getMainNote;
-		//using CompoundGenerator<T>::getIntensity;
-		//using CompoundGenerator<T>::operator[];
 		double getSample(double t) const;
 
 	private:
@@ -290,7 +289,7 @@ double DynamicCompoundGenerator<T>::getSample(double t) const
 }
 
 template<std::size_t maxTones>
-class DynamicToneSum : protected CompoundGenerator<DynamicCompoundGenerator<Tone>>
+class DynamicToneSum : public CompoundGenerator<DynamicCompoundGenerator<Tone>>
 {
 	using Base_t = CompoundGenerator<DynamicCompoundGenerator<Tone>>;
 
@@ -306,9 +305,11 @@ class DynamicToneSum : protected CompoundGenerator<DynamicCompoundGenerator<Tone
 		void unlock() const { mtx.unlock(); }
 		double time() const { return lastTime.load(); }
 
-		using Base_t::getMainNote;
-		using Base_t::modifyMainPitch;
-		using Base_t::operator[];
+		//double getSample(double t) const
+		//{
+		//	lastTime.store(t);
+		//	return Base_t::getSample(t);
+		//}
 
 		double getSample(double t) const
 		{
@@ -318,9 +319,10 @@ class DynamicToneSum : protected CompoundGenerator<DynamicCompoundGenerator<Tone
 			double result{ 0. };
 			std::size_t count{ 0 };
 			for (auto& c : components) {
+				if (count >= maxTones) break;
 				const double& sample = c.getSample(t);
 				if (sample != 0) {
-					if (++count > maxTones) break;
+					++count;
 					result += sample;
 				}
 			}

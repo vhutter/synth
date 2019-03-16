@@ -26,6 +26,13 @@ static const std::array<Note, 12> baseNotes = {
 	Note::B
 };
 
+static TimbreModel CustomToneModel{
+	{
+		TimbreModel::ToneSkeleton{ 1., 1.,  waves::sine },
+		TimbreModel::ToneSkeleton{ 3., 0.3, waves::sine },
+	}
+};
+
 template<std::size_t maxTones>
 class CustomTone1 : public DynamicToneSum<maxTones>
 {
@@ -68,18 +75,16 @@ template<std::size_t maxTones>
 std::vector<typename CustomTone1<maxTones>::DynamicTone> CustomTone1<maxTones>::generateTones()
 {
 	const std::vector<Note>& notes{ generateNotes(0,2) };
-	TimbreModel myToneModel{
-		{
-			TimbreModel::ToneSkeleton{ 1., 1.,  waves::sine },
-			TimbreModel::ToneSkeleton{ 3., 0.3, waves::sine },
-		},
-		[this](double t, Tone& tone) {
-		//tone.phase += sin(t*60) * 2 / tone.note / M_PI/2;
-		tone.note = tone.note * octave;
-	},
+	TimbreModel myToneModel{ CustomToneModel };
+	myToneModel.beforeTone = [this](double t, Tone& tone) {
+		tone.note = tone.getMainFreq() * octave;
 	};
 	// Tone for glide effect
 	TimbreModel glidingToneModel{ myToneModel };
+	glidingToneModel.beforeTone = [this](double t, Tone& tone) {
+		//tone.phase += sin(t*10) * 15 / tone.note;
+		tone.note = tone.note * octave;
+	};
 	glidingToneModel.before = [this](double t, CompoundGenerator<Tone>& input) {
 		input.modifyMainPitch(t, glidePitch.getValue(t));
 	};
@@ -90,6 +95,7 @@ std::vector<typename CustomTone1<maxTones>::DynamicTone> CustomTone1<maxTones>::
 			sample = glidingTone.getSample(t);
 		}
 	};
+	//Generation of the final tones
 	std::vector<DynamicTone> tones;
 	tones.reserve(notes.size());
 	for (auto& note : notes) {
@@ -116,7 +122,7 @@ CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t aft
 		const auto& kb = keyboard;
 		if (kb->isLastEventKeypress()) {
 			if (glide) {
-				glidePitch.setValueLinear(Base_t::components[keyIdx].getMainNote(), this->time(), glideSpeed);
+				glidePitch.setValueLinear(Base_t::components[keyIdx].getMainFreq(), this->time(), glideSpeed);
 				if (lastKeyIdx != -1) Base_t::components[lastKeyIdx].stop(this->time());
 			}
 			Base_t::components[keyIdx].start(this->time());
@@ -129,18 +135,13 @@ CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t aft
 		}
 	});
 
-	// Volume control
-	//std::shared_ptr sliderVolume{ Slider::DefaultSlider("Volume", 0, 1, 30, 50, [this](const Slider& sliderVolume) {
-	//	amp.setValueLinear(sliderVolume.getValue(), this->time(), 0.005);
-	//}) };
-
 	// Pitch slider
-	std::shared_ptr sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, 100, 50, [this](const Slider& sliderPitch) {
+	std::shared_ptr sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, 100, 50, [this](const Slider& this_slider) {
 		static double lastValue = 0;
-		const double dif = sliderPitch.getValue() - lastValue;
+		const double dif = this_slider.getValue() - lastValue;
 		std::lock_guard lock(*this);
 		lastValue = lastValue + dif;
-		Base_t::modifyMainPitch(this->time(), this->getMainNote() + sliderPitch.getValue() * 1 / 9 * this->getMainNote());
+		this->modifyMainPitch(this->time(), this->getMainFreq() + this_slider.getValue() * 1 / 9 * this->getMainFreq());
 	}) };
 	sliderPitch->setFixed(true);
 
