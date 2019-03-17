@@ -59,28 +59,3 @@ void VolumeControl::effectImpl(double t, double & sample)
 	impl->lastTime = t;
 	sample *= impl->amp.getValue(t);
 }
-
-Glider::Glider(GuiElement & gui)
-	:impl{std::make_shared<Impl>()}
-{
-	//TimbreModel glidingToneModel{ myToneModel };
-	//glidingToneModel.before = [this](double t, CompoundGenerator<Tone>& input) {
-	//	input.modifyMainPitch(t, glidePitch.getValue(t));
-	//};
-	//static CompoundTone glidingTone{ glidingToneModel(notes.front()) };
-	//myToneModel.after = [this](double t, double& sample) {
-	//	if (glide) {
-	//		glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
-	//		sample = glidingTone.getSample(t);
-	//	}
-	//};
-	gui.addChildren({ impl->glideSpeedSlider, impl->glideButton });
-}
-
-void Glider::effectImpl(double t, double & sample)
-{
-	//if (impl->glide) {
-	//	impl->glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
-	//	sample = glidingTone.getSample(t);
-	//}
-}

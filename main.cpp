@@ -28,18 +28,22 @@
 int main()
 {
 	const unsigned sampleRate(44100);
+	const unsigned maxNotes{ 5 };
 	EmptyGuiElement gui{ {} };
 	auto keyboard = KeyboardOutput();
 	gui.addChildren({ keyboard.getGuiElement() });
 
-	auto generator = CustomTone1<5>(gui, mergeEffects(
+	auto notes = generateNotes(0, 2);
+	auto glideEffect = Glider(gui, CustomToneModel, notes, maxNotes);
+	auto generator = CustomTone1<maxNotes>(gui, CustomToneModel, notes, mergeEffects(
 		//TestFilter(gui),
-		//EchoEffect(gui, sampleRate, 0.03, 0.95),
+		glideEffect,
+		EchoEffect(gui, sampleRate, 0.3, 0.6),
 		VolumeControl(gui),
 		DebugFilter(gui)
 	));
 
-	keyboard.outputTo(generator);
+	keyboard.outputTo(generator, glideEffect);
 	
 	const auto& generateSample = [&](double t) -> double {
         std::lock_guard lock(generator);

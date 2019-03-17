@@ -96,24 +96,55 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-// to be continued...
 class Glider : public EffectBase<Glider>
 {
 	friend class EffectBase<Glider>;
 
 public:
-	Glider(GuiElement& gui);
-	void effectImpl(double t, double& sample);
+
+	Glider(GuiElement & gui, const TimbreModel& model, const std::vector<Note>& notes, unsigned maxNotes)
+		:maxNotes(maxNotes),
+		notes{ notes },
+		impl{ std::make_shared<Impl>(model) }
+	{
+		gui.addChildren({ impl->glideSpeedSlider, impl->glideButton });
+	}
+
+	void effectImpl(double t, double & sample)
+	{
+		if (impl->glide) {
+			impl->glidingTone.modifyMainPitch(t, impl->glidePitch.getValue(t));
+			sample = impl->glidingTone.getSample(t)/maxNotes;
+		}
+		impl->lastTime = t;
+	}
+	void onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
+	{
+		if (keyState == SynthKey::State::Pressed) {
+			impl->glidePitch.setValueLinear(notes[keyIdx], impl->lastTime, impl->glideSpeed);
+			impl->glidingTone.start(impl->lastTime);
+			lastPressed = keyIdx;
+		}
+		else if (keyIdx == lastPressed) {
+			impl->glidingTone.stop(impl->lastTime);
+		}
+	}
 
 protected:
 	struct Impl
 	{
-		std::atomic<double> lastTime, glideSpeed{ .5 };
+		DynamicCompoundGenerator<Tone> glidingTone;
+		ContinuousFunction glidePitch{ 100 };
+		std::atomic<double> glideSpeed{ .5 }, lastTime{ 0. };
 		std::atomic<bool> glide{ false };
 		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, 160, 50, glideSpeed) };
 		std::shared_ptr<Button> glideButton{ Button::DefaultButton("Glide", 180, 180, glide) };
+
+		Impl(const TimbreModel& model) : glidingTone(model(100)) {}
 	};
 
+	unsigned lastPressed, maxNotes;
+	const std::vector<Note>& notes;
 	std::shared_ptr<Impl> impl;
 };
 

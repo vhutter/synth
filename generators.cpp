@@ -181,7 +181,7 @@ TimbreModel::TimbreModel(
 	after(after)
 {}
 
-CompoundGenerator<Tone> TimbreModel::operator()(const double& baseFreq)
+CompoundGenerator<Tone> TimbreModel::operator()(const double& baseFreq) const
 {
 	std::vector<Tone> tones;
 	tones.reserve(components.size());

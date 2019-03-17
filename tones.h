@@ -26,6 +26,9 @@ static const std::array<Note, 12> baseNotes = {
 	Note::B
 };
 
+std::vector<Note> generateNotes(int fromOctave, int toOctave);
+
+
 static TimbreModel CustomToneModel{
 	{
 		TimbreModel::ToneSkeleton{ 1., 1.,  waves::sine },
@@ -42,70 +45,44 @@ class CustomTone1 : public DynamicToneSum<maxTones>
 
 public:
 
-	CustomTone1(GuiElement& gui, typename Base_t::after_t after = {});
+	CustomTone1(
+		GuiElement& gui, 
+		const TimbreModel& model, 
+		const std::vector<Note>& notes, 
+		typename Base_t::after_t after = {}
+	);
 	void onKeyEvent(unsigned key, SynthKey::State keyState);
 
 private:
 
-	std::vector<Note> generateNotes(int from, int to);
-	std::vector<DynamicTone> generateTones();
-
-	ContinuousFunction glidePitch{ 100 };
-	std::atomic<bool> glide{ false };
-	std::atomic<double> octave{ 1. };
-	std::atomic<double> glideSpeed{ .3 };
-	int lastKeyIdx{ -1 };
+	std::vector<DynamicTone> generateTones(TimbreModel model, const std::vector<Note>& notes);
 
 };
 
 template<std::size_t maxTones>
-std::vector<Note> CustomTone1<maxTones>::generateNotes(int from, int to)
+std::vector<typename CustomTone1<maxTones>::DynamicTone> CustomTone1<maxTones>::generateTones(
+	TimbreModel model, 
+	const std::vector<Note>& notes
+)
 {
-	std::vector<Note> notes;
-	for (int i = from; i <= to; ++i)
-		for (auto note : baseNotes) notes.push_back(note * pow(2, i));
-	notes.push_back(baseNotes[0] * pow(2, to + 1));
-	return notes;
-}
-
-template<std::size_t maxTones>
-std::vector<typename CustomTone1<maxTones>::DynamicTone> CustomTone1<maxTones>::generateTones()
-{
-	const std::vector<Note>& notes{ generateNotes(0,2) };
-	TimbreModel myToneModel{ CustomToneModel };
-	myToneModel.beforeTone = [this](double t, Tone& tone) {
-		tone.note = tone.getMainFreq() * octave;
-	};
-	// Tone for glide effect
-	TimbreModel glidingToneModel{ myToneModel };
-	glidingToneModel.beforeTone = [this](double t, Tone& tone) {
-		//tone.phase += sin(t*10) * 15 / tone.note;
-		tone.note = tone.note * octave;
-	};
-	glidingToneModel.before = [this](double t, CompoundGenerator<Tone>& input) {
-		input.modifyMainPitch(t, glidePitch.getValue(t));
-	};
-	//static CompoundTone glidingTone{ glidingToneModel(notes.front()) };
-	//myToneModel.after = [this](double t, double& sample) {
-	//	if (glide) {
-	//		glidingTone.modifyMainPitch(t, glidePitch.getValue(t));
-	//		sample = glidingTone.getSample(t);
-	//	}
-	//};
-	//Generation of the final tones
 	std::vector<DynamicTone> tones;
 	tones.reserve(notes.size());
 	for (auto& note : notes) {
-		tones.emplace_back(myToneModel(note));
+		tones.emplace_back(model(note));
 	}
 	return tones;
 }
 
 template<std::size_t maxTones>
-CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t after)
+CustomTone1<maxTones>::CustomTone1(
+	GuiElement& gui, 
+	const TimbreModel& model, 
+	const std::vector<Note>& notes,
+	typename Base_t::after_t after
+)
 	:Base_t::DynamicToneSum{
 		{
-			generateTones(),
+			generateTones(model, notes),
 			{},
 			after
 		}
@@ -121,51 +98,16 @@ CustomTone1<maxTones>::CustomTone1(GuiElement& gui, typename Base_t::after_t aft
 	}) };
 	sliderPitch->setFixed(true);
 
-	// Gui for the glide effect
-	std::shared_ptr glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, 160, 50, glideSpeed) };
-	std::shared_ptr glideButton{ Button::DefaultButton("Glide", 180, 180, glide) };
-
-	// Octave with mouse
-	static std::shared_ptr mouseEvents{ std::make_shared<EmptyGuiElement>([this](const SynthEvent& eventArg) {
-
-		if (std::holds_alternative<sf::Event>(eventArg)) {
-			const sf::Event& event = std::get<sf::Event>(eventArg);
-
-			switch (event.type) {
-				case sf::Event::MouseWheelScrolled: {
-					std::lock_guard lock(*this);
-					if (event.mouseWheelScroll.delta > 0)
-						octave = octave * 2.;
-					else
-						octave = octave * 0.5;
-					break;
-				}
-				default: {
-
-				}
-			}
-		}
-	}) };
-
-
 	gui.addChildren({
 		sliderPitch,
-		glideSpeedSlider,
-		glideButton,
-		mouseEvents,
-		});
+	});
 }
 
 template<std::size_t maxTones>
 void CustomTone1<maxTones>::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 {
 	if (keyState == SynthKey::State::Pressed) {
-		if (glide) {
-			glidePitch.setValueLinear(Base_t::components[keyIdx].getMainFreq(), this->time(), glideSpeed);
-			if (lastKeyIdx != -1) Base_t::components[lastKeyIdx].stop(this->time());
-		}
 		Base_t::components[keyIdx].start(this->time());
-		lastKeyIdx = keyIdx;
 	}
 	else {
 		Base_t::components[keyIdx].stop(this->time());

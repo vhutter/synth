@@ -166,6 +166,7 @@ class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
     public:
 		typedef std::function<void(double, CompoundGenerator&)> before_t;
 
+		CompoundGenerator();
         CompoundGenerator(
 			const std::vector<T>&,
 			before_t before = {},
@@ -176,7 +177,6 @@ class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
         void modifyMainPitch(double t, double dest);
 		const T& operator[](std::size_t idx) const;
 
-
     protected:
         double getSampleImpl(double t) const;
 		const double getMainFreqImpl() const;
@@ -184,6 +184,10 @@ class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
         const std::vector<T> initialComponents;
         std::vector<T> components;
 };
+
+template<class T>
+CompoundGenerator<T>::CompoundGenerator()
+{}
 
 template<class T>
 CompoundGenerator<T>::CompoundGenerator(
@@ -352,7 +356,7 @@ struct TimbreModel
 		CompoundGenerator<Tone>::before_t before = {},
 		CompoundGenerator<Tone>::after_t  after = {}
 	);
-	CompoundGenerator<Tone> operator()(const double& baseFreq);
+	CompoundGenerator<Tone> operator()(const double& baseFreq) const;
 
 	std::vector<ToneSkeleton> components;
 	Tone::before_t         beforeTone;
