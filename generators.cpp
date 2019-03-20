@@ -43,9 +43,6 @@ namespace waves
 ADSREnvelope::ADSREnvelope(double a, double d, double s, double r)
     :attack(a), decay(d), sustain(s), release(r) {}
 
-//ADSREnvelope::ADSREnvelope(const ADSREnvelope& rhs)
-//    :attack(rhs.attack), decay(rhs.decay), sustain(rhs.sustain), release(rhs.release) {}
-
 void ADSREnvelope::start(double t) const
 {
     startAmp = getAmplitude(t);
@@ -165,7 +162,75 @@ const double Tone::getMainFreqImpl() const
 	return note.getInitialFreq();
 }
 
+DynamicToneSum::DynamicToneSum(const Base_t& tones, unsigned maxTones)
+	:Base_t(tones),
+	maxTones(maxTones),
+	mainId(std::this_thread::get_id())
+{}
+DynamicToneSum::DynamicToneSum(const DynamicToneSum& that)
+	:DynamicToneSum(Base_t(that.initialComponents), that.maxTones)
+{}
 
+void DynamicToneSum::lock() const { mtx.lock(); }
+void DynamicToneSum::unlock() const { mtx.unlock(); }
+double DynamicToneSum::time() const { return lastTime.load(); }
+
+//double DynamicToneSum::getSample(double t) const
+//{
+//	lastTime.store(t);
+//	return Base_t::getSample(t);
+//}
+
+double DynamicToneSum::getSample(double t) const
+{
+	// The application of effects looks ugly
+	lastTime.store(t);
+	if (beforeSample) beforeSample(t, *const_cast<DynamicToneSum*>(this));
+	double result{ 0. };
+	std::size_t count{ 0 };
+	for (auto& c : components) {
+		if (count >= maxTones) break;
+		if (auto sample = c.getSample(t)) {
+			++count;
+			result += sample.value();
+		}
+	}
+	result /= maxTones;
+	if (afterSample) afterSample(t, result);
+	return result;
+}
+
+unsigned DynamicToneSum::getMaxTones() const
+{
+	return maxTones;
+}
+
+unsigned DynamicToneSum::addAfterCallback(Base_t::after_t callback) 
+{ 
+	return addCallback(afterSample, afterSampleCallbacks, callback); 
+}
+void DynamicToneSum::removeAfterCallback(unsigned id)
+{ 
+	removeCallback(afterSampleCallbacks, id); 
+}
+unsigned DynamicToneSum::addBeforeCallback(Base_t::before_t callback)
+{ 
+	return addCallback(beforeSample, beforeSampleCallbacks, callback); 
+}
+void DynamicToneSum::removeBeforeCallback(unsigned id) 
+{ 
+	removeCallback(beforeSampleCallbacks, id); 
+}
+
+void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
+{
+	if (keyState == SynthKey::State::Pressed) {
+		components[keyIdx].start(this->time());
+	}
+	else {
+		components[keyIdx].stop(this->time());
+	}
+}
 
 TimbreModel::TimbreModel(
 	std::vector<TimbreModel::ToneSkeleton> components,

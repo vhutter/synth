@@ -303,7 +303,7 @@ void Slider::onEvent(const SynthEvent& eventArg)
 					auto[px, py] = mainRect.getPosition();
 					sliderRect.setPosition(sf::Vector2f(px + mainRect.getSize().x / 2 - sliderRectSize.x / 2, py + mainRect.getSize().y / 2 - sliderRectSize.y / 2));
 					moveSlider(sf::Vector2f(px + mainRect.getSize().x / 2, py + mainRect.getSize().y / 2));
-					onMove();
+					if(onMove) onMove();
 				}
 				break;
 			}
@@ -311,7 +311,7 @@ void Slider::onEvent(const SynthEvent& eventArg)
 				if (clicked) {
 					const auto& mousePos = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
 					moveSlider(mousePos);
-					onMove();
+					if (onMove) onMove();
 				}
 				break;
 			}

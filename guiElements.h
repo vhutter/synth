@@ -137,12 +137,12 @@ class Slider : public GuiElement
 public:
     enum Orientation : bool {Vertical = true, Horizontal = false};
 
-    Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::function<void()> onMove);
+	Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::function<void()> onMove = {});
     Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::atomic<double>& val);
     Slider& setFixed(bool val) {fixed = val; return *this;}
 
-	template<class T>
-	static std::unique_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal)
+	template<class T = std::function<void()>>
+	static std::unique_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal = {})
 	{
 		constexpr float width = 30;
 		constexpr float height = 100;

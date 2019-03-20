@@ -10,8 +10,11 @@
 #include <algorithm>
 #include <atomic>
 #include <mutex>
+#include <optional>
 #include <type_traits>
 #include <SFML/System.hpp>
+
+#include "guiElements.h"
 
 namespace waves
 {
@@ -98,18 +101,18 @@ public:
 		std::function<void(double, T&)> before = {},
 		after_t after = {}
 	)
-		:beforeEffect(before),
-		afterEffect(after)
+		:beforeSample(before),
+		afterSample(after)
 	{}
 	double getSample(double t) const
 	{
 		T input = *const_cast<T*>(static_cast<const T*>(this));
- 		if (beforeEffect) {
-			beforeEffect(t, input);
+ 		if (beforeSample) {
+			beforeSample(t, input);
 		}
 		double result = input.getSampleImpl(t);
-		if (afterEffect) {
-			afterEffect(t, result);
+		if (afterSample) {
+			afterSample(t, result);
 		}
 		return result;
 	}
@@ -128,8 +131,8 @@ public:
 		return static_cast<const T*>(this)->getMainFreqImpl();
 	}
 protected:
-	std::function<void(double, T&)> beforeEffect;
-	after_t afterEffect;
+	std::function<void(double, T&)> beforeSample;
+	after_t afterSample;
 };
 
 class Tone : public SampleGenerator<Tone>
@@ -164,7 +167,7 @@ class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
 {
 	friend class SampleGenerator<CompoundGenerator<T>>;
     public:
-		typedef std::function<void(double, CompoundGenerator&)> before_t;
+		typedef std::function<void(double, CompoundGenerator<T>&)> before_t;
 
 		CompoundGenerator();
         CompoundGenerator(
@@ -254,7 +257,7 @@ class DynamicCompoundGenerator: public CompoundGenerator<T>
 		);
 		void start(double t) const;
 		void stop(double t) const;
-		double getSample(double t) const;
+		std::optional<double> getSample(double t) const;
 
 	private:
 		ADSREnvelope envelope;
@@ -282,62 +285,92 @@ void DynamicCompoundGenerator<T>::stop(double t) const
 }
 
 template<class T>
-double DynamicCompoundGenerator<T>::getSample(double t) const
+std::optional<double> DynamicCompoundGenerator<T>::getSample(double t) const
 {
 	if (envelope.isNonZero()) {
 		return CompoundGenerator<T>::getSample(t) * envelope.getAmplitude(t);
 	}
 	else {
-		return 0;
+		return std::nullopt;
 	}
 }
 
-template<std::size_t maxTones>
 class DynamicToneSum : public CompoundGenerator<DynamicCompoundGenerator<Tone>>
 {
-	using Base_t = CompoundGenerator<DynamicCompoundGenerator<Tone>>;
+
+	template<class param_t>
+	using callback_t = std::function<void(double, param_t&)>;
 
 	public:
-		DynamicToneSum(const Base_t& tones)
-			:Base_t(tones)
-		{}
-		DynamicToneSum(const DynamicToneSum& that)
-			:DynamicToneSum(Base_t(that.initialComponents))
-		{}
+		using Base_t = CompoundGenerator<DynamicCompoundGenerator<Tone>>;
+		friend class std::lock_guard<DynamicToneSum>;
 
-		void lock() const { mtx.lock(); }
-		void unlock() const { mtx.unlock(); }
-		double time() const { return lastTime.load(); }
+		DynamicToneSum(const Base_t& tones, unsigned maxTones);
+		DynamicToneSum(const DynamicToneSum& that);
 
-		//double getSample(double t) const
-		//{
-		//	lastTime.store(t);
-		//	return Base_t::getSample(t);
-		//}
+		double time() const;
+		double getSample(double t) const;
+		unsigned getMaxTones() const;
 
-		double getSample(double t) const
+		unsigned addAfterCallback(Base_t::after_t callback);
+		void removeAfterCallback(unsigned id);
+		unsigned addBeforeCallback(Base_t::before_t callback);
+		void removeBeforeCallback(unsigned id);
+
+		void onKeyEvent(unsigned key, SynthKey::State keyState);
+
+	protected:
+
+		void lock() const;
+		void unlock() const;
+
+		template<class T>
+		struct give_id
 		{
-			// The application of effects looks ugly
-			lastTime.store(t);
-			if (beforeEffect) beforeEffect(t, *const_cast<DynamicToneSum*>(this));
-			double result{ 0. };
-			std::size_t count{ 0 };
-			for (auto& c : components) {
-				if (count >= maxTones) break;
-				const double& sample = c.getSample(t);
-				if (sample != 0) {
-					++count;
-					result += sample;
-				}
+			unsigned id;
+			T value;
+		};
+
+		template<class param_t>
+		unsigned addCallback(
+			callback_t<param_t>& raw_callback,
+			std::vector<give_id<callback_t<param_t>>>& arr,
+			callback_t<param_t>& callback
+		)
+		{
+			if (!raw_callback) {
+				raw_callback = [this, &arr](double t, param_t& sample) {
+					for (const auto& cb : arr) cb.value(t, sample);
+				};
 			}
-			result /= maxTones;
-			if (afterEffect) afterEffect(t, result);
-			return result;
+			const unsigned id = arr.size();
+			arr.push_back(std::move(give_id<std::function<void(double, param_t&)>>{ id, callback }));
+			return id;
 		}
 
-	private:
+		template<class callback_t>
+		void removeCallback(std::vector<give_id<callback_t>>& arr, unsigned id)
+		{
+			auto found = std::find_if(arr.begin(), arr.end(), [id](const auto& elem) {
+				return elem.id == id;
+			});
+			if (found == arr.end()) {
+				throw std::logic_error("The given callback was not registered before.");
+			}
+			else {
+				arr.erase(found);
+				if (arr.size() == 0) {
+					afterSample = {};
+				}
+			}
+		}
+
+		const unsigned maxTones;
 		mutable std::atomic<double> lastTime{ 0 };
 		mutable std::mutex mtx;
+		const std::thread::id mainId;
+		std::vector<give_id<Base_t::after_t>> afterSampleCallbacks;
+		std::vector<give_id<Base_t::before_t>> beforeSampleCallbacks;
 };
 
 

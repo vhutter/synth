@@ -12,7 +12,7 @@ DebugFilter::DebugFilter(GuiElement& gui)
 	gui.addChildren({ impl->oscilloscope });
 }
 
-void DebugFilter::effectImpl(double t, double & sample)
+void DebugFilter::effectImpl(double t, double & sample) const
 {
 	static auto sampleId = 0u;
 	static std::vector<double> lastSamples(impl->oscilloscope->getResolution());
@@ -27,6 +27,18 @@ void DebugFilter::effectImpl(double t, double & sample)
 	}
 }
 
+VolumeControl::VolumeControl(GuiElement & gui)
+	:impl{ std::make_shared<Impl>() }
+{
+	gui.addChildren({impl->sliderVolume});
+}
+
+void VolumeControl::effectImpl(double t, double & sample) const
+{
+	impl->lastTime = t;
+	sample *= impl->amp.getValue(t);
+}
+
 EchoEffect::Impl::Impl(double coeff, unsigned bufSize)
 	:coeff(coeff),
 	bufSize(bufSize),
@@ -39,7 +51,7 @@ EchoEffect::EchoEffect(GuiElement & gui, unsigned sampleRate, double echoLength,
 {
 }
 
-void EchoEffect::effectImpl(double t, double & sample)
+void EchoEffect::effectImpl(double t, double & sample) const
 {
 	static unsigned sampleId{ 0 };
 	unsigned idx = sampleId % impl->bufSize;
@@ -48,14 +60,30 @@ void EchoEffect::effectImpl(double t, double & sample)
 	++sampleId;
 }
 
-VolumeControl::VolumeControl(GuiElement & gui)
-	:impl{ std::make_shared<Impl>() }
+Glider::Glider(GuiElement & gui, const TimbreModel& model, const std::vector<Note>& notes, unsigned maxNotes)
+	:maxNotes(maxNotes),
+	notes{ notes },
+	impl{ std::make_shared<Impl>(model) }
 {
-	gui.addChildren({impl->sliderVolume});
+	gui.addChildren({ impl->glideSpeedSlider, impl->glideButton });
 }
 
-void VolumeControl::effectImpl(double t, double & sample)
+void Glider::effectImpl(double t, double & sample) const
 {
+	if (impl->glide) {
+		impl->glidingTone.modifyMainPitch(t, impl->glidePitch.getValue(t));
+		sample = impl->glidingTone.getSample(t).value_or(0.) / maxNotes;
+	}
 	impl->lastTime = t;
-	sample *= impl->amp.getValue(t);
+}
+void Glider::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
+{
+	if (keyState == SynthKey::State::Pressed) {
+		impl->glidePitch.setValueLinear(notes[keyIdx], impl->lastTime, impl->glideSpeed);
+		impl->glidingTone.start(impl->lastTime);
+		lastPressed = keyIdx;
+	}
+	else if (keyIdx == lastPressed) {
+		impl->glidingTone.stop(impl->lastTime);
+	}
 }

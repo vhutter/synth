@@ -7,37 +7,31 @@
 #include "generators.h"
 
 
-template <typename ...T>
+template <typename param_t, typename ...T>
 auto mergeEffects(T&& ...args)
 {
-	return[=](double t, double& sample) mutable
+	return[=](double t, param_t& sample) mutable
 	{
 		(args(t, sample), ...);
 	};
 }
 
 
-template<class T>
+template<class T, class param_t>
 class EffectBase
 {
 public:
-	void operator()(double t, double& sample)
+	void operator()(double t, param_t& sample) const
 	{
-		static_cast<T*>(this)->effectImpl(t, sample);
-	}
-	~EffectBase()
-	{
-		//auto _this = static_cast<T*>(this);
+		static_cast<const T*>(this)->effectImpl(t, sample);
 	}
 };
 
-class DebugFilter: public EffectBase<DebugFilter>
+class DebugFilter: public EffectBase<DebugFilter, double>
 {
-	friend class EffectBase<DebugFilter>;
-
 public:
 	DebugFilter(GuiElement& gui);
-	void effectImpl(double t, double& sample);
+	void effectImpl(double t, double& sample) const;
 
 private:
 	struct Impl
@@ -49,13 +43,11 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class VolumeControl : public EffectBase<VolumeControl>
+class VolumeControl : public EffectBase<VolumeControl, double>
 {
-	friend class EffectBase<VolumeControl>;
-
 public:
 	VolumeControl(GuiElement& gui);
-	void effectImpl(double t, double& sample);
+	void effectImpl(double t, double& sample) const;
 
 private:
 	struct Impl
@@ -70,10 +62,8 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class EchoEffect: public EffectBase<EchoEffect>
+class EchoEffect: public EffectBase<EchoEffect, double>
 {
-	friend class EffectBase<EchoEffect>;
-
 public:
 	EchoEffect(
 		GuiElement& gui, 
@@ -81,7 +71,7 @@ public:
 		double echoLength,
 		double echoCoeff
 	);
-	void effectImpl(double t, double& sample);
+	void effectImpl(double t, double& sample) const;
 
 private:
 	struct Impl
@@ -96,41 +86,19 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class Glider : public EffectBase<Glider>
+class Glider : public EffectBase<Glider, double>
 {
-	friend class EffectBase<Glider>;
-
 public:
+	Glider(
+		GuiElement & gui, 
+		const TimbreModel& model, 
+		const std::vector<Note>& notes, 
+		unsigned maxNotes
+	);
+	void onKeyEvent(unsigned keyIdx, SynthKey::State keyState);
+	void effectImpl(double t, double & sample) const;
 
-	Glider(GuiElement & gui, const TimbreModel& model, const std::vector<Note>& notes, unsigned maxNotes)
-		:maxNotes(maxNotes),
-		notes{ notes },
-		impl{ std::make_shared<Impl>(model) }
-	{
-		gui.addChildren({ impl->glideSpeedSlider, impl->glideButton });
-	}
-
-	void effectImpl(double t, double & sample)
-	{
-		if (impl->glide) {
-			impl->glidingTone.modifyMainPitch(t, impl->glidePitch.getValue(t));
-			sample = impl->glidingTone.getSample(t)/maxNotes;
-		}
-		impl->lastTime = t;
-	}
-	void onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
-	{
-		if (keyState == SynthKey::State::Pressed) {
-			impl->glidePitch.setValueLinear(notes[keyIdx], impl->lastTime, impl->glideSpeed);
-			impl->glidingTone.start(impl->lastTime);
-			lastPressed = keyIdx;
-		}
-		else if (keyIdx == lastPressed) {
-			impl->glidingTone.stop(impl->lastTime);
-		}
-	}
-
-protected:
+private:
 	struct Impl
 	{
 		DynamicCompoundGenerator<Tone> glidingTone;
@@ -148,33 +116,35 @@ protected:
 	std::shared_ptr<Impl> impl;
 };
 
-//class Flanger : public EffectBase<Flanger>
-//{
-//	friend class EffectBase<Flanger>;
-//
-//public:
-//	Flanger() {}
-//	void effectImpl(double t, double& sample)
-//	{
-//		const double speed{ 99 };
-//		const std::size_t bufSize{ 100 };
-//		static std::vector<double> samples(bufSize, 0.);
-//		static unsigned sampleId{ 0 };
-//		unsigned idx = sampleId % bufSize;
-//		samples[idx] = sample;
-//		idx = std::floor(std::fmod(t*speed, bufSize));
-//		sample = (sample + samples[idx]) / 2.;
-//		++sampleId;
-//	}
-//
-//protected:
-//
-//};
-
-class TestFilter : public EffectBase<TestFilter>
+template<class SampleGenerator_T>
+class PitchBender:public EffectBase<PitchBender<SampleGenerator_T>, typename SampleGenerator_T::Base_t>
 {
-	friend class EffectBase<TestFilter>;
+	using Base_t = DynamicToneSum::Base_t;
 
+public:
+	PitchBender(GuiElement& gui, SampleGenerator_T& generator)
+		:generator(generator)
+	{
+		sliderPitch->setFixed(true);
+		gui.addChildren({ sliderPitch });
+	}
+	void operator()(double t, Base_t& sample) const
+	{
+		generator.modifyMainPitch(
+			generator.time(),
+			generator.getMainFreq() + sliderPitch->getValue() * 1 / 9 * generator.getMainFreq()
+		);
+	}
+
+private:
+
+	SampleGenerator_T& generator;
+	std::shared_ptr<Slider> sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, 100, 50) };
+
+};
+
+class TestFilter : public EffectBase<TestFilter, double>
+{
 public:
 	TestFilter(GuiElement& gui)
 		:impl{ std::make_shared<Impl>() }
@@ -182,7 +152,7 @@ public:
 		gui.addChildren({ Slider::DefaultSlider("Glide", 0, 1, 200, 50, impl->a) });
 		impl->b = 1.f - impl->a; impl->z = 0;
 	};
-	void effectImpl(double t, double& sample) 
+	void effectImpl(double t, double& sample) const
 	{ 
 		sample = (sample * impl->b) + (impl->z * impl->a);
 	}

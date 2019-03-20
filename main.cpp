@@ -34,21 +34,24 @@ int main()
 	gui.addChildren({ keyboard.getGuiElement() });
 
 	auto notes = generateNotes(0, 2);
-	auto glideEffect = Glider(gui, CustomToneModel, notes, maxNotes);
-	auto generator = CustomTone1<maxNotes>(gui, CustomToneModel, notes, mergeEffects(
-		//TestFilter(gui),
-		glideEffect,
-		EchoEffect(gui, sampleRate, 0.3, 0.6),
-		VolumeControl(gui),
-		DebugFilter(gui)
-	));
+	auto tones = generateTones<Tone>(Sine13, notes);
+	auto generator = DynamicToneSum(tones, maxNotes);
+	auto glideEffect = Glider(gui, Sine13, notes, maxNotes);
+
+	generator.addAfterCallback(glideEffect);
+	generator.addAfterCallback(EchoEffect(gui, sampleRate, 0.3, 0.6));
+	generator.addAfterCallback(VolumeControl(gui));
+	generator.addAfterCallback(DebugFilter(gui));
+
+	generator.addBeforeCallback(PitchBender(gui, generator));
 
 	keyboard.outputTo(generator, glideEffect);
 	
 	const auto& generateSample = [&](double t) -> double {
-        std::lock_guard lock(generator);
+        std::lock_guard<DynamicToneSum> lock(generator);
 		double sample = generator.getSample(t);
 		return sample;
+		return 0.;
 	};
 	
 	SynthStream synth(sampleRate, 1, generateSample, generateSample);
