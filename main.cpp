@@ -29,7 +29,7 @@ int main()
 {
 	const unsigned sampleRate(44100);
 	const unsigned maxNotes{ 5 };
-	EmptyGuiElement gui{ {} };
+	EmptyGuiElement gui;
 	auto keyboard = KeyboardOutput();
 	gui.addChildren({ keyboard.getGuiElement() });
 

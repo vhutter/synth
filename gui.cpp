@@ -48,6 +48,7 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 				}
 				case sf::Keyboard::Space: {
 					// For testing
+					gui.move(3., 3.);
 					break;
 				}
 				default:

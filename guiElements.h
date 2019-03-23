@@ -29,7 +29,7 @@ private:
 
 };
 
-class GuiElement: public sf::Drawable, public std::enable_shared_from_this<GuiElement>
+class GuiElement: public sf::Drawable, public sf::Transformable
 {
 public:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const final override;
@@ -42,7 +42,6 @@ protected:
 	virtual void onEvent(const SynthEvent& event) {}
 
 	std::vector<std::shared_ptr<GuiElement>> children;
-	std::weak_ptr<GuiElement> parent;
 };
 
 class EmptyGuiElement : public GuiElement
@@ -50,7 +49,7 @@ class EmptyGuiElement : public GuiElement
 	using callback_t = std::function<void(const SynthEvent&)>;
 
 public:
-	EmptyGuiElement(const callback_t& onEvt) :callback(onEvt) {}
+	EmptyGuiElement(const callback_t& onEvt = {}) :callback(onEvt) {}
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override {}
@@ -70,10 +69,6 @@ public:
 
     virtual void onEvent(const SynthEvent& event) override;
 
-    void setPosition(const sf::Vector2f& p);
-    sf::Vector2f getPosition() const {return pos;};
-    bool isLastEventKeypress() const {return lastPressed;}
-
     SynthKey& operator[] (std::size_t i) {return keys[i];}
 
 private:
@@ -82,10 +77,8 @@ private:
     virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
     void repositionKeys();
 
-    sf::Vector2f pos;
     std::vector<SynthKey> keys;
 	callback_t onKey;
-    bool lastPressed = false;
 };
 
 class TextDisplay : public GuiElement

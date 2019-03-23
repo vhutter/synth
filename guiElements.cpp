@@ -68,29 +68,30 @@ void GuiElement::forwardEvent(const SynthEvent& event)
 void GuiElement::addChildren(std::vector<std::shared_ptr<GuiElement>> newChildren)
 {
 	children.insert(children.end(), newChildren.begin(), newChildren.end());
-	for (auto child : children) {
-		child->parent = std::enable_shared_from_this<GuiElement>::weak_from_this();
-	}
 }
 
 void GuiElement::removeChild(std::shared_ptr<GuiElement> child)
 {
 	auto found = std::find(children.begin(), children.end(), child);
 	if (found != children.end()) {
-		child->parent.reset();
 		children.erase(found);
 	}
 }
 
 void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
+	states.transform *= getTransform();
 	drawImpl(target, states);
-	for (auto& child : children) child->drawImpl(target, states);
+	for (auto& child : children) {
+		child->drawImpl(target, states);
+	}
 }
 
 SynthKeyboard::SynthKeyboard(float px, float py, callback_t eventCallback)
-    : pos(px, py), onKey(eventCallback)
+    : onKey(eventCallback)
 {
+	setPosition(px, py);
+
     const auto& w = SynthKey::White;
     const auto& b = SynthKey::Black;
 
@@ -123,7 +124,6 @@ void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 	};
 
 	unsigned char value = keyCode - 48;
-	lastPressed = false;
 	if (value >= keys.size())
 		return;
 
@@ -131,7 +131,6 @@ void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 	switch (static_cast<MsgType>(eventType))
 	{
 	case MsgType::KEYDOWN:
-		lastPressed = true;
 		onKey(value, SynthKey::State::Pressed);
 		break;
 	case MsgType::KEYUP:
@@ -189,16 +188,12 @@ void SynthKeyboard::onSfmlEvent(const sf::Event & event)
 		break;
 	}
 
-
-	lastPressed = false;
-
 	if (value == -1)
 		return;
 
 	switch (event.type)
 	{
 	case sf::Event::KeyPressed: {
-		lastPressed = true;
 		onKey(value, SynthKey::State::Pressed);
 		break;
 	}
@@ -215,11 +210,11 @@ void SynthKeyboard::drawImpl(sf::RenderTarget& target, sf::RenderStates states) 
 {
     for (const auto& key: keys)
         if (key.getType() == SynthKey::White)
-            target.draw(key);
+            target.draw(key, states);
 
     for (const auto& key: keys)
         if (key.getType() == SynthKey::Black)
-            target.draw(key);
+            target.draw(key, states);
 }
 
 void SynthKeyboard::onEvent(const SynthEvent& eventArg)
@@ -232,17 +227,12 @@ void SynthKeyboard::onEvent(const SynthEvent& eventArg)
 	}
 }
 
-void SynthKeyboard::setPosition(const sf::Vector2f& newPos)
-{
-    pos = newPos;
-    repositionKeys();
-}
-
 void SynthKeyboard::repositionKeys()
 {
     unsigned whitesCount = 0;
     float dif = SynthKey::whiteSize.x - SynthKey::blackSize.x / 2;
     for (unsigned i=0; i<keys.size(); ++i) {
+		const auto& pos = getPosition();
         auto& key = keys[i];
         if (key.getType() == SynthKey::White) {
             key.setPosition(sf::Vector2f(pos.x+ whitesCount*SynthKey::whiteSize.x, pos.y));
@@ -388,7 +378,7 @@ Oscilloscope::Oscilloscope(float px, float py, float sx, float sy, unsigned res,
 void Oscilloscope::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
     target.draw(window, states);
-    target.draw(vArray.data(), resolution, sf::LineStrip);
+    target.draw(vArray.data(), resolution, sf::LineStrip, states);
 }
 
 

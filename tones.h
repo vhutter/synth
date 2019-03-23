@@ -8,9 +8,6 @@
 #include "generators.h"
 #include "guiElements.h"
 
-
-#include <iostream>
-
 static const std::array<Note, 12> baseNotes = {
 	Note::C,
 	Note::Cis,
