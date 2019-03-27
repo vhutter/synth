@@ -16,12 +16,12 @@ public:
     enum Type : bool { White = true, Black = false };
 	enum State : bool { Pressed = true, Released = false };
 
-    SynthKey(Type t, float px=0, float py=0);
+    SynthKey(Type t, float px=0, float py=0, const sf::Vector2f& size = sf::Vector2f(0,0));
     Type getType() const {return type;};
     void setPressed(bool pressed);
     bool isPressed() const;
 
-    static const sf::Vector2f whiteSize, blackSize;
+    static const sf::Vector2f whiteSizeDefault, blackSizeDefault;
 
 private:
     bool pressed = std::atomic<bool>(false);
@@ -33,9 +33,11 @@ class GuiElement: public sf::Drawable, public sf::Transformable
 {
 public:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const final override;
+	virtual sf::FloatRect AABB();
 	void forwardEvent(const SynthEvent& event);
-	void addChildren(std::vector<std::shared_ptr<GuiElement>> child);
-	void removeChild(std::shared_ptr<GuiElement> child);
+	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& child);
+	void removeChild(const std::shared_ptr<GuiElement>& child);
+	void moveAroundPoint(const sf::Vector2f& center);
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const = 0;
@@ -68,6 +70,7 @@ public:
     SynthKeyboard(float px, float py, callback_t eventCallback);
 
     virtual void onEvent(const SynthEvent& event) override;
+	virtual sf::FloatRect AABB() override;
 
     SynthKey& operator[] (std::size_t i) {return keys[i];}
 
@@ -79,26 +82,45 @@ private:
 
     std::vector<SynthKey> keys;
 	callback_t onKey;
+	const sf::Vector2f blackSize{ SynthKey::blackSizeDefault }, whiteSize{ SynthKey::whiteSizeDefault };
+};
+
+class Window : public GuiElement
+{
+public:
+	Window(float px, float py, float sx, float sy, const sf::Color& fillColor);
+	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& child);
+	void setSize(const sf::Vector2f& size);
+
+	virtual sf::FloatRect AABB() override;
+
+private:
+	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
+
+	sf::RectangleShape mainRect;
+	float childAlignment{ 10 }, cursorX{ 0 }, cursorY{ 0 };
 };
 
 class TextDisplay : public GuiElement
 {
 public:
     TextDisplay(const std::string& initialText, float px, float py, float sx=0, float sy=0, unsigned int charSize=24);
-    static TextDisplay AroundPoint(const std::string text, float px, float py, float sx=0, float sy=0, unsigned int charSize=24);
+    static TextDisplay Multiline(const std::string text, float px, float py, float sx=0, float sy=0, unsigned int charSize=24);
 
-    void setPosition(const sf::Vector2f& p) {window.setPosition(p);}
-    sf::Vector2f getPosition() const {return window.getPosition();}
     const std::string& getText() {return content;}
     void setText(const std::string& text);
     const sf::Text& getText() const {return text;}
     void setBgColor(const sf::Color& color);
-    const sf::Color& getBgColor() {return window.getFillColor();}
+	const sf::Color& getBgColor() const;
+
+	virtual sf::FloatRect AABB() override;
+	void centralize();
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
+	void fitFrame(float sx, float sy);
 
-    sf::RectangleShape window;
+    sf::RectangleShape frame;
     sf::Text text;
     std::string content;
 
@@ -155,6 +177,7 @@ public:
 	}
 
     virtual void onEvent(const SynthEvent& event) override;
+	virtual sf::FloatRect AABB() override;
     sf::Vector2f getPosition() const {return mainRect.getPosition();}
     void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
 
@@ -185,6 +208,8 @@ class Oscilloscope : public GuiElement
 {
 public:
     Oscilloscope(float px, float py, float sx, float sy, unsigned resolution, double speed);
+
+	virtual sf::FloatRect AABB() override;
 
     void setPosition(const sf::Vector2f& p) {window.setPosition(p);}
     sf::Vector2f getPosition() const {return window.getPosition();}

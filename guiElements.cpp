@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <variant>
+#include <string>
 #include <bitset>
 
 namespace
@@ -19,21 +20,22 @@ namespace
     }
 }
 
-const sf::Vector2f SynthKey::whiteSize(100, 200);
-const sf::Vector2f SynthKey::blackSize(40, 150);
+const sf::Vector2f SynthKey::whiteSizeDefault(100, 200);
+const sf::Vector2f SynthKey::blackSizeDefault(40, 150);
 sf::Font TextDisplay::font = loadCourierNew();
 
-SynthKey::SynthKey(Type t, float px, float py)
+SynthKey::SynthKey(Type t, float px, float py, const sf::Vector2f& size)
     :type(t)
 {
     setPosition(sf::Vector2f(px, py));
+	setSize(size);
 
     if (t == Type::Black) {
-        setSize(SynthKey::blackSize);
+        if(size.x == 0) setSize(SynthKey::blackSizeDefault);
         setFillColor(sf::Color::Black);
     }
     else {
-        setSize(SynthKey::whiteSize);
+		if (size.x == 0) setSize(SynthKey::whiteSizeDefault);
         setFillColor(sf::Color::White);
     }
 
@@ -65,17 +67,24 @@ void GuiElement::forwardEvent(const SynthEvent& event)
 	for (auto& child : children) child->forwardEvent(event);
 }
 
-void GuiElement::addChildren(std::vector<std::shared_ptr<GuiElement>> newChildren)
+void GuiElement::addChildren(const std::vector<std::shared_ptr<GuiElement>>& newChildren)
 {
 	children.insert(children.end(), newChildren.begin(), newChildren.end());
 }
 
-void GuiElement::removeChild(std::shared_ptr<GuiElement> child)
+void GuiElement::removeChild(const std::shared_ptr<GuiElement>& child)
 {
 	auto found = std::find(children.begin(), children.end(), child);
 	if (found != children.end()) {
 		children.erase(found);
 	}
+}
+
+void GuiElement::moveAroundPoint(const sf::Vector2f & center)
+{
+	const auto& bounds = AABB();
+	auto newPos = center - sf::Vector2f(bounds.width, bounds.height) / 2.f;
+	setPosition(floor(newPos.x), floor(newPos.y));
 }
 
 void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -85,6 +94,11 @@ void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	for (auto& child : children) {
 		child->drawImpl(target, states);
 	}
+}
+
+sf::FloatRect GuiElement::AABB()
+{
+	return sf::FloatRect(0, 0, 0, 0);
 }
 
 SynthKeyboard::SynthKeyboard(float px, float py, callback_t eventCallback)
@@ -227,15 +241,23 @@ void SynthKeyboard::onEvent(const SynthEvent& eventArg)
 	}
 }
 
+sf::FloatRect SynthKeyboard::AABB()
+{
+	sf::Vector2f size;
+	size.x = keys.back().getPosition().x - keys.front().getPosition().x + keys.back().getSize().x;
+	size.y = std::max(whiteSize.y, blackSize.y);
+	return sf::FloatRect{ getPosition(), size };
+}
+
 void SynthKeyboard::repositionKeys()
 {
     unsigned whitesCount = 0;
-    float dif = SynthKey::whiteSize.x - SynthKey::blackSize.x / 2;
+    float dif = whiteSize.x - blackSize.x / 2;
     for (unsigned i=0; i<keys.size(); ++i) {
 		const auto& pos = getPosition();
         auto& key = keys[i];
         if (key.getType() == SynthKey::White) {
-            key.setPosition(sf::Vector2f(pos.x+ whitesCount*SynthKey::whiteSize.x, pos.y));
+            key.setPosition(sf::Vector2f(pos.x+ whitesCount* key.getSize().x, pos.y));
             ++whitesCount;
         }
         else {
@@ -246,8 +268,9 @@ void SynthKeyboard::repositionKeys()
 
 
 Slider::Slider(const std::string& str, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::function<void()> callback)
-    :title(TextDisplay::AroundPoint(str, int(px+sx/2), int(py-40), 0,0,titleSize)), from(from), to(to), name(str), orientation(ori), value((from+to)/2.), onMove(callback), size(sx, sy)
+    :title(str, 0, 0, 0,0,titleSize), from(from), to(to), name(str), orientation(ori), value((from+to)/2.), onMove(callback), size(sx, sy)
 {
+	title.moveAroundPoint({ px + sx / 2, py - 40 });
     const auto& minDim = std::min(sx, sy)/2;
     sliderRectSize = sf::Vector2(minDim, minDim);
 
@@ -310,6 +333,19 @@ void Slider::onEvent(const SynthEvent& eventArg)
 			}
 		}
 	}
+}
+
+sf::FloatRect Slider::AABB()
+{
+	const sf::FloatRect 
+		&box1{ title.AABB() }, 
+		&box2{ mainRect.getPosition(), mainRect.getSize() };
+	return {
+		std::min(box1.left, box2.left),
+		std::min(box1.top, box2.top),
+		std::max(box1.width, box2.width),
+		std::max(box1.height, box2.height)
+	};
 }
 
 void Slider::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
@@ -375,6 +411,11 @@ Oscilloscope::Oscilloscope(float px, float py, float sx, float sy, unsigned res,
     }
 }
 
+sf::FloatRect Oscilloscope::AABB()
+{
+	return { window.getPosition(), window.getSize() };
+}
+
 void Oscilloscope::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
     target.draw(window, states);
@@ -399,49 +440,108 @@ void Oscilloscope::newSamples(const std::vector<double>& samples) const
     }
 }
 
+void TextDisplay::fitFrame(float sx, float sy)
+{
+	const auto& boundingBox = text.getGlobalBounds();
+	auto[px, py] = text.getPosition();
+	std::tie(sx, sy) = std::tie(std::max(sx, boundingBox.width), std::max(sy, boundingBox.height));
+	std::tie(px, py) = std::tie(boundingBox.left, boundingBox.top);
+
+	frame.setPosition(sf::Vector2f(px, py));
+	frame.setFillColor(sf::Color::Black);
+	frame.setSize(sf::Vector2f(sx, sy));
+	frame.setOutlineColor(sf::Color::Green);
+	frame.setOutlineThickness(1);
+}
+
+void TextDisplay::centralize()
+{
+	const auto& textBounds = text.getGlobalBounds();
+	const auto& textDim = sf::Vector2f{ textBounds.width, textBounds.height };
+	const auto& textBoundsPos = sf::Vector2f{ textBounds.left, textBounds.top };
+
+	auto dif = (frame.getSize() - textDim) / 2.f - (textBoundsPos - text.getPosition());
+
+	dif.x = floor(dif.x);
+	dif.y = floor(dif.y);
+
+	text.setPosition(frame.getPosition() + dif);
+}
+
 TextDisplay::TextDisplay(const std::string& initialText, float px, float py, float sx, float sy, unsigned int size)
     : text()
 {
     text.setFont(font);
     text.setCharacterSize(size);
     text.setString(initialText);
-    text.setPosition(sf::Vector2f(px, py));
+    text.setPosition(sf::Vector2f(floor(px), floor(py)));
     text.setFillColor(sf::Color::Green);
 
-    const auto& boundingBox = text.getGlobalBounds();
-    std::tie(sx, sy) = std::tie(std::max(sx, boundingBox.width), std::max(sy, boundingBox.height));
-    std::tie(px, py) = std::tie(boundingBox.left, boundingBox.top);
-
-    px = px - (sx-boundingBox.width)/2;
-    py = py - (sy-boundingBox.height)/2;
-
-    window.setPosition(sf::Vector2f(px, py));
-    window.setSize(sf::Vector2f(sx, sy));
-    window.setOutlineColor(sf::Color::Black);
-    window.setFillColor(sf::Color::Black);
-    window.setOutlineThickness(1.);
+	fitFrame(sx, sy);
 }
 
-TextDisplay TextDisplay::AroundPoint(const std::string initialText, float px, float py, float sx, float sy, unsigned int charSize)
+TextDisplay TextDisplay::Multiline(const std::string initialText, float px, float py, float sx, float sy, unsigned int charSize)
 {
-	TextDisplay ret(initialText, px, py, sx, sy, charSize);
-    auto dif = ret.window.getSize() / 2.f;
-	dif.x = floor(dif.x);
-	dif.y = floor(dif.y);
-    ret.window.setPosition(ret.window.getPosition()-dif);
-    ret.text.setPosition  (ret.text.getPosition()-dif);
-    return std::move(ret);
+	sf::Text dummyText;
+	dummyText.setFont(font);
+	dummyText.setCharacterSize(charSize);
+	dummyText.setPosition(sf::Vector2f(px, py));
+
+	std::string row, result;
+	std::istringstream words(initialText);
+	auto wordIt = std::istream_iterator<std::string>(words);
+	result = *wordIt;
+	row = *wordIt;
+	unsigned wordCount = 1;
+	while(++wordCount, ++wordIt != std::istream_iterator<std::string>()) {
+		row.append(" "+*wordIt);
+		dummyText.setString(row);
+		const auto& bounds = dummyText.getGlobalBounds();
+		if (wordCount > 1 && bounds.width > sx) {
+			result.append("\n");
+			row = *wordIt;
+			wordCount = 1;
+		}
+		else {
+			result.append(" ");
+		}
+		result.append(*wordIt);
+	}
+
+	auto ret = TextDisplay(result, px, py, sx, sy, charSize);
+	ret.frame.setSize({ sx,sy });
+	return ret;
 }
 
 void TextDisplay::setBgColor(const sf::Color& color)
 {
-    window.setFillColor(color);
+	frame.setFillColor(color);
+}
+
+
+const sf::Color& TextDisplay::getBgColor() const 
+{ 
+	return frame.getFillColor();
+}
+
+sf::FloatRect TextDisplay::AABB()
+{
+	return { frame.getPosition(), frame.getSize() };
 }
 
 void TextDisplay::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    target.draw(window, states);
+	sf::View view = target.getView();
+	sf::View savedView = view;
+
+	//view.setViewport({ 0.25f, 0.25, 0.5f, 0.5f });
+
+	target.setView(view);
+
+    target.draw(frame, states);
     target.draw(text, states);
+
+	target.setView(savedView);
 }
 
 void TextDisplay::setText(const std::string& content)
@@ -452,7 +552,8 @@ void TextDisplay::setText(const std::string& content)
 Button::Button(const std::string& initialText, float px, float py, float sx, float sy, unsigned int charSize, std::function<void()> onClick)
     :TextDisplay(initialText, px, py, sx, sy, charSize), clickCallback(onClick)
 {
-    window.setOutlineColor(sf::Color::White);
+	centralize();
+	frame.setOutlineColor(sf::Color::White);
 }
 
 
@@ -461,10 +562,45 @@ void Button::onEvent(const SynthEvent& eventArg)
 	if (std::holds_alternative<sf::Event>(eventArg)) {
 		const sf::Event& event = std::get<sf::Event>(eventArg);
 		static bool black = true;
-		if (event.type == sf::Event::MouseButtonPressed && window.getGlobalBounds().contains(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+		if (event.type == sf::Event::MouseButtonPressed && frame.getGlobalBounds().contains(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
 			black = !black;
-			window.setFillColor(black ? sf::Color::Black : sf::Color(0xaaaaaaaa));
+			frame.setFillColor(black ? sf::Color::Black : sf::Color(0xaaaaaaaa));
 			clickCallback();
 		}
 	}
+}
+
+Window::Window(float px, float py, float sx, float sy, const sf::Color & fillColor)
+	:mainRect({ sx, sy })
+{
+	mainRect.setPosition(px, py);
+	mainRect.setFillColor(fillColor);
+	
+	//mainRect.setOutlineThickness(0);
+	mainRect.setOutlineColor(sf::Color::Green);
+	mainRect.setOutlineThickness(1);
+}
+
+void Window::drawImpl(sf::RenderTarget & target, sf::RenderStates states) const
+{
+	target.draw(mainRect, states);
+}
+
+void Window::addChildren(const std::vector<std::shared_ptr<GuiElement>>& children)
+{
+	//for (auto& child : children) {
+	//	if (cursorX + child.) {
+	//
+	//	}
+	//}
+}
+
+void Window::setSize(const sf::Vector2f & size)
+{
+	mainRect.setSize(size);
+}
+
+sf::FloatRect Window::AABB()
+{
+	return { mainRect.getPosition(), mainRect.getSize() };
 }
