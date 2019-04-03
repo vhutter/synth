@@ -1,7 +1,5 @@
 #include "guiElements.h"
 
-#include <frozen/string.h>
-
 #include <mutex>
 
 #include "generators.h"
@@ -46,25 +44,6 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 					window.close();
 					break;
 				}
-				case sf::Keyboard::Space: {
-					// For testing
-					//sf::View oldView = window.getView();
-					sf::View oldView(sf::FloatRect(0, 0, 1600, 1000));
-					auto oldSize = oldView.getSize();
-					auto size = oldSize /2.f;
-					auto ratio = sf::Vector2f(size.x / oldSize.x, size.y / oldSize.y);
-
-					static float x = 0, y = 0;
-					x = x - 10;
-					y = y - 10;
-
-					sf::View view(sf::FloatRect(0, 0, size.x, size.y));
-					view.setCenter(x, y);
-					view.setViewport(sf::FloatRect(0,0, ratio.x, ratio.y));
-					window.setView(view);
-
-					break;
-				}
 				default:
 					break;
 				}
@@ -81,13 +60,7 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 		}
 	});
 
-	//auto test = std::make_shared<TextDisplay>("The quick brown fox jumps over the lazy dog", 600, 200, 300, 300);
-	auto test = std::make_shared<TextDisplay>(TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 600, 200, 70, 150, 24));
-	//test->setBgColor(sf::Color::Blue);
-
 	gui.addChildren({ 
-		setup, 
-		//std::make_shared<Window>(10, 10, 500, 500, sf::Color{ 0x8b, 0, 0, 100 }) ,
-		test,
+		setup,
 	});
 }

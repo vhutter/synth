@@ -15,15 +15,14 @@
 
 #include <iostream>
 
-#include <frozen/unordered_map.h>
-#include <frozen/string.h>
-
 #include "tones.h"
 #include "synth.h"
 #include "guiElements.h"
 #include "gui.h"
 #include "events.h"
 #include "effects.h"
+
+#include "Test/test.h"
 
 int main()
 {
@@ -37,15 +36,19 @@ int main()
 	auto tones = generateTones<Tone>(Sine13, notes);
 	auto generator = DynamicToneSum(tones, maxNotes);
 	auto glideEffect = Glider(gui, Sine13, notes, maxNotes);
+	keyboard.outputTo(
+		generator,
+		glideEffect
+	);
 
+	generator.addBeforeCallback(PitchBender(gui, generator));
+	
 	generator.addAfterCallback(glideEffect);
 	generator.addAfterCallback(EchoEffect(gui, sampleRate, 0.3, 0.6));
 	generator.addAfterCallback(VolumeControl(gui));
 	generator.addAfterCallback(DebugFilter(gui));
-
-	generator.addBeforeCallback(PitchBender(gui, generator));
-
-	keyboard.outputTo(generator, glideEffect);
+	
+	testGui(gui);
 	
 	const auto& generateSample = [&](double t) -> double {
         std::lock_guard<DynamicToneSum> lock(generator);
@@ -54,7 +57,7 @@ int main()
 		return 0.;
 	};
 	
-	SynthStream synth(sampleRate, 1, generateSample, generateSample);
+	SynthStream synth(sampleRate, 32, generateSample, generateSample);
 	synth.play();
 	
 	MidiContext midiContext;

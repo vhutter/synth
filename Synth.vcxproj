@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D54C7D50-3940-4ED8-A128-7FA5B5C63E7C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -152,6 +152,7 @@
     <ClCompile Include="RtMidi.cpp" />
     <ClCompile Include="synth.cpp" />
     <ClCompile Include="events.cpp" />
+    <ClCompile Include="test\test.cpp" />
     <ClCompile Include="tones.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -162,6 +163,7 @@
     <ClInclude Include="RtMidi.h" />
     <ClInclude Include="synth.h" />
     <ClInclude Include="events.h" />
+    <ClInclude Include="test\test.h" />
     <ClInclude Include="tones.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -34,10 +34,10 @@ class GuiElement: public sf::Drawable, public sf::Transformable
 public:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const final override;
 	virtual sf::FloatRect AABB();
+	virtual void moveAroundPoint(const sf::Vector2f& center);
 	void forwardEvent(const SynthEvent& event);
 	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& child);
 	void removeChild(const std::shared_ptr<GuiElement>& child);
-	void moveAroundPoint(const sf::Vector2f& center);
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const = 0;
@@ -104,25 +104,39 @@ private:
 class TextDisplay : public GuiElement
 {
 public:
-    TextDisplay(const std::string& initialText, float px, float py, float sx=0, float sy=0, unsigned int charSize=24);
-    static TextDisplay Multiline(const std::string text, float px, float py, float sx=0, float sy=0, unsigned int charSize=24);
+    TextDisplay(const std::string& initialText, float px, float py, float sx=0, float sy=0, unsigned int charSize=30);
+	static std::unique_ptr<TextDisplay> DefaultText(
+		const std::string& initialText, 
+		float px, float py,
+		unsigned int charSize = 30
+	);
+    static std::unique_ptr<TextDisplay> Multiline(
+		const std::string text, 
+		float px, float py, 
+		float width,
+		unsigned int charSize=24
+	);
 
-    const std::string& getText() {return content;}
-    void setText(const std::string& text);
-    const sf::Text& getText() const {return text;}
-    void setBgColor(const sf::Color& color);
+    const std::string& getText() const {return content;}
 	const sf::Color& getBgColor() const;
+
+    void setText(const std::string& text);
+    void setBgColor(const sf::Color& color);
 
 	virtual sf::FloatRect AABB() override;
 	void centralize();
+	void setFixedSize(bool fixed);
+	void setFrameSize(const sf::Vector2f& size);
+	void fitFrame(const sf::Vector2f& size = {0,0});
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
-	void fitFrame(float sx, float sy);
+	const sf::Vector2f topLeftAlignment() const;
 
     sf::RectangleShape frame;
     sf::Text text;
     std::string content;
+	bool fixedFrame{ false };
 
     static sf::Font font;
 };
@@ -187,6 +201,7 @@ private:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
     void moveSlider(const sf::Vector2f& p);
     bool containsPoint(const sf::Vector2f& p) const;
+	void refreshText();
 
 
     TextDisplay title;

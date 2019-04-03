@@ -18,6 +18,20 @@ namespace
         }
         return tmpFont;
     }
+
+	sf::View getCroppedView(const sf::View& oldView, float x, float y, float w, float h)
+	{
+		const auto center = sf::Vector2f{ floor(x + w / 2), floor(y + h / 2) };
+		const auto size = sf::Vector2f{ w, h };
+		sf::View ret(center, size);
+
+		const auto& oldSize = oldView.getSize();
+		const auto ratio = sf::Vector2f{ size.x / oldSize.x, size.y / oldSize.y };
+		const auto pos = sf::Vector2f{ x / oldSize.x, y / oldSize.y };
+
+		ret.setViewport(sf::FloatRect(pos.x, pos.y, ratio.x, ratio.y));
+		return ret;
+	}
 }
 
 const sf::Vector2f SynthKey::whiteSizeDefault(100, 200);
@@ -92,7 +106,7 @@ void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	states.transform *= getTransform();
 	drawImpl(target, states);
 	for (auto& child : children) {
-		child->drawImpl(target, states);
+		child->draw(target, states);
 	}
 }
 
@@ -271,6 +285,8 @@ Slider::Slider(const std::string& str, double from, double to, float px, float p
     :title(str, 0, 0, 0,0,titleSize), from(from), to(to), name(str), orientation(ori), value((from+to)/2.), onMove(callback), size(sx, sy)
 {
 	title.moveAroundPoint({ px + sx / 2, py - 40 });
+	refreshText();
+
     const auto& minDim = std::min(sx, sy)/2;
     sliderRectSize = sf::Vector2(minDim, minDim);
 
@@ -316,7 +332,8 @@ void Slider::onEvent(const SynthEvent& eventArg)
 					auto[px, py] = mainRect.getPosition();
 					sliderRect.setPosition(sf::Vector2f(px + mainRect.getSize().x / 2 - sliderRectSize.x / 2, py + mainRect.getSize().y / 2 - sliderRectSize.y / 2));
 					moveSlider(sf::Vector2f(px + mainRect.getSize().x / 2, py + mainRect.getSize().y / 2));
-					if(onMove) onMove();
+					refreshText();
+					if (onMove) onMove();
 				}
 				break;
 			}
@@ -324,6 +341,7 @@ void Slider::onEvent(const SynthEvent& eventArg)
 				if (clicked) {
 					const auto& mousePos = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
 					moveSlider(mousePos);
+					refreshText();
 					if (onMove) onMove();
 				}
 				break;
@@ -348,11 +366,15 @@ sf::FloatRect Slider::AABB()
 	};
 }
 
+void Slider::refreshText()
+{
+	std::ostringstream oss;
+	oss << std::setprecision(2) << std::fixed << value;
+	title.setText(name + "\n[" + oss.str() + "]");
+}
+
 void Slider::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
-    std::ostringstream oss;
-    oss << std::setprecision(2) << std::fixed << value;
-    const_cast<TextDisplay*>(&title)->setText(name+"\n["+oss.str()+"]");
     target.draw(title, states);
     target.draw(mainRect, states);
     target.draw(sliderRect, states);
@@ -422,7 +444,6 @@ void Oscilloscope::drawImpl(sf::RenderTarget& target, sf::RenderStates states) c
     target.draw(vArray.data(), resolution, sf::LineStrip, states);
 }
 
-
 void Oscilloscope::newSamples(const std::vector<double>& samples) const
 {
 	const double halfY = window.getSize().y / 2;
@@ -440,32 +461,43 @@ void Oscilloscope::newSamples(const std::vector<double>& samples) const
     }
 }
 
-void TextDisplay::fitFrame(float sx, float sy)
+const sf::Vector2f TextDisplay::topLeftAlignment() const
 {
 	const auto& boundingBox = text.getGlobalBounds();
-	auto[px, py] = text.getPosition();
-	std::tie(sx, sy) = std::tie(std::max(sx, boundingBox.width), std::max(sy, boundingBox.height));
-	std::tie(px, py) = std::tie(boundingBox.left, boundingBox.top);
-
-	frame.setPosition(sf::Vector2f(px, py));
-	frame.setFillColor(sf::Color::Black);
-	frame.setSize(sf::Vector2f(sx, sy));
-	frame.setOutlineColor(sf::Color::Green);
-	frame.setOutlineThickness(1);
+	sf::Vector2f topleft = { boundingBox.left, boundingBox.top };
+	return topleft - text.getPosition();
 }
 
 void TextDisplay::centralize()
 {
 	const auto& textBounds = text.getGlobalBounds();
 	const auto& textDim = sf::Vector2f{ textBounds.width, textBounds.height };
-	const auto& textBoundsPos = sf::Vector2f{ textBounds.left, textBounds.top };
+	const auto& topLeftPos = sf::Vector2f{ textBounds.left, textBounds.top };
 
-	auto dif = (frame.getSize() - textDim) / 2.f - (textBoundsPos - text.getPosition());
+	auto dif = (frame.getSize() - textDim) / 2.f - (topLeftPos - text.getPosition());
 
 	dif.x = floor(dif.x);
 	dif.y = floor(dif.y);
 
-	text.setPosition(frame.getPosition() + dif);
+	text.setPosition(dif);
+}
+
+void TextDisplay::setFixedSize(bool fixed)
+{
+	fixedFrame = fixed;
+}
+
+void TextDisplay::setFrameSize(const sf::Vector2f & size)
+{
+	if (fixedFrame) return;
+	frame.setSize(size);
+}
+
+void TextDisplay::fitFrame(const sf::Vector2f& size)
+{
+	if (fixedFrame) return;
+	const auto& boundingBox = text.getGlobalBounds();
+	frame.setSize({ std::max(size.x, boundingBox.width), std::max(size.y, boundingBox.height) });
 }
 
 TextDisplay::TextDisplay(const std::string& initialText, float px, float py, float sx, float sy, unsigned int size)
@@ -477,10 +509,34 @@ TextDisplay::TextDisplay(const std::string& initialText, float px, float py, flo
     text.setPosition(sf::Vector2f(floor(px), floor(py)));
     text.setFillColor(sf::Color::Green);
 
-	fitFrame(sx, sy);
+	//frame.setOutlineThickness(1);
+	frame.setFillColor(sf::Color::Black);
+	frame.setPosition(0, 0);
+
+	fitFrame({ sx, sy });
+
+	const auto& boundingBox = text.getGlobalBounds();
+	sf::Vector2f topleft = { boundingBox.left, boundingBox.top };
+	setPosition(topleft);
+
+	text.setPosition(-topLeftAlignment());
 }
 
-TextDisplay TextDisplay::Multiline(const std::string initialText, float px, float py, float sx, float sy, unsigned int charSize)
+std::unique_ptr<TextDisplay> TextDisplay::DefaultText(
+	const std::string & initialText, 
+	float px, float py, 
+	unsigned int charSize)
+{
+	return std::make_unique<TextDisplay>(initialText, px, py, 0, 0, charSize);
+}
+
+std::unique_ptr<TextDisplay> TextDisplay::Multiline(
+	const std::string initialText, 
+	float px, 
+	float py, 
+	float width, 
+	unsigned int charSize
+)
 {
 	sf::Text dummyText;
 	dummyText.setFont(font);
@@ -497,7 +553,7 @@ TextDisplay TextDisplay::Multiline(const std::string initialText, float px, floa
 		row.append(" "+*wordIt);
 		dummyText.setString(row);
 		const auto& bounds = dummyText.getGlobalBounds();
-		if (wordCount > 1 && bounds.width > sx) {
+		if (wordCount > 1 && bounds.width > width) {
 			result.append("\n");
 			row = *wordIt;
 			wordCount = 1;
@@ -508,16 +564,13 @@ TextDisplay TextDisplay::Multiline(const std::string initialText, float px, floa
 		result.append(*wordIt);
 	}
 
-	auto ret = TextDisplay(result, px, py, sx, sy, charSize);
-	ret.frame.setSize({ sx,sy });
-	return ret;
+	return TextDisplay::DefaultText(result, px, py, charSize);
 }
 
 void TextDisplay::setBgColor(const sf::Color& color)
 {
 	frame.setFillColor(color);
 }
-
 
 const sf::Color& TextDisplay::getBgColor() const 
 { 
@@ -526,27 +579,31 @@ const sf::Color& TextDisplay::getBgColor() const
 
 sf::FloatRect TextDisplay::AABB()
 {
-	return { frame.getPosition(), frame.getSize() };
+	return { getPosition(), frame.getSize() };
 }
 
 void TextDisplay::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	sf::View view = target.getView();
-	sf::View savedView = view;
-
-	//view.setViewport({ 0.25f, 0.25, 0.5f, 0.5f });
-
-	target.setView(view);
-
-    target.draw(frame, states);
+	const auto savedView = target.getView();
+	 
+	// This view makes some texts blurry (why?)
+	const auto view = getCroppedView(
+		savedView,
+		getPosition().x-1,
+		getPosition().y-1,
+		frame.getSize().x+2,
+		frame.getSize().y+2
+	);
+	//target.setView(view);
+	target.draw(frame, states);
     target.draw(text, states);
-
 	target.setView(savedView);
 }
 
 void TextDisplay::setText(const std::string& content)
 {
     text.setString(content);
+	fitFrame();
 }
 
 Button::Button(const std::string& initialText, float px, float py, float sx, float sy, unsigned int charSize, std::function<void()> onClick)
@@ -554,6 +611,7 @@ Button::Button(const std::string& initialText, float px, float py, float sx, flo
 {
 	centralize();
 	frame.setOutlineColor(sf::Color::White);
+	frame.setOutlineThickness(1);
 }
 
 
