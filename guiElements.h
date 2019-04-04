@@ -8,6 +8,7 @@
 #include <variant>
 #include <memory>
 
+#include "utility.h"
 #include "events.h"
 
 class SynthKey : public sf::RectangleShape
@@ -16,12 +17,12 @@ public:
     enum Type : bool { White = true, Black = false };
 	enum State : bool { Pressed = true, Released = false };
 
-    SynthKey(Type t, float px=0, float py=0, const sf::Vector2f& size = sf::Vector2f(0,0));
+    SynthKey(Type t, SynthFloat px=0, SynthFloat py=0, const SynthVec2& size = SynthVec2(0,0));
     Type getType() const {return type;};
     void setPressed(bool pressed);
     bool isPressed() const;
 
-    static const sf::Vector2f whiteSizeDefault, blackSizeDefault;
+    static const SynthVec2 whiteSizeDefault, blackSizeDefault;
 
 private:
     bool pressed = std::atomic<bool>(false);
@@ -32,9 +33,9 @@ private:
 class GuiElement: public sf::Drawable, public sf::Transformable
 {
 public:
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const final override;
-	virtual sf::FloatRect AABB();
-	void moveAroundPoint(const sf::Vector2f& center);
+    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+	virtual SynthRect AABB() const;
+	void moveAroundPoint(const SynthVec2& center);
 	void forwardEvent(const SynthEvent& event, const sf::Transform& transform = {});
 	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& child);
 	void removeChild(const std::shared_ptr<GuiElement>& child);
@@ -70,10 +71,10 @@ class SynthKeyboard : public GuiElement
 public:
 	using callback_t = std::function<void(unsigned, SynthKey::State)>;
 
-    SynthKeyboard(float px, float py, callback_t eventCallback);
+    SynthKeyboard(SynthFloat px, SynthFloat py, callback_t eventCallback);
 
     virtual void onEvent(const SynthEvent& event) override;
-	virtual sf::FloatRect AABB() override;
+	virtual SynthRect AABB() const override;
 
     SynthKey& operator[] (std::size_t i) {return keys[i];}
 
@@ -85,38 +86,38 @@ private:
 
     std::vector<SynthKey> keys;
 	callback_t onKey;
-	const sf::Vector2f blackSize{ SynthKey::blackSizeDefault }, whiteSize{ SynthKey::whiteSizeDefault };
+	const SynthVec2 blackSize{ SynthKey::blackSizeDefault }, whiteSize{ SynthKey::whiteSizeDefault };
 };
 
 class Window : public GuiElement
 {
 public:
-	Window(float px, float py, float sx, float sy, const sf::Color& fillColor);
-	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& child);
-	void setSize(const sf::Vector2f& size);
+	Window(SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, const sf::Color& fillColor);
+	void setSize(const SynthVec2& size);
 
-	virtual sf::FloatRect AABB() override;
+	virtual SynthRect AABB() const override;
+	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 	sf::RectangleShape mainRect;
-	float childAlignment{ 10 }, cursorX{ 0 }, cursorY{ 0 };
+	SynthFloat childAlignment{ 10 }, cursorX{ 0 }, cursorY{ 0 };
 };
 
 class TextDisplay : public GuiElement
 {
 public:
-    TextDisplay(const std::string& initialText, float px, float py, float sx=0, float sy=0, unsigned int charSize=30);
+    TextDisplay(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx=0, SynthFloat sy=0, unsigned int charSize=30);
 	static std::unique_ptr<TextDisplay> DefaultText(
 		const std::string& initialText, 
-		float px, float py,
+		SynthFloat px, SynthFloat py,
 		unsigned int charSize = 30
 	);
     static std::unique_ptr<TextDisplay> Multiline(
 		const std::string text, 
-		float px, float py, 
-		float width,
+		SynthFloat px, SynthFloat py, 
+		SynthFloat width,
 		unsigned int charSize=24
 	);
 
@@ -126,15 +127,15 @@ public:
     void setText(const std::string& text);
     void setBgColor(const sf::Color& color);
 
-	virtual sf::FloatRect AABB() override;
+	virtual SynthRect AABB() const override;
 	void centralize();
 	void setFixedSize(bool fixed);
-	void setFrameSize(const sf::Vector2f& size);
-	void fitFrame(const sf::Vector2f& size = {0,0});
+	void setFrameSize(const SynthVec2& size);
+	void fitFrame(const SynthVec2& size = {0,0});
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
-	const sf::Vector2f topLeftAlignment() const;
+	const SynthVec2 topLeftAlignment() const;
 
     sf::RectangleShape frame;
     sf::Text text;
@@ -147,12 +148,12 @@ protected:
 class Button : public TextDisplay
 {
 public:
-    Button(const std::string& initialText, float px, float py, float sx, float sy, unsigned int charSize, std::function<void()> onClick);
+    Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
 
-    static std::unique_ptr<Button> DefaultButton(const std::string& s, float px, float py, std::function<void()> onClick) {
+    static std::unique_ptr<Button> DefaultButton(const std::string& s, SynthFloat px, SynthFloat py, std::function<void()> onClick) {
         return std::make_unique<Button>(s, px, py, 100, 30, 16, onClick);
     }
-    static std::unique_ptr<Button> DefaultButton(const std::string& s, float px, float py, std::atomic<bool>& val) {
+    static std::unique_ptr<Button> DefaultButton(const std::string& s, SynthFloat px, SynthFloat py, std::atomic<bool>& val) {
         return std::make_unique<Button>(s, px, py, 100, 30, 16, [&](){val = !val;});
     }
 
@@ -169,15 +170,15 @@ class Slider : public GuiElement
 public:
     enum Orientation : bool {Vertical = true, Horizontal = false};
 
-	Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::function<void()> onMove = {});
-    Slider(const std::string& name, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::atomic<double>& val);
+	Slider(const std::string& name, double from, double to, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::function<void()> onMove = {});
+    Slider(const std::string& name, double from, double to, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val);
     Slider& setFixed(bool val) {fixed = val; return *this;}
 
 	template<class T = std::function<void()>>
-	static std::unique_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, float px, float py, T&& onMoveVal = {})
+	static std::unique_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, SynthFloat px, SynthFloat py, T&& onMoveVal = {})
 	{
-		constexpr float width = 30;
-		constexpr float height = 100;
+		constexpr SynthFloat width = 30;
+		constexpr SynthFloat height = 100;
 		constexpr unsigned titleSize = 16;
 
 		if constexpr (std::is_constructible_v<std::function<void(Slider&)>,T>)
@@ -194,14 +195,14 @@ public:
 	}
 
     virtual void onEvent(const SynthEvent& event) override;
-	virtual sf::FloatRect AABB() override;
+	virtual SynthRect AABB() const override;
 
     double getValue() const {return value;}
 
 private:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
-    void moveSlider(const sf::Vector2f& p);
-    bool containsPoint(const sf::Vector2f& p) const;
+    void moveSlider(const SynthVec2& p);
+    bool containsPoint(const SynthVec2& p) const;
 	void refreshText();
 
 
@@ -216,16 +217,16 @@ private:
     bool clicked = false;
     std::function<void()> onMove;
 
-    sf::Vector2f size;
-    sf::Vector2f sliderRectSize;
+    SynthVec2 size;
+    SynthVec2 sliderRectSize;
 };
 
 class Oscilloscope : public GuiElement
 {
 public:
-    Oscilloscope(float px, float py, float sx, float sy, unsigned resolution, double speed);
+    Oscilloscope(SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned resolution, double speed);
 
-	virtual sf::FloatRect AABB() override;
+	virtual SynthRect AABB() const override;
 
 	unsigned getResolution() const { return resolution; }
 	void newSamples(const std::vector<double>& samples) const;

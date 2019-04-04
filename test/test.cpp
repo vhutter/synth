@@ -2,24 +2,51 @@
 
 void testGui(GuiElement& gui)
 {
-	auto events = std::make_shared<EmptyGuiElement>([&](const SynthEvent& eventArg) {
+	sf::Color bgcolor = sf::Color::Magenta;
+	bgcolor.a = 100;
+	std::shared_ptr testWindow = std::make_unique<Window>(50, 270, 700, 400, bgcolor);
+	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 0, 0, 24);
+	std::shared_ptr testWindow2 = std::make_unique<Window>(200, 100, 200, 200, sf::Color::Black);
+	windowText->setPosition(50, 50);
+	testWindow2->addChildren({
+		TextDisplay::Multiline("cat...\ncat\ncat\ncat\ncat\ncat\ncat\ncat\ncat\ncat", 0, 0, 100, 24)
+	});
+	testWindow->addChildren({
+		windowText,
+		testWindow2
+	});
+
+
+
+
+	auto events = std::make_shared<EmptyGuiElement>([=](const SynthEvent& eventArg) {
 		if (std::holds_alternative<sf::Event>(eventArg)) {
 			const sf::Event& event = std::get<sf::Event>(eventArg);
 
 			switch (event.type) {
-			case sf::Event::KeyPressed: {
-				switch (event.key.code) {
-				case sf::Keyboard::Space: {
-					// For testing
-
+				case sf::Event::KeyPressed: {
+					switch (event.key.code) {
+					case sf::Keyboard::X: {
+						// For testing
+						testWindow->move(50,50);
+						break;
+					}
+					case sf::Keyboard::Z: {
+						// For testing
+						testWindow->move(-10,-10);
+						break;
+					}
+					default:
+						break;
+					}
 					break;
 				}
-				default:
+				case sf::Event::MouseWheelMoved: {
+					windowText->move(event.mouseWheel.delta*6, event.mouseWheel.delta*6);
+				}
+				default: {
 					break;
 				}
-				break;
-			}
-			default:
 				break;
 			}
 		}
@@ -41,5 +68,6 @@ void testGui(GuiElement& gui)
 		test,
 		test2,
 		test3,
-		});
+		testWindow,
+	});
 }

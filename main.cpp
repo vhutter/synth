@@ -59,6 +59,8 @@ int main()
 	synth.play();
 	
 	MidiContext midiContext;
+
+	testGui(gui);
 	
 	sf::RenderWindow window(sf::VideoMode(1600, 1000), "Basic synth");
 	setupGui(gui, window);

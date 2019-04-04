@@ -19,37 +19,53 @@ namespace
         return tmpFont;
     }
 
-	sf::View getCroppedView(const sf::View& oldView, float x, float y, float w, float h)
+	sf::View getCroppedView(const sf::View& oldView, SynthFloat x, SynthFloat y, SynthFloat w, SynthFloat h)
 	{
-		const auto center = sf::Vector2f{ floor(x + w / 2), floor(y + h / 2) };
-		const auto size = sf::Vector2f{ w, h };
-		sf::View ret(center, size);
+		const auto center = SynthVec2{ std::round(x + w / 2), std::round(y + h / 2) };
+		const auto size = SynthVec2{ w, h };
+		sf::View ret{ sf::Vector2f(center), sf::Vector2f(size) };
 
-		const auto& oldSize = oldView.getSize();
-		const auto ratio = sf::Vector2f{ size.x / oldSize.x, size.y / oldSize.y };
-		const auto pos = sf::Vector2f{ x / oldSize.x, y / oldSize.y };
+		const auto& oldViewport = SynthRect{ oldView.getViewport() };
+		auto oldSize = SynthVec2{ oldView.getSize() };
+		oldSize.x = std::round(oldSize.x * 1.f / oldViewport.width);
+		oldSize.y = std::round(oldSize.y * 1.f / oldViewport.height);
+		const auto ratio = SynthVec2{ 
+			size.x / oldSize.x, 
+			size.y / oldSize.y 
+		};
+		const auto pos = SynthVec2{ x / oldSize.x, y / oldSize.y };
 
 		ret.setViewport(sf::FloatRect(pos.x, pos.y, ratio.x, ratio.y));
 		return ret;
 	}
+
+	sf::View getCroppedView(const sf::View& oldView, const SynthVec2& p, const SynthVec2& s)
+	{
+		return getCroppedView(oldView, p.x, p.y, s.x, s.y);
+	}
+
+	sf::View getCroppedView(const sf::View& oldView, const SynthRect& box)
+	{
+		return getCroppedView(oldView, box.left, box.top, box.width, box.height);
+	}
 }
 
-const sf::Vector2f SynthKey::whiteSizeDefault(100, 200);
-const sf::Vector2f SynthKey::blackSizeDefault(40, 150);
+const SynthVec2 SynthKey::whiteSizeDefault(100, 200);
+const SynthVec2 SynthKey::blackSizeDefault(40, 150);
 sf::Font TextDisplay::font = loadCourierNew();
 
-SynthKey::SynthKey(Type t, float px, float py, const sf::Vector2f& size)
+SynthKey::SynthKey(Type t, SynthFloat px, SynthFloat py, const SynthVec2& size)
     :type(t)
 {
-    setPosition(sf::Vector2f(px, py));
-	setSize(size);
+    setPosition(px, py);
+	setSize(sf::Vector2f(size));
 
     if (t == Type::Black) {
-        if(size.x == 0) setSize(SynthKey::blackSizeDefault);
+        if(size.x == 0) setSize(sf::Vector2f(SynthKey::blackSizeDefault));
         setFillColor(sf::Color::Black);
     }
     else {
-		if (size.x == 0) setSize(SynthKey::whiteSizeDefault);
+		if (size.x == 0) setSize(sf::Vector2f(SynthKey::whiteSizeDefault));
         setFillColor(sf::Color::White);
     }
 
@@ -95,11 +111,11 @@ void GuiElement::removeChild(const std::shared_ptr<GuiElement>& child)
 	}
 }
 
-void GuiElement::moveAroundPoint(const sf::Vector2f & center)
+void GuiElement::moveAroundPoint(const SynthVec2 & center)
 {
 	const auto& bounds = AABB();
-	auto newPos = center - sf::Vector2f(bounds.width, bounds.height) / 2.f;
-	setPosition(floor(newPos.x), floor(newPos.y));
+	auto newPos = center - SynthVec2(bounds.width, bounds.height) / 2.;
+	setPosition(std::round(newPos.x), std::round(newPos.y));
 }
 
 void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -111,12 +127,12 @@ void GuiElement::draw(sf::RenderTarget& target, sf::RenderStates states) const
 	}
 }
 
-sf::FloatRect GuiElement::AABB()
+SynthRect GuiElement::AABB() const
 {
-	return sf::FloatRect(0, 0, 0, 0);
+	return SynthRect(0, 0, 0, 0);
 }
 
-SynthKeyboard::SynthKeyboard(float px, float py, callback_t eventCallback)
+SynthKeyboard::SynthKeyboard(SynthFloat px, SynthFloat py, callback_t eventCallback)
     : onKey(eventCallback)
 {
 	setPosition(px, py);
@@ -256,26 +272,26 @@ void SynthKeyboard::onEvent(const SynthEvent& eventArg)
 	}
 }
 
-sf::FloatRect SynthKeyboard::AABB()
+SynthRect SynthKeyboard::AABB() const
 {
-	sf::Vector2f size;
+	SynthVec2 size;
 	size.x = keys.back().getPosition().x - keys.front().getPosition().x + keys.back().getSize().x;
 	size.y = std::max(whiteSize.y, blackSize.y);
-	return sf::FloatRect{ getPosition(), size };
+	return SynthRect{ SynthVec2(getPosition()), size };
 }
 
 void SynthKeyboard::repositionKeys()
 {
     unsigned whitesCount = 0;
-    float dif = whiteSize.x - blackSize.x / 2;
+    SynthFloat dif = whiteSize.x - blackSize.x / 2;
     for (unsigned i=0; i<keys.size(); ++i) {
         auto& key = keys[i];
         if (key.getType() == SynthKey::White) {
-            key.setPosition(sf::Vector2f(whitesCount* key.getSize().x, 0));
+            key.setPosition(whitesCount* key.getSize().x, 0);
             ++whitesCount;
         }
         else {
-            key.setPosition(sf::Vector2f(keys[i-1].getPosition().x + dif, 0));
+            key.setPosition(keys[i-1].getPosition().x + dif, 0);
         }
     }
 }
@@ -286,36 +302,32 @@ void Slider::refreshText()
 	oss << std::setprecision(2) << std::fixed << value;
 	title.setText(name + "\n[" + oss.str() + "]");
 	const auto& s = mainRect.getSize();
-	//const auto& p = getPosition();
-	const auto& p = sf::Vector2f(0, 0);
+	const auto& p = SynthVec2(0, 0);
 	title.moveAroundPoint({ p.x + s.x / 2.f, p.y - 20 });
 }
 
-Slider::Slider(const std::string& str, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::function<void()> callback)
+Slider::Slider(const std::string& str, double from, double to, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::function<void()> callback)
 	:title(str, 0, 0, 0, 0, titleSize), from(from), to(to), name(str), orientation(ori), value((from + to) / 2.), onMove(callback), size(sx, sy)
 {
-	//title.moveAroundPoint({ px + sx / 2, py - 40 });
-	//title.setPosition({px, py-40});
-
 	const auto& minDim = std::min(sx, sy) / 2;
-	sliderRectSize = sf::Vector2(minDim, minDim);
+	sliderRectSize = SynthVec2(minDim, minDim);
 
 	if (orientation == Vertical) {
-		mainRect.setSize(size);
+		mainRect.setSize(sf::Vector2f(size));
 	}
 	else {
 		mainRect.setSize(sf::Vector2f(size.y, size.x));
 	}
 
-	setPosition({ px, py });
+	setPosition( px, py );
 
 	mainRect.setPosition({ 0,0 });
     mainRect.setOutlineColor(sf::Color(0x757575FF));
     mainRect.setFillColor(sf::Color(0x660000FF));
     mainRect.setOutlineThickness(1.);
 
-    sliderRect.setSize(sliderRectSize);
-    sliderRect.setPosition(sf::Vector2f(mainRect.getSize().x/2 - sliderRectSize.x/2, mainRect.getSize().y/2 - sliderRectSize.y/2));
+	sliderRect.setSize(sf::Vector2f(sliderRectSize));
+    sliderRect.setPosition(mainRect.getSize().x/2 - sliderRectSize.x/2, mainRect.getSize().y/2 - sliderRectSize.y/2);
     sliderRect.setOutlineColor(sf::Color(0x757575FF));
     sliderRect.setFillColor(sf::Color(0x003366FF));
     sliderRect.setOutlineThickness(2.);
@@ -323,7 +335,7 @@ Slider::Slider(const std::string& str, double from, double to, float px, float p
 	refreshText();
 }
 
-Slider::Slider(const std::string& str, double from, double to, float px, float py, float sx, float sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
+Slider::Slider(const std::string& str, double from, double to, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
     : Slider(str, from, to, px, py, sx, sy, titleSize, ori, [&](){val=getValue();})
 {
 }
@@ -335,7 +347,7 @@ void Slider::onEvent(const SynthEvent& eventArg)
 		switch (event.type)
 		{
 			case sf::Event::MouseButtonPressed: {
-				const auto& mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+				const auto& mousePos = SynthVec2(event.mouseButton.x, event.mouseButton.y);
 				if (containsPoint(mousePos))
 					clicked = true;
 				break;
@@ -344,8 +356,8 @@ void Slider::onEvent(const SynthEvent& eventArg)
 				clicked = false;
 				if (fixed) {
 					auto[px, py] = mainRect.getPosition();
-					sliderRect.setPosition(sf::Vector2f(px + mainRect.getSize().x / 2 - sliderRectSize.x / 2, py + mainRect.getSize().y / 2 - sliderRectSize.y / 2));
-					moveSlider(sf::Vector2f(px + mainRect.getSize().x / 2, py + mainRect.getSize().y / 2));
+					sliderRect.setPosition(px + mainRect.getSize().x / 2 - sliderRectSize.x / 2, py + mainRect.getSize().y / 2 - sliderRectSize.y / 2);
+					moveSlider(SynthVec2(px + mainRect.getSize().x / 2, py + mainRect.getSize().y / 2));
 					refreshText();
 					if (onMove) onMove();
 				}
@@ -354,7 +366,7 @@ void Slider::onEvent(const SynthEvent& eventArg)
 			case sf::Event::MouseMoved: {
 				if (clicked) {
 					const auto& mousePos = globalTransform.getInverse() * sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
-					moveSlider(mousePos);
+					moveSlider(SynthVec2(mousePos));
 					refreshText();
 					if (onMove) onMove();
 				}
@@ -367,11 +379,11 @@ void Slider::onEvent(const SynthEvent& eventArg)
 	}
 }
 
-sf::FloatRect Slider::AABB()
+SynthRect Slider::AABB() const
 {
-	const sf::FloatRect 
+	const SynthRect 
 		&box1{ title.AABB() }, 
-		&box2{ mainRect.getPosition(), mainRect.getSize() };
+		&box2{ SynthVec2(mainRect.getPosition()), SynthVec2(mainRect.getSize()) };
 	return {
 		std::min(box1.left, box2.left),
 		std::min(box1.top, box2.top),
@@ -387,7 +399,7 @@ void Slider::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
     target.draw(sliderRect, states);
 }
 
-bool Slider::containsPoint(const sf::Vector2f& p) const
+bool Slider::containsPoint(const SynthVec2& p) const
 {
     const auto& rect = sliderRect;
     const auto& u = globalTransform * rect.getPosition();
@@ -397,7 +409,7 @@ bool Slider::containsPoint(const sf::Vector2f& p) const
         u.y <= p.y && p.y <= v.y;
 }
 
-void Slider::moveSlider(const sf::Vector2f& p)
+void Slider::moveSlider(const SynthVec2& p)
 {
     const auto& minPos = mainRect.getPosition();
     const auto& maxPos = minPos + mainRect.getSize() - sliderRect.getSize();
@@ -409,21 +421,21 @@ void Slider::moveSlider(const sf::Vector2f& p)
     double newValueNormalized;
 
     if (orientation == Vertical) {
-        sliderRect.setPosition(currentPos.x, std::clamp(p.y-sliderSize.y/2, minPos.y, maxPos.y));
+        sliderRect.setPosition(currentPos.x, std::clamp(p.y-sliderSize.y/2, SynthFloat(minPos.y), SynthFloat(maxPos.y)));
         newValueNormalized = (midPos.y - sliderRect.getPosition().y) / rectSize.y*2;
     }
     else {
-        sliderRect.setPosition(std::clamp(p.x-sliderSize.x/2, minPos.x, maxPos.x), currentPos.y);
+        sliderRect.setPosition(std::clamp(p.x-sliderSize.x/2, SynthFloat(minPos.x), SynthFloat(maxPos.x)), currentPos.y);
         newValueNormalized = (sliderRect.getPosition().x - midPos.x) / rectSize.x*2;
     }
 
     value = from + (newValueNormalized+1) / 2. * (to-from);
 }
 
-Oscilloscope::Oscilloscope(float px, float py, float sx, float sy, unsigned res, double speed)
+Oscilloscope::Oscilloscope(SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned res, double speed)
     : resolution(res), speed(speed)
 {
-    setPosition(sf::Vector2f(px, py));
+    setPosition(px, py);
 
     window.setSize(sf::Vector2f(sx, sy));
     window.setOutlineColor(sf::Color::White);
@@ -441,9 +453,9 @@ Oscilloscope::Oscilloscope(float px, float py, float sx, float sy, unsigned res,
     }
 }
 
-sf::FloatRect Oscilloscope::AABB()
+SynthRect Oscilloscope::AABB() const
 {
-	return { window.getPosition(), window.getSize() };
+	return { SynthVec2(getPosition()), SynthVec2(window.getSize()) };
 }
 
 void Oscilloscope::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
@@ -469,23 +481,23 @@ void Oscilloscope::newSamples(const std::vector<double>& samples) const
     }
 }
 
-const sf::Vector2f TextDisplay::topLeftAlignment() const
+const SynthVec2 TextDisplay::topLeftAlignment() const
 {
 	const auto& boundingBox = text.getGlobalBounds();
-	sf::Vector2f topleft = { boundingBox.left, boundingBox.top };
-	return topleft - text.getPosition();
+	const auto& topleft = sf::Vector2f( boundingBox.left, boundingBox.top );
+	return SynthVec2(topleft - text.getPosition());
 }
 
 void TextDisplay::centralize()
 {
 	const auto& textBounds = text.getGlobalBounds();
-	const auto& textDim = sf::Vector2f{ textBounds.width, textBounds.height };
-	const auto& topLeftPos = sf::Vector2f{ textBounds.left, textBounds.top };
+	const auto& textDim    = sf::Vector2f( textBounds.width, textBounds.height );
+	const auto& topLeftPos = sf::Vector2f( textBounds.left, textBounds.top );
 
 	auto dif = (frame.getSize() - textDim) / 2.f - (topLeftPos - text.getPosition());
 
-	dif.x = floor(dif.x);
-	dif.y = floor(dif.y);
+	dif.x = std::round(dif.x);
+	dif.y = std::round(dif.y);
 
 	text.setPosition(dif);
 }
@@ -495,26 +507,29 @@ void TextDisplay::setFixedSize(bool fixed)
 	fixedFrame = fixed;
 }
 
-void TextDisplay::setFrameSize(const sf::Vector2f & size)
+void TextDisplay::setFrameSize(const SynthVec2 & size)
 {
 	if (fixedFrame) return;
-	frame.setSize(size);
+	frame.setSize(sf::Vector2f(size));
 }
 
-void TextDisplay::fitFrame(const sf::Vector2f& size)
+void TextDisplay::fitFrame(const SynthVec2& size)
 {
 	if (fixedFrame) return;
-	const auto& boundingBox = text.getGlobalBounds();
-	frame.setSize({ std::max(size.x, boundingBox.width), std::max(size.y, boundingBox.height) });
+	const auto& boundingBox = SynthRect(text.getGlobalBounds());
+	frame.setSize(sf::Vector2f(
+		std::max(size.x, boundingBox.width), 
+		std::max(size.y, boundingBox.height) 
+	));
 }
 
-TextDisplay::TextDisplay(const std::string& initialText, float px, float py, float sx, float sy, unsigned int size)
+TextDisplay::TextDisplay(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int size)
     : text()
 {
     text.setFont(font);
     text.setCharacterSize(size);
     text.setString(initialText);
-    text.setPosition(sf::Vector2f(floor(px), floor(py)));
+    text.setPosition(std::round(px), std::round(py));
     text.setFillColor(sf::Color::Green);
 
 	frame.setOutlineThickness(0);
@@ -524,15 +539,14 @@ TextDisplay::TextDisplay(const std::string& initialText, float px, float py, flo
 	fitFrame({ sx, sy });
 
 	const auto& boundingBox = text.getGlobalBounds();
-	sf::Vector2f topleft = { boundingBox.left, boundingBox.top };
-	setPosition(topleft);
+	setPosition(boundingBox.left, boundingBox.top);
 
-	text.setPosition(-topLeftAlignment());
+	text.setPosition(sf::Vector2f(-topLeftAlignment()));
 }
 
 std::unique_ptr<TextDisplay> TextDisplay::DefaultText(
 	const std::string & initialText, 
-	float px, float py, 
+	SynthFloat px, SynthFloat py, 
 	unsigned int charSize)
 {
 	return std::make_unique<TextDisplay>(initialText, px, py, 0, 0, charSize);
@@ -540,16 +554,16 @@ std::unique_ptr<TextDisplay> TextDisplay::DefaultText(
 
 std::unique_ptr<TextDisplay> TextDisplay::Multiline(
 	const std::string initialText, 
-	float px, 
-	float py, 
-	float width, 
+	SynthFloat px, 
+	SynthFloat py, 
+	SynthFloat width, 
 	unsigned int charSize
 )
 {
 	sf::Text dummyText;
 	dummyText.setFont(font);
 	dummyText.setCharacterSize(charSize);
-	dummyText.setPosition(sf::Vector2f(px, py));
+	dummyText.setPosition(px, py);
 
 	std::string row, result;
 	std::istringstream words(initialText);
@@ -585,27 +599,15 @@ const sf::Color& TextDisplay::getBgColor() const
 	return frame.getFillColor();
 }
 
-sf::FloatRect TextDisplay::AABB()
+SynthRect TextDisplay::AABB() const
 {
-	return { getPosition(), frame.getSize() };
+	return { SynthVec2(getPosition()), SynthVec2(frame.getSize()) };
 }
 
 void TextDisplay::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	const auto savedView = target.getView();
-	 
-	// This view makes some texts blurry (why?)
-	const auto view = getCroppedView(
-		savedView,
-		getPosition().x-1,
-		getPosition().y-1,
-		frame.getSize().x+2,
-		frame.getSize().y+2
-	);
-	//target.setView(view);
 	target.draw(frame, states);
     target.draw(text, states);
-	target.setView(savedView);
 }
 
 void TextDisplay::setText(const std::string& content)
@@ -614,7 +616,7 @@ void TextDisplay::setText(const std::string& content)
 	fitFrame();
 }
 
-Button::Button(const std::string& initialText, float px, float py, float sx, float sy, unsigned int charSize, std::function<void()> onClick)
+Button::Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick)
     :TextDisplay(initialText, px, py, sx, sy, charSize), clickCallback(onClick)
 {
 	centralize();
@@ -629,8 +631,8 @@ void Button::onEvent(const SynthEvent& eventArg)
 		const sf::Event& event = std::get<sf::Event>(eventArg);
 		static bool black = true;
 		if (event.type == sf::Event::MouseButtonPressed) {
-			sf::Rect rect = { globalTransform * frame.getPosition(), frame.getSize() };
-			if (rect.contains(sf::Vector2f(event.mouseButton.x, event.mouseButton.y))) {
+			SynthRect rect = { SynthVec2(globalTransform * frame.getPosition()), SynthVec2(frame.getSize()) };
+			if (rect.contains(SynthVec2(event.mouseButton.x, event.mouseButton.y))) {
 				black = !black;
 				frame.setFillColor(black ? sf::Color::Black : sf::Color(0xaaaaaaaa));
 				clickCallback();
@@ -639,15 +641,14 @@ void Button::onEvent(const SynthEvent& eventArg)
 	}
 }
 
-Window::Window(float px, float py, float sx, float sy, const sf::Color & fillColor)
-	:mainRect({ sx, sy })
+Window::Window(SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
+	:mainRect( sf::Vector2f(sx, sy) )
 {
-	mainRect.setPosition(px, py);
+	setPosition(px, py);
 	mainRect.setFillColor(fillColor);
 	
-	//mainRect.setOutlineThickness(0);
-	mainRect.setOutlineColor(sf::Color::Green);
 	mainRect.setOutlineThickness(1);
+	mainRect.setOutlineColor(sf::Color::Green);
 }
 
 void Window::drawImpl(sf::RenderTarget & target, sf::RenderStates states) const
@@ -655,21 +656,22 @@ void Window::drawImpl(sf::RenderTarget & target, sf::RenderStates states) const
 	target.draw(mainRect, states);
 }
 
-void Window::addChildren(const std::vector<std::shared_ptr<GuiElement>>& children)
+void Window::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
-	//for (auto& child : children) {
-	//	if (cursorX + child.) {
-	//
-	//	}
-	//}
+	const auto savedView = target.getView();
+	target.setView(getCroppedView(savedView, SynthRect(states.transform.transformRect(sf::FloatRect(AABB())))));
+
+	GuiElement::draw(target, states);
+
+	target.setView(savedView);
 }
 
-void Window::setSize(const sf::Vector2f & size)
+void Window::setSize(const SynthVec2 & size)
 {
-	mainRect.setSize(size);
+	mainRect.setSize(sf::Vector2f(size));
 }
 
-sf::FloatRect Window::AABB()
+SynthRect Window::AABB() const
 {
-	return { mainRect.getPosition(), mainRect.getSize() };
+	return { SynthVec2(getPosition()), SynthVec2(mainRect.getSize()) };
 }
