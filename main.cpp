@@ -48,8 +48,6 @@ int main()
 	generator.addAfterCallback(VolumeControl(gui));
 	generator.addAfterCallback(DebugFilter(gui));
 	
-	testGui(gui);
-	
 	const auto& generateSample = [&](double t) -> double {
         std::lock_guard<DynamicToneSum> lock(generator);
 		double sample = generator.getSample(t);

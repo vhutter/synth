@@ -34,8 +34,8 @@ class GuiElement: public sf::Drawable, public sf::Transformable
 public:
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const final override;
 	virtual sf::FloatRect AABB();
-	virtual void moveAroundPoint(const sf::Vector2f& center);
-	void forwardEvent(const SynthEvent& event);
+	void moveAroundPoint(const sf::Vector2f& center);
+	void forwardEvent(const SynthEvent& event, const sf::Transform& transform = {});
 	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& child);
 	void removeChild(const std::shared_ptr<GuiElement>& child);
 
@@ -44,6 +44,9 @@ protected:
 	virtual void onEvent(const SynthEvent& event) {}
 
 	std::vector<std::shared_ptr<GuiElement>> children;
+
+	// Used for event handling
+	sf::Transform globalTransform;
 };
 
 class EmptyGuiElement : public GuiElement
@@ -192,8 +195,6 @@ public:
 
     virtual void onEvent(const SynthEvent& event) override;
 	virtual sf::FloatRect AABB() override;
-    sf::Vector2f getPosition() const {return mainRect.getPosition();}
-    void setPosition(const sf::Vector2f& p) {mainRect.setPosition(p);}
 
     double getValue() const {return value;}
 
@@ -226,8 +227,6 @@ public:
 
 	virtual sf::FloatRect AABB() override;
 
-    void setPosition(const sf::Vector2f& p) {window.setPosition(p);}
-    sf::Vector2f getPosition() const {return window.getPosition();}
 	unsigned getResolution() const { return resolution; }
 	void newSamples(const std::vector<double>& samples) const;
 
