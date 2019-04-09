@@ -15,6 +15,9 @@
     <Filter Include="Tests">
       <UniqueIdentifier>{78cd687e-4c68-4196-b697-40778d30abb9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{0c409f2c-ea1c-49e0-8af0-43dbda359ce3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="generators.cpp">
@@ -47,15 +50,36 @@
     <ClCompile Include="test\test.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="gui\Button.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\Oscilloscope.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\Slider.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\SynthKeyboard.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\TextDisplay.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\Window.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\GuiElement.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="utility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="generators.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="synth.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="guiElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RtMidi.h">
@@ -77,6 +101,30 @@
       <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\Button.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\Oscilloscope.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\Slider.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\SynthKeyboard.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\TextDisplay.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\Window.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\GuiElement.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="guiElements.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -40,7 +40,7 @@ int main()
 		generator,
 		glideEffect
 	);
-
+	
 	generator.addBeforeCallback(PitchBender(gui, generator));
 	
 	generator.addAfterCallback(glideEffect);

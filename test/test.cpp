@@ -4,16 +4,18 @@ void testGui(GuiElement& gui)
 {
 	sf::Color bgcolor = sf::Color::Magenta;
 	bgcolor.a = 100;
-	std::shared_ptr testWindow = std::make_unique<Window>(50, 270, 700, 400, bgcolor);
+	std::shared_ptr testWindow = std::make_unique<Window>("OuterWindow", 50, 270, 700, 400, bgcolor);
 	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 0, 0, 24);
-	std::shared_ptr testWindow2 = std::make_unique<Window>(200, 100, 200, 200, sf::Color::Black);
+	std::shared_ptr testWindow2 = std::make_unique<Window>("InnerWindow", 200, 100, 200, 200, sf::Color::Black);
+	std::shared_ptr testWindow3 = std::make_unique<Window>("Inner2", 300, 130, 200, 200, sf::Color::Black);
 	windowText->setPosition(50, 50);
 	testWindow2->addChildren({
-		TextDisplay::Multiline("cat...\ncat\ncat\ncat\ncat\ncat\ncat\ncat\ncat\ncat", 0, 0, 100, 24)
+		TextDisplay::Multiline("cat... cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat", 0, 0, 100, 24)
 	});
 	testWindow->addChildren({
 		windowText,
-		testWindow2
+		testWindow2,
+		testWindow3,
 	});
 
 
@@ -28,12 +30,13 @@ void testGui(GuiElement& gui)
 					switch (event.key.code) {
 					case sf::Keyboard::X: {
 						// For testing
-						testWindow->move(50,50);
+						//testWindow->move(50,50);
 						break;
 					}
 					case sf::Keyboard::Z: {
 						// For testing
-						testWindow->move(-10,-10);
+						static int v = 0;
+						testWindow->setVisibility((v++) % 2);
 						break;
 					}
 					default:
@@ -42,7 +45,7 @@ void testGui(GuiElement& gui)
 					break;
 				}
 				case sf::Event::MouseWheelMoved: {
-					windowText->move(event.mouseWheel.delta*6, event.mouseWheel.delta*6);
+					//windowText->move(event.mouseWheel.delta*6, event.mouseWheel.delta*6);
 				}
 				default: {
 					break;
@@ -63,11 +66,11 @@ void testGui(GuiElement& gui)
 	test->fitFrame();
 
 	gui.addChildren({
-		events,
 		//std::make_shared<Window>(10, 10, 500, 500, sf::Color{ 0x8b, 0, 0, 100 }) ,
 		test,
 		test2,
 		test3,
+		events,
 		testWindow,
 	});
 }

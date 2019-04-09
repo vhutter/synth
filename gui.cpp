@@ -11,10 +11,10 @@ KeyboardOutput::KeyboardOutput()
 {
 	kb = std::make_unique<SynthKeyboard>(50, 700, [this](unsigned keyIdx, SynthKey::State keyState) {
 		if (keyState == SynthKey::State::Pressed) {
-			(*kb)[keyIdx].setPressed(true);
+			(*kb)[keyIdx].pressed = true;
 		}
 		else {
-			(*kb)[keyIdx].setPressed(false);
+			(*kb)[keyIdx].pressed = false;
 		}
 		for (auto callback : callbacks) {
 			callback(keyIdx, keyState);
@@ -29,10 +29,7 @@ std::shared_ptr<SynthKeyboard> KeyboardOutput::getGuiElement() const
 
 void setupGui(GuiElement& gui, sf::RenderWindow& window)
 {
-	auto setup = std::make_shared<EmptyGuiElement>([&](const SynthEvent& eventArg) {
-		if (std::holds_alternative<sf::Event>(eventArg)) {
-			const sf::Event& event = std::get<sf::Event>(eventArg);
-
+	auto setup = std::make_shared<EmptyGuiElement>([&](const sf::Event& event) {
 			switch (event.type) {
 			case sf::Event::Closed: {
 				window.close();
@@ -57,7 +54,6 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 			default:
 				break;
 			}
-		}
 	});
 
 	gui.addChildren({ 
