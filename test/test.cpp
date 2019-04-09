@@ -1,4 +1,5 @@
 #include "test.h"
+#include "../gui.h"
 
 void testGui(GuiElement& gui)
 {
@@ -17,9 +18,6 @@ void testGui(GuiElement& gui)
 		testWindow2,
 		testWindow3,
 	});
-
-
-
 
 	auto events = std::make_shared<EmptyGuiElement>([=](const SynthEvent& eventArg) {
 		if (std::holds_alternative<sf::Event>(eventArg)) {
@@ -73,4 +71,36 @@ void testGui(GuiElement& gui)
 		events,
 		testWindow,
 	});
+}
+
+int testMain(int argc, char** argv)
+{
+	EmptyGuiElement gui;
+	auto keyboard = KeyboardOutput();
+
+	MidiContext midiContext;
+
+	testGui(gui);
+
+	sf::RenderWindow window(sf::VideoMode(1600, 1000), "Basic synth");
+	setupGui(gui, window);
+	window.setKeyRepeatEnabled(false);
+	window.setVerticalSyncEnabled(true);
+	while (window.isOpen()) {
+		static sf::Event event;
+		static MidiEvent midiEvent;
+
+		while (midiContext.pollEvent(midiEvent)) {
+			gui.forwardEvent(midiEvent);
+		}
+		while (window.pollEvent(event)) {
+			gui.forwardEvent(event);
+		}
+
+		window.clear(sf::Color::Black);
+		window.draw(gui);
+		window.display();
+	}
+
+	return 0;
 }

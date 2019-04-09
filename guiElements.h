@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "gui/events.h"
 #include "gui/GuiElement.h"
 #include "gui/SynthKeyboard.h"
 #include "gui/TextDisplay.h"

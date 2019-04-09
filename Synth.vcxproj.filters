@@ -29,19 +29,10 @@
     <ClCompile Include="synth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="guiElements.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RtMidi.cpp">
-      <Filter>RtMidi</Filter>
-    </ClCompile>
     <ClCompile Include="gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tones.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="events.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="effects.cpp">
@@ -74,6 +65,15 @@
     <ClCompile Include="utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gui\events.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="RtMidi\RtMidi.cpp">
+      <Filter>RtMidi</Filter>
+    </ClCompile>
+    <ClCompile Include="synthMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="generators.h">
@@ -82,16 +82,10 @@
     <ClInclude Include="synth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RtMidi.h">
-      <Filter>RtMidi</Filter>
-    </ClInclude>
     <ClInclude Include="gui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tones.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="events.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="effects.h">
@@ -125,6 +119,15 @@
       <Filter>gui</Filter>
     </ClInclude>
     <ClInclude Include="guiElements.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\events.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="RtMidi\RtMidi.h">
+      <Filter>RtMidi</Filter>
+    </ClInclude>
+    <ClInclude Include="synthMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

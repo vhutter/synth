@@ -3,7 +3,7 @@
 
 #include <sfml/Graphics.hpp>
 #include "../utility.h"
-#include "../events.h"
+#include "events.h"
 
 class GuiElement : public sf::Drawable, public sf::Transformable
 {

@@ -4,5 +4,6 @@
 #include "../guiElements.h"
 
 void testGui(GuiElement& gui);
+int testMain(int argc, char** argv);
 
 #endif
