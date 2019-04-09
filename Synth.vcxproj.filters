@@ -12,9 +12,6 @@
     <Filter Include="RtMidi">
       <UniqueIdentifier>{effe7dda-01d4-4123-9624-dedbd2f522f3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests">
-      <UniqueIdentifier>{78cd687e-4c68-4196-b697-40778d30abb9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="gui">
       <UniqueIdentifier>{0c409f2c-ea1c-49e0-8af0-43dbda359ce3}</UniqueIdentifier>
     </Filter>
@@ -37,9 +34,6 @@
     </ClCompile>
     <ClCompile Include="effects.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="test\test.cpp">
-      <Filter>Tests</Filter>
     </ClCompile>
     <ClCompile Include="gui\Button.cpp">
       <Filter>gui</Filter>
@@ -90,9 +84,6 @@
     </ClInclude>
     <ClInclude Include="effects.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test\test.h">
-      <Filter>Tests</Filter>
     </ClInclude>
     <ClInclude Include="utility.h">
       <Filter>Header Files</Filter>
