@@ -71,9 +71,6 @@
     <ClCompile Include="RtMidi\RtMidi.cpp">
       <Filter>RtMidi</Filter>
     </ClCompile>
-    <ClCompile Include="synthMain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="generators.h">
@@ -126,9 +123,6 @@
     </ClInclude>
     <ClInclude Include="RtMidi\RtMidi.h">
       <Filter>RtMidi</Filter>
-    </ClInclude>
-    <ClInclude Include="synthMain.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

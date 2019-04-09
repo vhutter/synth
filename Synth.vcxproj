@@ -158,7 +158,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RtMidi\RtMidi.cpp" />
     <ClCompile Include="synth.cpp" />
-    <ClCompile Include="synthMain.cpp" />
     <ClCompile Include="test\test.cpp" />
     <ClCompile Include="tones.cpp" />
     <ClCompile Include="utility.cpp" />
@@ -178,7 +177,6 @@
     <ClInclude Include="gui\Window.h" />
     <ClInclude Include="RtMidi\RtMidi.h" />
     <ClInclude Include="synth.h" />
-    <ClInclude Include="synthMain.h" />
     <ClInclude Include="test\test.h" />
     <ClInclude Include="tones.h" />
     <ClInclude Include="utility.h" />
