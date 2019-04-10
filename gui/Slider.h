@@ -4,7 +4,8 @@
 #include <atomic>
 
 #include "GuiElement.h"
-#include "TextDisplay.h"
+
+class TextDisplay;
 
 class Slider : public GuiElement
 {
@@ -48,7 +49,7 @@ private:
 	void refreshText();
 
 
-	TextDisplay title;
+	std::unique_ptr<TextDisplay> title;
 	const double from, to;
 	const std::string name;
 	sf::RectangleShape mainRect, sliderRect;

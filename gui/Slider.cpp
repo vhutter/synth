@@ -1,4 +1,5 @@
 #include "Slider.h"
+#include "TextDisplay.h"
 
 #include <sstream>
 #include <iomanip>
@@ -7,14 +8,21 @@ void Slider::refreshText()
 {
 	std::ostringstream oss;
 	oss << std::setprecision(2) << std::fixed << value;
-	title.setText(name + "\n[" + oss.str() + "]");
+	title->setText(name + "\n[" + oss.str() + "]");
 	const auto& s = mainRect.getSize();
 	const auto& p = SynthVec2(0, 0);
-	title.moveAroundPoint({ p.x + s.x / 2.f, p.y - 20 });
+	title->moveAroundPoint({ p.x + s.x / 2.f, p.y - 20 });
 }
 
 Slider::Slider(const std::string& str, double from, double to, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::function<void()> callback)
-	:title(str, 0, 0, 0, 0, titleSize), from(from), to(to), name(str), orientation(ori), value((from + to) / 2.), onMove(callback), size(sx, sy)
+	:title(std::make_unique<TextDisplay>(str, 0, 0, 0, 0, titleSize)), 
+	from(from), 
+	to(to), 
+	name(str), 
+	orientation(ori), 
+	value((from + to) / 2.), 
+	onMove(callback), 
+	size(sx, sy)
 {
 	const auto& minDim = std::min(sx, sy) / 2;
 	sliderRectSize = SynthVec2(minDim, minDim);
@@ -97,7 +105,7 @@ void Slider::onSfmlEvent(const sf::Event& event)
 SynthRect Slider::AABB() const
 {
 	SynthRect
-		box1{ title.AABB() },
+		box1{ title->AABB() },
 		box2{ SynthVec2(getPosition()), SynthVec2(mainRect.getSize()) };
 	box1.left += getPosition().x;
 	box1.top += getPosition().y;
@@ -110,7 +118,7 @@ SynthRect Slider::AABB() const
 
 void Slider::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	target.draw(title, states);
+	target.draw(*title, states);
 	target.draw(mainRect, states);
 	target.draw(sliderRect, states);
 }

@@ -1,4 +1,6 @@
 #include "effects.h"
+#include "gui/Button.h"
+#include "gui/Slider.h"
 
 //DebugFilter::Impl::Impl(decltype(oscilloscope) oscilloscope, double maxSamp)
 //	:oscilloscope(oscilloscope),

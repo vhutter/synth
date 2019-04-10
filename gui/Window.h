@@ -2,7 +2,8 @@
 #define WINDOW_H_INCLUDED
 
 #include "GuiElement.h"
-#include "TextDisplay.h"
+
+class TextDisplay;
 
 class Window : public GuiElement
 {
@@ -24,7 +25,7 @@ private:
 	const sf::FloatRect globalMainRect() const;
 
 	SynthFloat childAlignment{ 10 }, cursorX{ 0 }, cursorY{ 0 }, headerSize{ 30 };
-	TextDisplay header;
+	std::unique_ptr<TextDisplay> header;
 	sf::RectangleShape mainRect;
 
 	sf::Vector2i lastMousePos;

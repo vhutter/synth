@@ -1,7 +1,8 @@
 #include "Window.h"
+#include "TextDisplay.h"
 
 Window::Window(const std::string& title, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
-	:mainRect(sf::Vector2f(sx, sy))
+	:mainRect(sf::Vector2f(sx, sy)), header(std::make_unique<TextDisplay>())
 {
 	setDynamic(true);
 	setPosition(px, py);
@@ -11,13 +12,13 @@ Window::Window(const std::string& title, SynthFloat px, SynthFloat py, SynthFloa
 	mainRect.setOutlineThickness(0);
 	mainRect.setOutlineColor(sf::Color::Green);
 
-	header.setTextColor(sf::Color::Black);
-	header.setText(title);
-	header.setBgColor(sf::Color::White);
-	header.setPosition(0, 0);
-	header.setFrameSize(SynthVec2(sx, headerSize));
-	header.setFixedSize(true);
-	header.centralize();
+	header->setPosition(0, 0);
+	header->setTextColor(sf::Color::Black);
+	header->setText(title);
+	header->setBgColor(sf::Color::White);
+	header->setFrameSize(SynthVec2(sx, headerSize));
+	header->setFixedSize(true);
+	header->centralize();
 }
 
 const sf::FloatRect Window::globalMainRect() const
@@ -62,7 +63,7 @@ void Window::onSfmlEvent(const sf::Event & event)
 {
 	switch (event.type) {
 	case sf::Event::MouseButtonPressed: {
-		SynthRect rect = { SynthVec2(globalTransform * header.getPosition()), SynthVec2(mainRect.getSize().x, headerSize) };
+		SynthRect rect = { SynthVec2(globalTransform * header->getPosition()), SynthVec2(mainRect.getSize().x, headerSize) };
 		lastMousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
 		if (rect.contains(event.mouseButton.x, event.mouseButton.y)) {
 			moving = true;
@@ -84,7 +85,7 @@ void Window::onSfmlEvent(const sf::Event & event)
 	}
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
-		SynthRect rect = { SynthVec2(globalTransform * header.getPosition()), SynthVec2(mainRect.getSize().x, headerSize) };
+		SynthRect rect = { SynthVec2(globalTransform * header->getPosition()), SynthVec2(mainRect.getSize().x, headerSize) };
 
 		if (rect.contains(event.mouseButton.x, event.mouseButton.y)) {
 			moving = true;
@@ -98,7 +99,7 @@ void Window::onSfmlEvent(const sf::Event & event)
 void Window::drawImpl(sf::RenderTarget & target, sf::RenderStates states) const
 {
 	target.draw(mainRect, states);
-	target.draw(header, states);
+	target.draw(*header, states);
 }
 
 sf::View Window::childrenView(const sf::RenderTarget& target, const sf::RenderStates& states) const
@@ -129,6 +130,6 @@ SynthRect Window::AABB() const
 {
 	return {
 		SynthVec2(getPosition()),
-		SynthVec2(mainRect.getSize() + sf::Vector2f(0, header.AABB().height))
+		SynthVec2(mainRect.getSize() + sf::Vector2f(0, header->AABB().height))
 	};
 }
