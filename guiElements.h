@@ -11,6 +11,7 @@
 #include "gui/Slider.h"
 #include "gui/Oscilloscope.h"
 #include "gui/Window.h"
+#include "gui/MenuOption.h"
 
 
 #endif // GUI_ELEMENTS_H_INCLUDED

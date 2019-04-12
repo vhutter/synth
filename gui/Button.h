@@ -3,7 +3,6 @@
 
 #include <atomic>
 
-#include "GuiElement.h"
 #include "TextDisplay.h"
 
 class Button : public TextDisplay

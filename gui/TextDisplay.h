@@ -23,15 +23,20 @@ public:
 	const std::string& getText() const;
 	const sf::Color& getTextColor() const;
 	const sf::Color& getBgColor() const;
+	const sf::Color& getOutlineColor() const;
+	const SynthVec2 getFrameSize() const;
+	const unsigned getTextSize() const;
 
 	void setText(const std::string& text);
 	void setTextColor(const sf::Color& color);
 	void setBgColor(const sf::Color& color);
+	void setOutlineColor(const sf::Color& color);
+	void setFrameSize(const SynthVec2& size);
+	void setTextSize(unsigned newSize);
 
 	virtual SynthRect AABB() const override;
 	void centralize();
 	void setFixedSize(bool fixed);
-	void setFrameSize(const SynthVec2& size);
 	void fitFrame(const SynthVec2& size = { 0,0 });
 
 protected:

@@ -4,6 +4,9 @@
 #include <memory>
 #include <tuple>
 #include "generators.h"
+#include "gui/Slider.h"
+#include "gui/Button.h"
+#include "gui/Oscilloscope.h"
 
 
 template <typename param_t, typename ...T>
@@ -15,9 +18,6 @@ auto mergeEffects(T&& ...args)
 	};
 }
 
-class Slider;
-class Button;
-class Oscilloscope;
 
 template<class T, class param_t>
 class EffectBase
