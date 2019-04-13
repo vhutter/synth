@@ -73,6 +73,7 @@
     </ClCompile>
     <ClCompile Include="gui\MenuOption.cpp">
       <Filter>gui</Filter>
+		</ClCompile>
     <ClCompile Include="synthMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -131,6 +132,7 @@
     </ClInclude>
     <ClInclude Include="gui\MenuOption.h">
       <Filter>gui</Filter>
+    </ClInclude>
     <ClInclude Include="synthMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
