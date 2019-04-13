@@ -1,11 +1,4 @@
-#include "guiElements.h"
-
-#include <mutex>
-
-#include "generators.h"
-#include "guiElements.h"
 #include "gui.h"
-
 
 void setupGui(GuiElement& gui, sf::RenderWindow& window)
 {

@@ -15,7 +15,7 @@ public:
 	virtual sf::View childrenView(const sf::RenderTarget& target, const sf::RenderStates& states) const { return target.getView(); }
 	void moveAroundPoint(const SynthVec2& center);
 	bool forwardEvent(const SynthEvent& event, const sf::Transform& transform = {});
-	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& child);
+	void addChildren(const std::vector<std::shared_ptr<GuiElement>>& children);
 	void removeChild(const std::shared_ptr<GuiElement>& child);
 	void onEvent(const SynthEvent& event);
 	void setVisibility(bool v);
@@ -28,7 +28,8 @@ protected:
 
 	std::vector<std::shared_ptr<GuiElement>> children;
 	sf::Transform globalTransform; // Used for event handling
-	bool visible{ true }, dynamic{ false };
+	bool visible{ true }, // visible elements are drawed and they forward events recursively
+		dynamic{ false }; // dynamic elements are focusable
 
 private:
 	using sf::Transformable::rotate;

@@ -118,6 +118,16 @@ void TextDisplay::setBgColor(const sf::Color& color)
 	frame.setFillColor(color);
 }
 
+void TextDisplay::setOutlineColor(const sf::Color & color)
+{
+	text.setOutlineColor(color);
+}
+
+void TextDisplay::setTextSize(unsigned newSize)
+{
+	text.setCharacterSize(newSize);
+}
+
 const std::string & TextDisplay::getText() const
 {
 	return content;
@@ -131,6 +141,21 @@ const sf::Color & TextDisplay::getTextColor() const
 const sf::Color& TextDisplay::getBgColor() const
 {
 	return frame.getFillColor();
+}
+
+const sf::Color & TextDisplay::getOutlineColor() const
+{
+	return text.getOutlineColor();
+}
+
+const SynthVec2 TextDisplay::getFrameSize() const
+{
+	return SynthVec2(frame.getSize());
+}
+
+const unsigned TextDisplay::getTextSize() const
+{
+	return text.getCharacterSize();
 }
 
 SynthRect TextDisplay::AABB() const

@@ -71,6 +71,8 @@
     <ClCompile Include="RtMidi\RtMidi.cpp">
       <Filter>RtMidi</Filter>
     </ClCompile>
+    <ClCompile Include="gui\MenuOption.cpp">
+      <Filter>gui</Filter>
     <ClCompile Include="synthMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -127,6 +129,8 @@
     <ClInclude Include="RtMidi\RtMidi.h">
       <Filter>RtMidi</Filter>
     </ClInclude>
+    <ClInclude Include="gui\MenuOption.h">
+      <Filter>gui</Filter>
     <ClInclude Include="synthMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -150,6 +150,7 @@
     <ClCompile Include="gui\Button.cpp" />
     <ClCompile Include="gui\events.cpp" />
     <ClCompile Include="gui\GuiElement.cpp" />
+    <ClCompile Include="gui\MenuOption.cpp" />
     <ClCompile Include="gui\Oscilloscope.cpp" />
     <ClCompile Include="gui\Slider.cpp" />
     <ClCompile Include="gui\SynthKeyboard.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="gui\Button.h" />
     <ClInclude Include="gui\events.h" />
     <ClInclude Include="gui\GuiElement.h" />
+    <ClInclude Include="gui\MenuOption.h" />
     <ClInclude Include="gui\Oscilloscope.h" />
     <ClInclude Include="gui\Slider.h" />
     <ClInclude Include="gui\SynthKeyboard.h" />

@@ -5,19 +5,33 @@ void testGui(GuiElement& gui)
 {
 	sf::Color bgcolor = sf::Color::Magenta;
 	bgcolor.a = 100;
-	std::shared_ptr testWindow = std::make_unique<Window>("OuterWindow", 50, 270, 700, 400, bgcolor);
+	std::shared_ptr testWindow = std::make_unique<Window>(700, 400, bgcolor);
 	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 0, 0, 24);
-	std::shared_ptr testWindow2 = std::make_unique<Window>("InnerWindow", 200, 100, 200, 200, sf::Color::Black);
-	std::shared_ptr testWindow3 = std::make_unique<Window>("Inner2", 300, 130, 200, 200, sf::Color::Black);
+	std::shared_ptr testWindow2 = std::make_unique<Window>(200, 200, sf::Color::Black);
+	std::shared_ptr testWindow3 = std::make_unique<Window>(200, 200, sf::Color::Black);
+
+	testWindow->setHeader(30, "OuterWindow");
+	testWindow3->setHeader(30, "Inner2");
+
+	testWindow->setPosition(50, 270);
+	testWindow2->setPosition(200, 100);
+	testWindow3->setPosition(300, 130);
+
 	windowText->setPosition(50, 50);
 	testWindow2->addChildren({
 		TextDisplay::Multiline("cat... cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat", 0, 0, 100, 24)
-	});
+		});
 	testWindow->addChildren({
 		windowText,
 		testWindow2,
 		testWindow3,
-	});
+		});
+	testWindow->setMenuBar(20);
+
+	std::shared_ptr menu1 = std::make_unique<MenuOption>("Option1", 10);
+	menu1->addChildren({TextDisplay::DefaultText("This works! :)", 50, 50, 50)});
+
+	testWindow->addMenuOption(menu1);
 
 	auto events = std::make_shared<EmptyGuiElement>([=](const SynthEvent& eventArg) {
 		if (std::holds_alternative<sf::Event>(eventArg)) {
@@ -28,7 +42,7 @@ void testGui(GuiElement& gui)
 					switch (event.key.code) {
 					case sf::Keyboard::X: {
 						// For testing
-						//testWindow->move(50,50);
+						testWindow->setSize(SynthVec2(10,10) + testWindow->getSize());
 						break;
 					}
 					case sf::Keyboard::Z: {
@@ -41,9 +55,6 @@ void testGui(GuiElement& gui)
 						break;
 					}
 					break;
-				}
-				case sf::Event::MouseWheelMoved: {
-					//windowText->move(event.mouseWheel.delta*6, event.mouseWheel.delta*6);
 				}
 				default: {
 					break;

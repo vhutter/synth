@@ -4,17 +4,15 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
-#include <chrono>
 #include <functional>
 #include <vector>
 #include <algorithm>
 #include <atomic>
 #include <mutex>
 #include <optional>
-#include <type_traits>
 #include <SFML/System.hpp>
 
-#include "guiElements.h"
+#include "gui/SynthKeyboard.h"
 
 namespace waves
 {

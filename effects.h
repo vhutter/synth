@@ -3,8 +3,10 @@
 
 #include <memory>
 #include <tuple>
-#include "guiElements.h"
 #include "generators.h"
+#include "gui/Slider.h"
+#include "gui/Button.h"
+#include "gui/Oscilloscope.h"
 
 
 template <typename param_t, typename ...T>

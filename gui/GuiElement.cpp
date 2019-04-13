@@ -22,6 +22,7 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 	}
 	globalTransform = getTransform() * transform;
 	if (needsEvent(event)) {
+		onEvent(event);
 		if (forwardsEvent(event)) {
 			auto clickedChild = children.end();
 			for (auto child = children.rbegin(); child != children.rend(); ++child) {
@@ -38,7 +39,6 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 				children.push_back(pElem);
 			}
 		}
-		onEvent(event);
 	}
 	return ret;
 }
