@@ -1,8 +1,8 @@
 #define _USE_MATH_DEFINES
 
-#include "synthMain.h"
+#include "test/test.h"
 
 int main(int argc, char** argv)
 {
-	synthMain(argc, argv);
+	testMain(argc, argv);
 }
