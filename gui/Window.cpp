@@ -139,11 +139,13 @@ void Window::addChildrenAutoPos(const std::vector<std::shared_ptr<GuiElement>>& 
 		child->setPosition(cursorX, cursorY);
 		const auto& aabb = child->AABB();
 		cursorX += aabb.width + childAlignment;
-		rowHeight = std::max(rowHeight, unsigned(aabb.height));
 		if (cursorX > getSize().x) {
+			cursorX = 0;
 			cursorY += rowHeight + childAlignment;
 			rowHeight = 0;
+			child->setPosition(cursorX, cursorY);
 		}
+		rowHeight = std::max(rowHeight, unsigned(aabb.height));
 	}
 }
 
@@ -204,6 +206,12 @@ void Window::setMenuBar(unsigned size)
 void Window::setChildAlignment(unsigned a)
 {
 	childAlignment = a;
+}
+
+void Window::setCursor(unsigned x, unsigned y)
+{
+	cursorX = x;
+	cursorY = y;
 }
 
 SynthRect Window::AABB() const

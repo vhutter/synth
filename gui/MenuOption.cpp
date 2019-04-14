@@ -15,7 +15,6 @@ void MenuOption::addChildren(const std::vector<std::shared_ptr<GuiElement>>& chi
 
 void MenuOption::dropdown()
 {
-	std::cout << "Macska\n";
 	active = !active;
 	for (auto child : children) {
 		child->setVisibility(active);

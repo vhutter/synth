@@ -8,30 +8,36 @@ void testGui(GuiElement& gui)
 	std::shared_ptr testWindow = std::make_unique<Window>(700, 400, bgcolor);
 	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 0, 0, 24);
 	std::shared_ptr testWindow2 = std::make_unique<Window>(200, 200, sf::Color::Black);
-	std::shared_ptr testWindow3 = std::make_unique<Window>(200, 200, sf::Color::Black);
+	std::shared_ptr testWindow3 = std::make_unique<Window>(600, 200, sf::Color::Black);
 
 	testWindow->setHeader(30, "OuterWindow");
+	testWindow2->setHeader(30, "Inner1");
 	testWindow3->setHeader(30, "Inner2");
 
 	testWindow->setPosition(50, 270);
-	testWindow2->setPosition(200, 100);
-	testWindow3->setPosition(300, 130);
+	//testWindow2->setPosition(200, 100);
+	//testWindow3->setPosition(300, 130);
 
 	windowText->setPosition(50, 50);
 	testWindow2->addChildren({
 		TextDisplay::Multiline("cat... cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat", 0, 0, 100, 24)
 		});
-	testWindow->addChildren({
+	testWindow->setCursor(0, 100);
+	testWindow->addChildrenAutoPos({
 		windowText,
 		testWindow2,
 		testWindow3,
 		});
-	testWindow->setMenuBar(20);
+	testWindow->setMenuBar(30);
 
-	std::shared_ptr menu1 = std::make_unique<MenuOption>("Option1", 10);
+	std::shared_ptr menu1 = std::make_unique<MenuOption>(" Option1 ", 15);
 	menu1->addChildren({TextDisplay::DefaultText("This works! :)", 50, 50, 50)});
 
+	std::shared_ptr menu2 = std::make_unique<MenuOption>(" Option2 ", 15);
+	menu2->addChildren({TextDisplay::DefaultText("This works! :)", 50, 80, 50)});
+
 	testWindow->addMenuOption(menu1);
+	testWindow->addMenuOption(menu2);
 
 	auto events = std::make_shared<EmptyGuiElement>([=](const SynthEvent& eventArg) {
 		if (std::holds_alternative<sf::Event>(eventArg)) {

@@ -22,6 +22,7 @@ private:
 	virtual void onSfmlEvent(const sf::Event& event) override;
 
 	std::function<void()> clickCallback;
+	bool pressed{ false };
 };
 
 #endif //BUTTON_H_INCLUDED
