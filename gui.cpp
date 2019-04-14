@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "gui/GuiElement.h"
 
 void setupGui(GuiElement& gui, sf::RenderWindow& window)
 {

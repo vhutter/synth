@@ -1,5 +1,6 @@
 #include "test.h"
 #include "../gui.h"
+#include "../guiElements.h"
 
 void testGui(GuiElement& gui)
 {
