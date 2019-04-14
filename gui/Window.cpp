@@ -57,7 +57,7 @@ void Window::onSfmlEvent(const sf::Event & event)
 
 		auto headerRect = SynthRect(
 			SynthVec2(globalTransform * header->getPosition()),
-			SynthVec2(mainRect.getSize().x, header->getFrameSize().y)
+			SynthVec2(mainRect.getSize().x, header->getSize().y)
 		);
 		lastMousePos = mousePos;
 		if (headerRect.contains(SynthVec2(mousePos))) {
@@ -87,7 +87,7 @@ void Window::onSfmlEvent(const sf::Event & event)
 	}
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
-		SynthRect rect = { SynthVec2(globalTransform * header->getPosition()), SynthVec2(mainRect.getSize().x, header->getFrameSize().y) };
+		SynthRect rect = { SynthVec2(globalTransform * header->getPosition()), SynthVec2(mainRect.getSize().x, header->getSize().y) };
 
 		if (rect.contains(event.mouseButton.x, event.mouseButton.y)) {
 			moving = true;
@@ -119,7 +119,7 @@ void Window::setSize(const SynthVec2 & size)
 	mainRect.setSize(sf::Vector2f(size));
 	if (header) {
 		header->setFixedSize(false);
-		header->setFrameSize(SynthVec2(size.x, header->getFrameSize().y));
+		header->setSize(SynthVec2(size.x, header->getSize().y));
 		header->setFixedSize(true);
 	}
 	if (menuBar) {
@@ -152,7 +152,7 @@ void Window::addChildrenAutoPos(const std::vector<std::shared_ptr<GuiElement>>& 
 void Window::addMenuOption(std::shared_ptr<MenuOption> option)
 {
 	if (!menuBar) return;
-	option->setFrameSize({ option->getFrameSize().x, menuBar->getSize().y });
+	option->setSize({ option->getSize().x, menuBar->getSize().y });
 	option->centralize();
 	menuBar->addChildrenAutoPos({ option });
 }
@@ -177,7 +177,7 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 	header->setBgColor(sf::Color::White);
 
 	header->setFixedSize(false);
-	header->setFrameSize(SynthVec2( mainRect.getSize().x, size ));
+	header->setSize(SynthVec2( mainRect.getSize().x, size ));
 	header->setFixedSize(true);
 	header->setText(title);
 	if (textSize)
@@ -200,7 +200,7 @@ void Window::setMenuBar(unsigned size)
 	}
 	mainRect.move(0, size);
 	menuBar = std::make_unique<MenuBar>(mainRect.getSize().x, size, sf::Color(128, 128, 128, 255));
-	menuBar->setPosition(0, header ? header->getFrameSize().y : 0);
+	menuBar->setPosition(0, header ? header->getSize().y : 0);
 }
 
 void Window::setChildAlignment(unsigned a)

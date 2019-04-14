@@ -14,16 +14,16 @@ const SynthVec2 TextDisplay::topLeftAlignment() const
 
 void TextDisplay::centralize()
 {
-	const auto& textBounds = text.getGlobalBounds();
-	const auto& textDim = sf::Vector2f(textBounds.width, textBounds.height);
-	const auto& topLeftPos = sf::Vector2f(textBounds.left, textBounds.top);
+	const auto& textBounds = SynthRect(text.getGlobalBounds());
+	const auto& textDim = SynthVec2(textBounds.width, textBounds.height);
+	const auto& topLeftPos = SynthVec2(textBounds.left, textBounds.top);
 
-	auto dif = (frame.getSize() - textDim) / 2.f - (topLeftPos - text.getPosition());
+	auto dif = (getSize() - textDim) / SynthFloat(2) - (topLeftPos - SynthVec2(text.getPosition()));
 
 	dif.x = std::round(dif.x);
 	dif.y = std::round(dif.y);
 
-	text.setPosition(dif);
+	text.setPosition(sf::Vector2f(dif));
 }
 
 void TextDisplay::setFixedSize(bool fixed)
@@ -31,20 +31,14 @@ void TextDisplay::setFixedSize(bool fixed)
 	fixedFrame = fixed;
 }
 
-void TextDisplay::setFrameSize(const SynthVec2 & size)
-{
-	if (fixedFrame) return;
-	frame.setSize(sf::Vector2f(size));
-}
-
 void TextDisplay::fitFrame(const SynthVec2& size)
 {
 	if (fixedFrame) return;
 	const auto& boundingBox = SynthRect(text.getGlobalBounds());
-	frame.setSize(sf::Vector2f(
+	setSize({
 		std::max(size.x, boundingBox.width),
 		std::max(size.y, boundingBox.height)
-	));
+	});
 }
 
 TextDisplay::TextDisplay(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int size)
@@ -56,9 +50,9 @@ TextDisplay::TextDisplay(const std::string& initialText, SynthFloat px, SynthFlo
 	text.setPosition(std::round(px), std::round(py));
 	text.setFillColor(sf::Color::Green);
 
-	frame.setOutlineThickness(0);
-	frame.setFillColor(sf::Color::Transparent);
-	frame.setPosition(0, 0);
+	setOutlineThickness(0);
+	setBgColor(sf::Color::Transparent);
+	setPosition(0, 0);
 
 	fitFrame({ sx, sy });
 
@@ -113,16 +107,6 @@ std::unique_ptr<TextDisplay> TextDisplay::Multiline(
 	return TextDisplay::DefaultText(result, px, py, charSize);
 }
 
-void TextDisplay::setBgColor(const sf::Color& color)
-{
-	frame.setFillColor(color);
-}
-
-void TextDisplay::setOutlineColor(const sf::Color & color)
-{
-	text.setOutlineColor(color);
-}
-
 void TextDisplay::setTextSize(unsigned newSize)
 {
 	text.setCharacterSize(newSize);
@@ -138,34 +122,14 @@ const sf::Color & TextDisplay::getTextColor() const
 	return text.getFillColor();
 }
 
-const sf::Color& TextDisplay::getBgColor() const
-{
-	return frame.getFillColor();
-}
-
-const sf::Color & TextDisplay::getOutlineColor() const
-{
-	return text.getOutlineColor();
-}
-
-const SynthVec2 TextDisplay::getFrameSize() const
-{
-	return SynthVec2(frame.getSize());
-}
-
 const unsigned TextDisplay::getTextSize() const
 {
 	return text.getCharacterSize();
 }
 
-SynthRect TextDisplay::AABB() const
-{
-	return { SynthVec2(getPosition()), SynthVec2(frame.getSize()) };
-}
-
 void TextDisplay::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	target.draw(frame, states);
+	Frame::drawImpl(target, states);
 	target.draw(text, states);
 }
 

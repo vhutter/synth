@@ -31,6 +31,7 @@ public:
 	virtual bool forwardsEvent(const SynthEvent& event) const override;
 
 private:
+
 	unsigned defaultTextSize(unsigned frameSize);
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
 	virtual void onSfmlEvent(const sf::Event& event) override;
