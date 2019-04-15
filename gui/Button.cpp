@@ -8,6 +8,16 @@ Button::Button(const std::string& initialText, SynthFloat px, SynthFloat py, Syn
 	frame.setOutlineThickness(-1);
 }
 
+void Button::setNormalColor(const sf::Color & col)
+{
+	normalCol = col;
+}
+
+void Button::setPressedColor(const sf::Color & col)
+{
+	pressedCol = col;
+}
+
 bool Button::needsEvent(const SynthEvent & event) const
 {
 	if (std::holds_alternative<MidiEvent>(event)) return false;
@@ -25,7 +35,7 @@ void Button::onSfmlEvent(const sf::Event& event)
 		SynthRect rect = { SynthVec2(globalTransform * frame.getPosition()), SynthVec2(frame.getSize()) };
 		if (rect.contains(event.mouseButton.x, event.mouseButton.y)) {
 			pressed = !pressed;
-			frame.setFillColor(pressed ? sf::Color::Black : sf::Color(0xaaaaaaaa));
+			frame.setFillColor(pressed ? pressedCol : normalCol);
 			clickCallback();
 		}
 	}

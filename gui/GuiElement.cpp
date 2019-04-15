@@ -12,7 +12,7 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 		return false;
 	bool ret = false;
 	if (auto e = std::get_if<sf::Event>(&event)) {
-		if (e->type == sf::Event::MouseButtonPressed && !dynamic_cast<EmptyGuiElement*>(this)) {
+		if (e->type == sf::Event::MouseButtonPressed && dynamic) {
 			const auto& aabb = transform.transformRect(sf::FloatRect(AABB()));
 			if (!aabb.contains(sf::Vector2f(e->mouseButton.x, e->mouseButton.y))) {
 				return false;

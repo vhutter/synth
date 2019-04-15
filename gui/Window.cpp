@@ -4,47 +4,20 @@
 #include <limits>
 
 Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
-	:mainRect(sf::Vector2f(sx, sy))
+	:content(std::make_shared<Frame>(sx, sy)),
+	headerPart(std::make_shared<Frame>()),
+	header(std::make_shared<TextDisplay>()),
+	menuBar(std::make_shared<Frame>())
 {
 	setPosition(0, 0);
-	mainRect.setFillColor(fillColor);
-	mainRect.setOutlineThickness(0);
-}
 
-const sf::FloatRect Window::globalMainRect() const
-{
-	return globalTransform.transformRect(sf::FloatRect(
-		mainRect.getPosition(),
-		mainRect.getSize()
-	));
-}
+	content->setSize({ sx, sy });
+	content->setBgColor(fillColor);
+	content->setOutlineThickness(0);
+	content->setCropping(true);
 
-bool Window::needsEvent(const SynthEvent & event) const
-{
-	if (auto pEvent = std::get_if<sf::Event>(&event)) {
-		if (pEvent->type == sf::Event::MouseMoved) {
-			const auto& rect = globalMainRect();
-			if (!rect.contains(sf::Vector2f(pEvent->mouseMove.x, pEvent->mouseMove.y)) &&
-				rect.contains(sf::Vector2f(lastMousePos))) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-bool Window::forwardsEvent(const SynthEvent& event) const
-{
-	if (auto pEvent = std::get_if<sf::Event>(&event)) {
-		if (pEvent->type != sf::Event::MouseButtonPressed)
-			return true;
-		else if (globalMainRect().contains(sf::Vector2f(pEvent->mouseButton.x, pEvent->mouseButton.y)))
-			return true;
-		else
-			return false;
-	}
-	else 
-		return true;
+	headerPart->addChildren({ menuBar, header });
+	addChildren({ content, headerPart });
 }
 
 void Window::onSfmlEvent(const sf::Event & event)
@@ -57,18 +30,11 @@ void Window::onSfmlEvent(const sf::Event & event)
 
 		auto headerRect = SynthRect(
 			SynthVec2(globalTransform * header->getPosition()),
-			SynthVec2(mainRect.getSize().x, header->getSize().y)
+			SynthVec2(content->getSize().x, header->getSize().y)
 		);
 		lastMousePos = mousePos;
 		if (headerRect.contains(SynthVec2(mousePos))) {
 			moving = true;
-		}
-
-		if (menuBar) {
-			auto menuRect = globalTransform.transformRect(sf::FloatRect(menuBar->AABB()));
-			if (menuRect.contains(sf::Vector2f(mousePos))) {
-				menuBar->forwardEvent(event, globalTransform);
-			}
 		}
 		break;
 	}
@@ -87,7 +53,7 @@ void Window::onSfmlEvent(const sf::Event & event)
 	}
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
-		SynthRect rect = { SynthVec2(globalTransform * header->getPosition()), SynthVec2(mainRect.getSize().x, header->getSize().y) };
+		SynthRect rect = { SynthVec2(globalTransform * header->getPosition()), SynthVec2(content->getSize().x, header->getSize().y) };
 
 		if (rect.contains(event.mouseButton.x, event.mouseButton.y)) {
 			moving = true;
@@ -100,23 +66,11 @@ void Window::onSfmlEvent(const sf::Event & event)
 
 void Window::drawImpl(sf::RenderTarget & target, sf::RenderStates states) const
 {
-	target.draw(mainRect, states);
-	if(menuBar) target.draw(*menuBar, states);
-	if(header) target.draw(*header, states);
-}
-
-sf::View Window::childrenView(const sf::RenderTarget& target, const sf::RenderStates& states) const
-{
-	return getCroppedView(
-		target.getView(),
-		SynthVec2(states.transform.transformPoint(mainRect.getPosition())),
-		SynthVec2(mainRect.getSize())
-	);
 }
 
 void Window::setSize(const SynthVec2 & size)
 {
-	mainRect.setSize(sf::Vector2f(size));
+	content->setSize(size);
 	if (header) {
 		header->setFixedSize(false);
 		header->setSize(SynthVec2(size.x, header->getSize().y));
@@ -129,24 +83,7 @@ void Window::setSize(const SynthVec2 & size)
 
 SynthVec2 Window::getSize() const
 {
-	return SynthVec2(mainRect.getSize());
-}
-
-void Window::addChildrenAutoPos(const std::vector<std::shared_ptr<GuiElement>>& children)
-{
-	addChildren(children);
-	for (auto child : children) {
-		child->setPosition(cursorX, cursorY);
-		const auto& aabb = child->AABB();
-		cursorX += aabb.width + childAlignment;
-		if (cursorX > getSize().x) {
-			cursorX = 0;
-			cursorY += rowHeight + childAlignment;
-			rowHeight = 0;
-			child->setPosition(cursorX, cursorY);
-		}
-		rowHeight = std::max(rowHeight, unsigned(aabb.height));
-	}
+	return SynthVec2(content->getSize());
 }
 
 void Window::addMenuOption(std::shared_ptr<MenuOption> option)
@@ -155,6 +92,14 @@ void Window::addMenuOption(std::shared_ptr<MenuOption> option)
 	option->setSize({ option->getSize().x, menuBar->getSize().y });
 	option->centralize();
 	menuBar->addChildrenAutoPos({ option });
+}
+
+void Window::fixLayout()
+{
+	header->setPosition(0, 0);
+	menuBar->setPosition(0, header->getSize().y);
+	headerPart->fitToChildren();
+	content->setPosition(0, headerPart->getSize().y);
 }
 
 unsigned Window::defaultTextSize(unsigned frameSize)
@@ -167,17 +112,14 @@ unsigned Window::defaultTextSize(unsigned frameSize)
 
 void Window::setHeader(unsigned size, const std::string & title, unsigned textSize)
 {
-	if (!header) header = std::make_unique<TextDisplay>();
-
 	// The window will be movable
 	setDynamic(true);
 
-	header->setPosition(0, 0);
 	header->setTextColor(sf::Color::Black);
 	header->setBgColor(sf::Color::White);
 
 	header->setFixedSize(false);
-	header->setSize(SynthVec2( mainRect.getSize().x, size ));
+	header->setSize(SynthVec2( content->getSize().x, size ));
 	header->setFixedSize(true);
 	header->setText(title);
 	if (textSize)
@@ -186,43 +128,26 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 		header->setTextSize(defaultTextSize(size));
 	header->centralize();
 
-	mainRect.setPosition(sf::Vector2f(0, size));
-	if (menuBar) {
-		menuBar->setPosition(sf::Vector2f(0, size));
-		mainRect.move(sf::Vector2f(0, menuBar->getSize().y));
-	}
+	fixLayout();
 }
 
 void Window::setMenuBar(unsigned size)
 {
-	if (!size) {
-		menuBar.reset(nullptr);
-	}
-	mainRect.move(0, size);
-	menuBar = std::make_unique<MenuBar>(mainRect.getSize().x, size, sf::Color(128, 128, 128, 255));
+	menuBar->setSize(SynthVec2(content->getSize().x, size));
 	menuBar->setPosition(0, header ? header->getSize().y : 0);
+
+	fixLayout();
 }
 
-void Window::setChildAlignment(unsigned a)
+const std::shared_ptr<Frame>& Window::getContentFrame() const
 {
-	childAlignment = a;
-}
-
-void Window::setCursor(unsigned x, unsigned y)
-{
-	cursorX = x;
-	cursorY = y;
+	return content;
 }
 
 SynthRect Window::AABB() const
 {
 	return {
 		SynthVec2(getPosition()),
-		SynthVec2(mainRect.getPosition() - (header ? header->getPosition() : sf::Vector2f(0,0)) + mainRect.getSize())
+		SynthVec2(content->getPosition() - (header ? header->getPosition() : sf::Vector2f(0,0)) + sf::Vector2f(content->getSize()))
 	};
-}
-
-sf::View MenuBar::childrenView(const sf::RenderTarget & target, const sf::RenderStates & states) const
-{
-	return GuiElement::childrenView(target, states);
 }
