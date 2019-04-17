@@ -44,10 +44,11 @@ void TextDisplay::fitFrame(const SynthVec2& size)
 TextDisplay::TextDisplay(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int size)
 	: text()
 {
+	setFocusable(false);
+
 	text.setFont(font);
 	text.setCharacterSize(size);
 	text.setString(initialText);
-	text.setPosition(std::round(px), std::round(py));
 	text.setFillColor(sf::Color::Green);
 
 	setOutlineThickness(0);
@@ -57,7 +58,7 @@ TextDisplay::TextDisplay(const std::string& initialText, SynthFloat px, SynthFlo
 	fitFrame({ sx, sy });
 
 	const auto& boundingBox = text.getGlobalBounds();
-	setPosition(boundingBox.left, boundingBox.top);
+	setPosition(px, py);
 
 	text.setPosition(sf::Vector2f(-topLeftAlignment()));
 }
