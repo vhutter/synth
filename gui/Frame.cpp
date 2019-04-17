@@ -10,6 +10,14 @@ Frame::Frame(const SynthVec2 & size)
 {
 }
 
+void Frame::setEventCallback(const std::variant<sfCallback_t, midiCallback_t>& cb)
+{
+	if (std::holds_alternative<sfCallback_t>(cb))
+		sfCallback = std::get<sfCallback_t>(cb);
+	else
+		midiCallback = std::get<midiCallback_t>(cb);
+}
+
 void Frame::fitToChildren()
 {
 	float x1 = getPosition().x;

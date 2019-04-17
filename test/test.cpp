@@ -28,9 +28,11 @@ void testGui(GuiElement& gui)
 
 	std::shared_ptr menu1 = std::make_unique<MenuOption>(" Option1 ", 15);
 	auto button1 = std::shared_ptr(Button::DefaultButton("This works! :)", 0, 30, []() {std::cout << "button1 pressed\n"; }));
-	button1->setBgColor(sf::Color::Magenta);
+	button1->setNormalColor(sf::Color::Magenta);
 	button1->setTextColor(sf::Color::Black);
 	menu1->addChildren({ button1 });
+
+	//inner2->getContentFrame()->addChildrenAutoPos({ button1 });
 
 	std::shared_ptr menu2 = std::make_unique<MenuOption>(" Option2 ", 15);
 	menu2->addChildren({TextDisplay::DefaultText("This works! :)", 50, 80, 50)});

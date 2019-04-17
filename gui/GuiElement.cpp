@@ -3,7 +3,9 @@
 EmptyGuiElement::EmptyGuiElement(const sfmlCallback_t& sfml, const midiCallback_t& midi)
 	:sfmlCallback(sfml),
 	midiCallback(midi)
-{}
+{
+	setFocusable(false);
+}
 
 // The return value indicates if the mouse click event was used
 bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& transform)
@@ -12,12 +14,11 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 		return false;
 	bool ret = false;
 	if (auto e = std::get_if<sf::Event>(&event)) {
-		if (e->type == sf::Event::MouseButtonPressed && dynamic) {
+		if (e->type == sf::Event::MouseButtonPressed && focusable) {
 			const auto& aabb = transform.transformRect(sf::FloatRect(AABB()));
-			if (!aabb.contains(sf::Vector2f(e->mouseButton.x, e->mouseButton.y))) {
-				return false;
+			if (aabb.contains(sf::Vector2f(e->mouseButton.x, e->mouseButton.y))) {
+				ret = true;
 			}
-			else ret = true;
 		}
 	}
 	globalTransform = getTransform() * transform;
@@ -27,12 +28,13 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 			for (auto child = children.rbegin(); child != children.rend(); ++child) {
 				if ((*child)->forwardEvent(event, globalTransform)) {
 					auto clickedChild = std::next(child).base();
-					if ((*child)->dynamic) {
+					if ((*child)->focusable) {
 						// set the element in focus
 						auto pElem = *child;
 						children.erase(clickedChild);
 						children.push_back(pElem);
 					}
+					ret = true;
 					break;
 				}
 			}
@@ -69,9 +71,9 @@ void GuiElement::setVisibility(bool v)
 	visible = v;
 }
 
-void GuiElement::setDynamic(bool d)
+void GuiElement::setFocusable(bool d)
 {
-	dynamic = d;
+	focusable = d;
 }
 
 void GuiElement::moveAroundPoint(const SynthVec2 & center)

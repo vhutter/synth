@@ -38,8 +38,9 @@ private:
 	std::shared_ptr<Frame> headerPart;
 	std::shared_ptr<TextDisplay> header;
 	std::shared_ptr<Frame> menuBar;
+	std::shared_ptr<Button> exitButton;
 
-	sf::Vector2i lastMousePos;
+	sf::Vector2f lastMousePos;
 	bool moving{ false };
 };
 

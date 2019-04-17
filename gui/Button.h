@@ -8,7 +8,7 @@
 class Button : public TextDisplay
 {
 public:
-	Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
+	Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick = {});
 
 	static std::unique_ptr<Button> DefaultButton(const std::string& s, SynthFloat px, SynthFloat py, std::function<void()> onClick) {
 		return std::make_unique<Button>(s, px, py, 100, 30, 16, onClick);
@@ -23,7 +23,8 @@ public:
 	virtual bool needsEvent(const SynthEvent& event) const override;
 
 private:
-	virtual void onSfmlEvent(const sf::Event& event) override;
+	using TextDisplay::setBgColor;
+	void refreshCol();
 
 	std::function<void()> clickCallback;
 	bool pressed{ false };

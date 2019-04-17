@@ -7,7 +7,10 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 	:content(std::make_shared<Frame>(sx, sy)),
 	headerPart(std::make_shared<Frame>()),
 	header(std::make_shared<TextDisplay>()),
-	menuBar(std::make_shared<Frame>())
+	menuBar(std::make_shared<Frame>()),
+	exitButton(std::make_shared<Button>("X", 0, 0, 0, 0, 0, [this]() {
+		this->setVisibility(false);
+	}))
 {
 	setPosition(0, 0);
 
@@ -18,23 +21,40 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 
 	headerPart->addChildren({ menuBar, header });
 	addChildren({ content, headerPart });
+	header->addChildren({ exitButton });
+	header->setOutlineColor(sf::Color::Black);
+	header->setOutlineThickness(-1);
+
+	content->setEventCallback([this](const sf::Event& event) {
+		if (event.type == sf::Event::MouseButtonPressed) {
+			for (auto child : getChildren(menuBar)) {
+				if (auto menuOpt = dynamic_cast<MenuOption*>(child.get())) {
+					if (menuOpt->isActive()) {
+						menuOpt->toggle();
+					}
+				}
+			}
+		}
+	});
+	content->setFocusable(false);
 }
 
 void Window::onSfmlEvent(const sf::Event & event)
 {
-	if (!dynamic) return;
+	if (!focusable) return;
 
 	switch (event.type) {
 	case sf::Event::MouseButtonPressed: {
-		const auto mousePos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+		const auto mousePos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
 
-		auto headerRect = SynthRect(
-			SynthVec2(globalTransform * header->getPosition()),
-			SynthVec2(content->getSize().x, header->getSize().y)
+		auto headerRect = sf::FloatRect(
+			globalTransform * header->getPosition(),
+			sf::Vector2f(header->getSize())
 		);
 		lastMousePos = mousePos;
-		if (headerRect.contains(SynthVec2(mousePos))) {
+		if (headerRect.contains(mousePos)) {
 			moving = true;
+			break;
 		}
 		break;
 	}
@@ -44,7 +64,7 @@ void Window::onSfmlEvent(const sf::Event & event)
 	}
 	case sf::Event::MouseMoved: {
 		if (moving) {
-			const auto& current = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+			const auto& current = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
 			const auto& dif = sf::Vector2f(current - lastMousePos);
 			move(dif);
 			lastMousePos = current;
@@ -113,7 +133,7 @@ unsigned Window::defaultTextSize(unsigned frameSize)
 void Window::setHeader(unsigned size, const std::string & title, unsigned textSize)
 {
 	// The window will be movable
-	setDynamic(true);
+	setFocusable(true);
 
 	header->setTextColor(sf::Color::Black);
 	header->setBgColor(sf::Color::White);
@@ -122,11 +142,15 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 	header->setSize(SynthVec2( content->getSize().x, size ));
 	header->setFixedSize(true);
 	header->setText(title);
-	if (textSize)
-		header->setTextSize(textSize);
-	else
-		header->setTextSize(defaultTextSize(size));
+	if (!textSize)
+		textSize = defaultTextSize(size);
+	header->setTextSize(textSize);
 	header->centralize();
+
+	exitButton->setTextSize(textSize);
+	exitButton->setSize(SynthVec2( size, size ));
+	exitButton->centralize();
+	exitButton->setPosition(header->getSize().x - size, 0);
 
 	fixLayout();
 }
