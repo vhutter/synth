@@ -1,7 +1,9 @@
 #ifndef GUI_H_INCLUDED
 #define GUI_H_INCLUDED
 
-#include "guiElements.h"
+#include <SFML/Graphics.hpp>
+
+class GuiElement;
 
 void setupGui(GuiElement& gui, sf::RenderWindow& window);
 

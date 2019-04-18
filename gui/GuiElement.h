@@ -19,7 +19,7 @@ public:
 	void removeChild(const std::shared_ptr<GuiElement>& child);
 	void onEvent(const SynthEvent& event);
 	void setVisibility(bool v);
-	void setDynamic(bool d);
+	void setFocusable(bool d);
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const = 0;
@@ -29,7 +29,12 @@ protected:
 	std::vector<std::shared_ptr<GuiElement>> children;
 	sf::Transform globalTransform; // Used for event handling
 	bool visible{ true }, // visible elements are drawed and they forward events recursively
-		dynamic{ false }; // dynamic elements are focusable
+		focusable{ true };
+
+	static decltype(children)& getChildren(const std::shared_ptr<GuiElement>& element)
+	{
+		return element->children;
+	}
 
 private:
 	using sf::Transformable::rotate;
