@@ -12,10 +12,13 @@ public:
 
 	SynthKey(Type t, SynthFloat px = 0, SynthFloat py = 0, const SynthVec2& size = SynthVec2(0, 0));
 	SynthKey(const SynthKey& other) : sf::RectangleShape(other), type(other.type), pressed(other.pressed.load()) {}
+	void setPressed(bool p);
 
 	static const SynthVec2 whiteSizeDefault, blackSizeDefault;
 
 	const Type type;
+
+private:
 	std::atomic<bool> pressed{ false };
 
 };

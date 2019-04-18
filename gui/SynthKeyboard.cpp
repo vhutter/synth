@@ -24,6 +24,20 @@ SynthKey::SynthKey(Type t, SynthFloat px, SynthFloat py, const SynthVec2& size)
 	setOutlineThickness(4.);
 }
 
+void SynthKey::setPressed(bool p)
+{
+	pressed = p;
+	if (type == Type::White) {
+		if (pressed) setFillColor(sf::Color(0xC0C0C0FF));
+		else setFillColor(sf::Color::White);
+	}
+	else {
+		if (pressed) setFillColor(sf::Color(0x404040FF));
+		else setFillColor(sf::Color::Black);
+	}
+}
+
+
 SynthKeyboard::SynthKeyboard(SynthFloat px, SynthFloat py, callback_t eventCallback)
 	: onKey(eventCallback)
 {
@@ -157,7 +171,7 @@ void SynthKeyboard::drawImpl(sf::RenderTarget& target, sf::RenderStates states) 
 SynthRect SynthKeyboard::AABB() const
 {
 	SynthVec2 size;
-	size.x = keys.back().getPosition().x - keys.front().getPosition().x + keys.back().getSize().x;
+	size.x = SynthFloat(keys.back().getPosition().x) - keys.front().getPosition().x + keys.back().getSize().x;
 	size.y = std::max(whiteSize.y, blackSize.y);
 	return SynthRect{ SynthVec2(getPosition()), size };
 }
@@ -192,10 +206,10 @@ KeyboardOutput::KeyboardOutput()
 {
 	kb = std::make_unique<SynthKeyboard>(50, 700, [this](unsigned keyIdx, SynthKey::State keyState) {
 		if (keyState == SynthKey::State::Pressed) {
-			(*kb)[keyIdx].pressed = true;
+			(*kb)[keyIdx].setPressed(true);
 		}
 		else {
-			(*kb)[keyIdx].pressed = false;
+			(*kb)[keyIdx].setPressed(false);
 		}
 		for (auto callback : callbacks) {
 			callback(keyIdx, keyState);
