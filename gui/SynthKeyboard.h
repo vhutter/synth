@@ -29,9 +29,12 @@ public:
 	using callback_t = std::function<void(unsigned, SynthKey::State)>;
 
 	SynthKeyboard(SynthFloat px, SynthFloat py, callback_t eventCallback);
+	void setSize(SynthKey::Type type, const SynthVec2& size);
+	void setOctaveCount(unsigned octaveCount);
 	virtual SynthRect AABB() const override;
 	virtual bool needsEvent(const SynthEvent& event) const override;
 	SynthKey& operator[] (std::size_t i) { return keys[i]; }
+
 
 private:
 	virtual void onMidiEvent(const MidiEvent& event) override;
@@ -41,7 +44,8 @@ private:
 
 	std::vector<SynthKey> keys;
 	callback_t onKey;
-	const SynthVec2 blackSize{ SynthKey::blackSizeDefault }, whiteSize{ SynthKey::whiteSizeDefault };
+	SynthVec2 blackSize{ SynthKey::blackSizeDefault }, whiteSize{ SynthKey::whiteSizeDefault };
+	unsigned short octaveCount{ 2 };
 };
 
 class KeyboardOutput
