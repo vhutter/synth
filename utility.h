@@ -3,24 +3,6 @@
 
 #include <SFML/Graphics.hpp>
 
-
-template<typename T>
-struct Property
-{
-public:
-	Property() = default;
-	Property(const T& val) : obj(val) {}
-
-	const T& get() { return obj; }
-	operator const T& () const { return obj; }
-	void set(const T& val) { obj = val; }
-	T& operator= (const T& val) { obj = val; return obj; }
-
-
-private:
-	T obj;
-};
-
 using SynthFloat = double;
 using SynthVec2 = sf::Vector2<SynthFloat>;
 using SynthRect = sf::Rect<SynthFloat>;

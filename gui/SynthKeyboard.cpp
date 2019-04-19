@@ -21,23 +21,72 @@ SynthKey::SynthKey(Type t, SynthFloat px, SynthFloat py, const SynthVec2& size)
 	}
 
 	setOutlineColor(sf::Color(0x4C0099FF));
-	setOutlineThickness(4.);
+	setOutlineThickness(1);
+}
+
+void SynthKey::setPressed(bool p)
+{
+	pressed = p;
+	if (type == Type::White) {
+		if (pressed) setFillColor(sf::Color(0xC0C0C0FF));
+		else setFillColor(sf::Color::White);
+	}
+	else {
+		if (pressed) setFillColor(sf::Color(0x404040FF));
+		else setFillColor(sf::Color::Black);
+	}
+}
+
+void SynthKeyboard::repositionKeys()
+{
+	unsigned whitesCount = 0;
+	const auto& w = SynthKey::White;
+	const auto& b = SynthKey::Black;
+	unsigned n = octaveCount * 12 + 1;
+	keys.clear();
+	keys.reserve(n);
+	std::basic_string<SynthKey::Type> orderedKeys = { w, b, w, b, w, w, b, w, b, w, b, w };
+	for (unsigned i = 0; i < n; ++i) {
+		auto type = orderedKeys[i % orderedKeys.size()];
+		keys.push_back(SynthKey(type));
+	}
+
+	SynthFloat dif = whiteSize.x - blackSize.x / 2;
+	for (unsigned i = 0; i < keys.size(); ++i) {
+		auto& key = keys[i];
+		if (key.type == SynthKey::White) {
+			key.setPosition(whitesCount * whiteSize.x, 0);
+			key.setSize(sf::Vector2f(whiteSize));
+			++whitesCount;
+		}
+		else {
+			key.setPosition(keys[i - 1].getPosition().x + dif, 0);
+			key.setSize(sf::Vector2f(blackSize));
+		}
+	}
 }
 
 SynthKeyboard::SynthKeyboard(SynthFloat px, SynthFloat py, callback_t eventCallback)
 	: onKey(eventCallback)
 {
 	setPosition(px, py);
+	repositionKeys();
+}
 
-	const auto& w = SynthKey::White;
-	const auto& b = SynthKey::Black;
+void SynthKeyboard::setSize(SynthKey::Type type, const SynthVec2& size)
+{
+	if (type == SynthKey::White) {
+		whiteSize = size;
+	}
+	else {
+		blackSize = size;
+	}
+	repositionKeys();
+}
 
-	keys.reserve(24);
-	std::basic_string<SynthKey::Type> orderedKeys = { w, b, w, b, w, w, b, w, b, w, b, w };
-	orderedKeys = orderedKeys + orderedKeys + orderedKeys[0];
-	for (auto type : orderedKeys)
-		keys.push_back(SynthKey(type));
-
+void SynthKeyboard::setOctaveCount(unsigned count)
+{
+	octaveCount = count;
 	repositionKeys();
 }
 
@@ -157,7 +206,7 @@ void SynthKeyboard::drawImpl(sf::RenderTarget& target, sf::RenderStates states) 
 SynthRect SynthKeyboard::AABB() const
 {
 	SynthVec2 size;
-	size.x = keys.back().getPosition().x - keys.front().getPosition().x + keys.back().getSize().x;
+	size.x = SynthFloat(keys.back().getPosition().x) - keys.front().getPosition().x + keys.back().getSize().x;
 	size.y = std::max(whiteSize.y, blackSize.y);
 	return SynthRect{ SynthVec2(getPosition()), size };
 }
@@ -172,35 +221,22 @@ bool SynthKeyboard::needsEvent(const SynthEvent & event) const
 	return false;
 }
 
-void SynthKeyboard::repositionKeys()
-{
-	unsigned whitesCount = 0;
-	SynthFloat dif = whiteSize.x - blackSize.x / 2;
-	for (unsigned i = 0; i < keys.size(); ++i) {
-		auto& key = keys[i];
-		if (key.type == SynthKey::White) {
-			key.setPosition(whitesCount* key.getSize().x, 0);
-			++whitesCount;
-		}
-		else {
-			key.setPosition(keys[i - 1].getPosition().x + dif, 0);
-		}
-	}
-}
-
 KeyboardOutput::KeyboardOutput()
 {
 	kb = std::make_unique<SynthKeyboard>(50, 700, [this](unsigned keyIdx, SynthKey::State keyState) {
 		if (keyState == SynthKey::State::Pressed) {
-			(*kb)[keyIdx].pressed = true;
+			(*kb)[keyIdx].setPressed(true);
 		}
 		else {
-			(*kb)[keyIdx].pressed = false;
+			(*kb)[keyIdx].setPressed(false);
 		}
 		for (auto callback : callbacks) {
 			callback(keyIdx, keyState);
 		}
 	});
+	kb->setSize(SynthKey::Black, {SynthKey::blackSizeDefault/SynthFloat(2)});
+	kb->setSize(SynthKey::White, {SynthKey::whiteSizeDefault/SynthFloat(2)});
+	kb->setOctaveCount(4);
 }
 
 std::shared_ptr<SynthKeyboard> KeyboardOutput::getGuiElement() const

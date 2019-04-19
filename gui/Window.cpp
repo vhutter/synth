@@ -114,6 +114,13 @@ void Window::addMenuOption(std::shared_ptr<MenuOption> option)
 	menuBar->addChildrenAutoPos({ option });
 }
 
+void Window::addMenuOptions(const std::vector<std::shared_ptr<MenuOption>>& options)
+{
+	for (auto option : options) {
+		addMenuOption(option);
+	}
+}
+
 void Window::fixLayout()
 {
 	header->setPosition(0, 0);

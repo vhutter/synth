@@ -41,3 +41,32 @@ bool MenuOption::isActive() const
 {
 	return active;
 }
+
+std::unordered_map<std::string, std::shared_ptr<GuiElement>> MenuOption::createMenu(
+	std::shared_ptr<GuiElement> parent,
+	const SynthVec2& pos,
+	const SynthVec2& size,
+	const OptionList option
+)
+{
+	auto ret = std::unordered_map<std::string, std::shared_ptr<GuiElement>>();
+
+	auto button = std::make_shared<MenuOption>(option.title, size.y);
+	button->setPosition(sf::Vector2f(pos));
+	button->setSize(size);
+	using pos_t = OptionList::ChildPos_t;
+	SynthVec2 startPos{ 0,0 }, difPos{ 0, size.y };
+	if (option.childPos == pos_t::Right) {
+		startPos.x += size.x;
+	}
+	else if (option.childPos == pos_t::Down) {
+		startPos.y += size.y;
+	}
+	for (auto child : option.children) {
+		auto childMap = createMenu(button, startPos, size, child);
+		ret.insert(childMap.begin(), childMap.end());
+		startPos += difPos;
+	}
+
+	return ret;
+}
