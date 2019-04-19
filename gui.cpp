@@ -4,7 +4,7 @@
 void setupGui(GuiElement& gui, sf::RenderWindow& window)
 {
 	auto setup = std::make_shared<EmptyGuiElement>([&](const sf::Event& event) {
-			switch (event.type) {
+		switch (event.type) {
 			case sf::Event::Closed: {
 				window.close();
 				break;
@@ -27,7 +27,7 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 			}
 			default:
 				break;
-			}
+		}
 	});
 
 	gui.addChildren({ 
