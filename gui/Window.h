@@ -18,6 +18,7 @@ public:
 	void setSize(const SynthVec2& size);
 	SynthVec2 getSize() const;
 	void addMenuOption(std::shared_ptr<MenuOption> option);
+	void addMenuOptions(const std::vector<std::shared_ptr<MenuOption>>& options);
 	
 	void setHeader(unsigned size, const std::string& title, unsigned textSize=0);
 	void setMenuBar(unsigned size);
