@@ -10,15 +10,15 @@ Button::Button(const std::string& initialText, SynthFloat px, SynthFloat py, Syn
 	refreshCol();
 
 	setEventCallback([this](const sf::Event& event){
+		lastEvent = event;
 		if (event.type == sf::Event::MouseButtonPressed) {
-			SynthRect rect = { SynthVec2(globalTransform * frame.getPosition()), SynthVec2(frame.getSize()) };
-			if (rect.contains(event.mouseButton.x, event.mouseButton.y)) {
+			if (isPressedOrReleased(event)) {
 				pressed = true;
 				refreshCol();
-				clickCallback();
 			}
 		}
 		else if (event.type == sf::Event::MouseButtonReleased) {
+			if(pressed || passesAllClicks) clickCallback();
 			pressed = false;
 			refreshCol();
 		}
@@ -42,6 +42,11 @@ void Button::setPressedColor(const sf::Color & col)
 	refreshCol();
 }
 
+bool Button::isPressed() const
+{
+	return pressed;
+}
+
 bool Button::needsEvent(const SynthEvent & event) const
 {
 	if (std::holds_alternative<MidiEvent>(event)) return false;
@@ -50,4 +55,10 @@ bool Button::needsEvent(const SynthEvent & event) const
 		sfEvent.type == sf::Event::MouseButtonReleased)
 		return true;
 	return false;
+}
+
+bool Button::isPressedOrReleased(const sf::Event& event) const
+{
+	sf::Vector2f mPos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
+	return globalTransform.transformRect({ frame.getPosition(), sf::Vector2f(getSize()) }).contains(mPos);
 }

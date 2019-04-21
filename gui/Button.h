@@ -8,7 +8,7 @@
 class Button : public TextDisplay
 {
 public:
-	Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick = {});
+	Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
 
 	static std::unique_ptr<Button> DefaultButton(const std::string& s, SynthFloat px, SynthFloat py, std::function<void()> onClick) {
 		return std::make_unique<Button>(s, px, py, 100, 30, 16, onClick);
@@ -19,8 +19,14 @@ public:
 
 	void setNormalColor(const sf::Color& col);
 	void setPressedColor(const sf::Color& col);
+	bool isPressed() const;
 
 	virtual bool needsEvent(const SynthEvent& event) const override;
+
+protected:
+	bool isPressedOrReleased(const sf::Event& event) const;
+	sf::Event lastEvent;
+	bool passesAllClicks{ false };
 
 private:
 	using TextDisplay::setBgColor;
@@ -28,7 +34,7 @@ private:
 
 	std::function<void()> clickCallback;
 	bool pressed{ false };
-	sf::Color normalCol, pressedCol{ 0xaaaaaaaa };
+	sf::Color normalCol{ sf::Color::Black }, pressedCol{ 0x555555ff };
 };
 
 #endif //BUTTON_H_INCLUDED

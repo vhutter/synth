@@ -25,17 +25,6 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 	header->setOutlineColor(sf::Color::Black);
 	header->setOutlineThickness(-1);
 
-	content->setEventCallback([this](const sf::Event& event) {
-		if (event.type == sf::Event::MouseButtonPressed) {
-			for (auto child : getChildren(menuBar)) {
-				if (auto menuOpt = dynamic_cast<MenuOption*>(child.get())) {
-					if (menuOpt->isActive()) {
-						menuOpt->toggle();
-					}
-				}
-			}
-		}
-	});
 	content->setFocusable(false);
 }
 
@@ -173,6 +162,11 @@ void Window::setMenuBar(unsigned size)
 const std::shared_ptr<Frame>& Window::getContentFrame() const
 {
 	return content;
+}
+
+const std::shared_ptr<Frame>& Window::getMenuFrame() const
+{
+	return menuBar;
 }
 
 SynthRect Window::AABB() const

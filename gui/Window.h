@@ -24,6 +24,7 @@ public:
 	void setMenuBar(unsigned size);
 
 	const std::shared_ptr<Frame>& getContentFrame() const;
+	const std::shared_ptr<Frame>& getMenuFrame() const;
 
 	virtual SynthRect AABB() const override;
 
