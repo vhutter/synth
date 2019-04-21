@@ -1,39 +1,75 @@
 #include "MenuOption.h"
+#include "Window.h"
 
-MenuOption::MenuOption(const std::string & text, unsigned int charSize)
-	:Button(text, 0,0,0,0, charSize)
+void MenuOption::init()
 {
-	//setFocusable(false);
-	setEventCallback([this](const sf::Event& event) {
-		if (event.type == sf::Event::MouseButtonPressed) {
-			sf::Vector2f mPos = sf::Vector2f(event.mouseButton.x, event.mouseButton.y);
-			const auto& t = globalTransform;
-			if (!globalTransform.transformRect({frame.getPosition(), sf::Vector2f(getSize())}).contains(mPos)) {
-				if (active)
-					for (auto child : children) {
-						child->forwardEvent(event, globalTransform);
-					}
-				else 
-					active = true; // because we want to deactivate with toggle()
-			}
-			toggle();
-		}
-	});
+	passesAllClicks = true;
 }
 
-void MenuOption::addChildren(const std::vector<std::shared_ptr<GuiElement>>& children)
+MenuOption* MenuOption::pressedChild()
 {
-	GuiElement::addChildren(children);
 	for (auto child : children) {
+		auto* c = dynamic_cast<MenuOption*>(child.get());
+		if (c->isPressed()) {
+			return c;
+		}
+		else {
+			auto* cPressed = c->pressedChild();
+			if (cPressed) return cPressed;
+		}
+	}
+	return nullptr;
+}
+
+MenuOption::MenuOption(const std::string & text, unsigned int charSize)
+	:Button(text, 0, 0, 0, 0, charSize, [this]() {
+		// the button is getting released after a click
+		if (isPressed()) {
+			active = !active;
+		}
+		else {
+			auto* pChild = pressedChild();
+			if (!pChild) active = false;
+			else if (pChild->children.size() == 0) {
+				pChild->forwardEvent(lastEvent, globalTransform);
+				active = false;
+			}
+		}
+
+		toggle(active);
+	})
+{
+	init();
+}
+
+MenuOption::MenuOption(const std::string& text, unsigned int charSize, std::shared_ptr<Window> popup)
+	:Button(text, 0, 0, 0, 0, charSize, [this, popup]() {
+		if (isPressed()) {
+			popup->setVisibility(true);
+		}
+	})
+{
+	init();
+}
+
+void MenuOption::addChildren(const std::vector<std::shared_ptr<MenuOption>>& children)
+{
+	for (auto child : children) {
+		GuiElement::addChildren({ child });
 		child->setVisibility(active);
 	}
 }
 
-void MenuOption::toggle()
+void MenuOption::toggle(bool state)
 {
-	active = !active;
 	for (auto child : children) {
-		child->setVisibility(active);
+		if (auto q = dynamic_cast<MenuOption*>(child.get())) {
+			q->setVisibility(state);
+			active = state;
+			if (state == false) {
+				q->toggle(state);
+			}
+		}
 	}
 }
 
@@ -42,30 +78,38 @@ bool MenuOption::isActive() const
 	return active;
 }
 
-std::unordered_map<std::string, std::shared_ptr<GuiElement>> MenuOption::createMenu(
-	std::shared_ptr<GuiElement> parent,
-	const SynthVec2& pos,
-	const SynthVec2& size,
-	const OptionList option
+std::shared_ptr<MenuOption> MenuOption::createMenu(
+	unsigned w, unsigned h,
+	unsigned fontSize,
+	const OptionList& option
 )
 {
-	auto ret = std::unordered_map<std::string, std::shared_ptr<GuiElement>>();
-
-	auto button = std::make_shared<MenuOption>(option.title, size.y);
-	button->setPosition(sf::Vector2f(pos));
-	button->setSize(size);
+	std::shared_ptr<MenuOption> ret;
+	if (std::holds_alternative< std::shared_ptr<Window>>(option.children)) {
+		ret = std::make_shared<MenuOption>(option.title, fontSize, std::get<std::shared_ptr<Window>>(option.children));
+	}
+	else {
+		ret = std::make_shared<MenuOption>(option.title, fontSize);
+	}
+	ret->setSize(SynthVec2(w,h));
+	ret->centralize();
 	using pos_t = OptionList::ChildPos_t;
-	SynthVec2 startPos{ 0,0 }, difPos{ 0, size.y };
+	SynthVec2 startPos{ 0,0 }, difPos{ 0, SynthFloat(h) };
 	if (option.childPos == pos_t::Right) {
-		startPos.x += size.x;
+		startPos.x += w;
 	}
 	else if (option.childPos == pos_t::Down) {
-		startPos.y += size.y;
+		startPos.y += h;
 	}
-	for (auto child : option.children) {
-		auto childMap = createMenu(button, startPos, size, child);
-		ret.insert(childMap.begin(), childMap.end());
-		startPos += difPos;
+
+	if (std::holds_alternative< std::vector<OptionList>>(option.children)) {
+		auto children = std::get<std::vector<OptionList>>(option.children);
+		for (auto child : children) {
+			auto newItem = createMenu(w, h, fontSize, child);
+			newItem->setPosition(startPos.x, startPos.y);
+			ret->addChildren({ newItem });
+			startPos += difPos;
+		}
 	}
 
 	return ret;
