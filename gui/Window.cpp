@@ -26,6 +26,7 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 	header->setOutlineThickness(-1);
 
 	content->setFocusable(false);
+	header->setVisibility(false);
 }
 
 void Window::onSfmlEvent(const sf::Event & event)
@@ -131,6 +132,7 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 	// The window will be movable
 	setFocusable(true);
 
+	header->setVisibility(true);
 	header->setTextColor(sf::Color::Black);
 	header->setBgColor(sf::Color::White);
 
