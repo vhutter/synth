@@ -2,46 +2,42 @@
 #include "../gui.h"
 #include "../guiElements.h"
 
-void testGui(GuiElement& gui)
+void testGui(std::shared_ptr<GuiElement> gui)
 {
 	///// Window
 	sf::Color bgcolor = sf::Color::Magenta;
 	bgcolor.a = 100;
 	std::shared_ptr outer1 = std::make_unique<Window>(700, 400, bgcolor);
 	std::shared_ptr outer2 = std::make_unique<Window>(700, 400, bgcolor);
-	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 0, 0, 24);
+	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 24);
 	std::shared_ptr inner1 = std::make_unique<Window>(200, 200, sf::Color::Black);
 	std::shared_ptr inner2 = std::make_unique<Window>(600, 200, sf::Color::Black);
 
 	outer1->setHeader(30, "Outer1");
-	outer1->setPosition(50, 270);
-	outer1->getContentFrame()->addChildrenAutoPos({
-		windowText,
-		});
+	outer1->getContentFrame()->addChildAutoPos(windowText);
 
 
-	outer2->setPosition(50, 370);
 	outer2->setHeader(30, "Outer2");
 
-	inner1->getContentFrame()->addChildrenAutoPos({
-		TextDisplay::Multiline("cat... cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat", 0, 0, 100, 24)
-		});
+	inner1->getContentFrame()->addChildAutoPos(
+		TextDisplay::Multiline("cat... cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat", 100, 24)
+	);
 
 	std::shared_ptr menu1 = std::make_unique<MenuOption>(" Option1 ", 15);
 	auto button1 = std::make_shared<MenuOption>("This works! :)", 30);
 	button1->setNormalColor(sf::Color::Magenta);
 	button1->setTextColor(sf::Color::Black);
-	button1->setPosition(0, 30);
-	menu1->addChildren({ button1 });
+	menu1->addChild( button1, 0, 30);
 
 	std::shared_ptr menu2 = std::make_unique<MenuOption>(" Option2 ", 15);
-	menu2->addChildren({ std::make_shared<MenuOption>("This works! :)", 30) });
+	menu2->addChild( std::make_shared<MenuOption>("This works! :)", 30) );
 
 	outer1->setMenuBar(30);
 	outer1->addMenuOption(menu1);
 	outer1->addMenuOption(menu2);
 
-	outer1->getContentFrame()->addChildrenAutoPos({ inner1, inner2 });
+	outer1->getContentFrame()->addChildAutoPos(inner1);
+	outer1->getContentFrame()->addChildAutoPos(inner2);
 	inner1->setHeader(30, "Inner1");
 	inner2->setHeader(30, "Inner2");
 
@@ -59,15 +55,14 @@ void testGui(GuiElement& gui)
 			}
 		}
 	);
-	outer2->getMenuFrame()->addChildrenAutoPos({ q });
+	outer2->getMenuFrame()->addChildAutoPos( q );
 
 ///// Text display
-	std::shared_ptr test = TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 600, 200, 50, 24);
-	std::shared_ptr test2 = TextDisplay::DefaultText("teeesztqq", 250, 200, 24);
-	std::shared_ptr test3 = std::make_unique<TextDisplay>("qweasd", 700, 700, 100, 100, 24);
+	std::shared_ptr test = TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 50, 24);
+	std::shared_ptr test2 = TextDisplay::DefaultText("teeesztqq", 24);
+	std::shared_ptr test3 = std::make_unique<TextDisplay>("qweasd", 100, 100, 24);
+
 	test2->centralize();
-	test2->moveAroundPoint({ 70,70 });
-	test->moveAroundPoint({ 625,290 });
 	test->setBgColor({ 0,0,0,0 });
 	test->fitFrame();
 
@@ -102,21 +97,23 @@ void testGui(GuiElement& gui)
 			}
 		}
 		});
+	
+	gui->addChild(test);
+	gui->addChild(test2);
+	gui->addChild(test3);
+	gui->addChild(events);
+	gui->addChild(outer1, 50, 270);
+	gui->addChild(outer2, 50, 370);
 
-	gui.addChildren({
-		//std::make_shared<Window>(10, 10, 500, 500, sf::Color{ 0x8b, 0, 0, 100 }) ,
-		test,
-		test2,
-		test3,
-		events,
-		outer1,
-		outer2,
-	});
+	test->moveAroundPoint({ 625,290 });
+	test2->moveAroundPoint({ 70,70 });
+	test3->moveAroundPoint({ 700, 700 });
+	
 }
 
 int testMain(int argc, char** argv)
 {
-	EmptyGuiElement gui;
+	auto gui = std::make_shared<EmptyGuiElement>();
 	auto keyboard = KeyboardOutput();
 
 	MidiContext midiContext;
@@ -132,14 +129,14 @@ int testMain(int argc, char** argv)
 		static MidiEvent midiEvent;
 
 		while (midiContext.pollEvent(midiEvent)) {
-			gui.forwardEvent(midiEvent);
+			gui->forwardEvent(midiEvent);
 		}
 		while (window.pollEvent(event)) {
-			gui.forwardEvent(event);
+			gui->forwardEvent(event);
 		}
 
 		window.clear(sf::Color::Black);
-		window.draw(gui);
+		window.draw(*gui);
 		window.display();
 	}
 

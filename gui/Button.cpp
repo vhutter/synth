@@ -1,7 +1,7 @@
 #include "Button.h"
 
-Button::Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick)
-	:TextDisplay(initialText, px, py, sx, sy, charSize), clickCallback(onClick)
+Button::Button(const std::string& initialText, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick)
+	:TextDisplay(initialText, sx, sy, charSize), clickCallback(onClick)
 {
 	setFocusable(true);
 	centralize();

@@ -1,14 +1,12 @@
 #include "Oscilloscope.h"
 
-Oscilloscope::Oscilloscope(SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned res, double speed)
+Oscilloscope::Oscilloscope(SynthFloat sx, SynthFloat sy, unsigned res, double speed)
 	: resolution(res), speed(speed)
 {
-	setPosition(px, py);
-
 	window.setSize(sf::Vector2f(sx, sy));
 	window.setOutlineColor(sf::Color::White);
 	window.setFillColor(sf::Color::Black);
-	window.setOutlineThickness(2.);
+	window.setOutlineThickness(-2.);
 
 	vArray.reserve(resolution * 2); // bigger buffer size for faster incoming samples
 	vArray.resize(resolution);

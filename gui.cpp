@@ -1,7 +1,8 @@
 #include "gui.h"
 #include "gui/GuiElement.h"
+#include "gui/Slider.h"
 
-void setupGui(GuiElement& gui, sf::RenderWindow& window)
+void setupGui(std::shared_ptr<GuiElement> gui, sf::RenderWindow& window)
 {
 	auto setup = std::make_shared<EmptyGuiElement>([&](const sf::Event& event) {
 		switch (event.type) {
@@ -30,7 +31,5 @@ void setupGui(GuiElement& gui, sf::RenderWindow& window)
 		}
 	});
 
-	gui.addChildren({ 
-		setup,
-	});
+	gui->addChild(setup);
 }

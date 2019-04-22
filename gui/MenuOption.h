@@ -11,7 +11,7 @@ class MenuOption :public Button
 public:
 	MenuOption(const std::string& text, unsigned int charSize);
 	MenuOption(const std::string& text, unsigned int charSize, std::shared_ptr<Window> popup);
-	void addChildren(const std::vector<std::shared_ptr<MenuOption>>& children);
+	void addChild(std::shared_ptr<MenuOption> child, unsigned px=0, unsigned py=0);
 	void toggle(bool state);
 	bool isActive() const;
 

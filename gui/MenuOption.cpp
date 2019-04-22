@@ -22,7 +22,7 @@ MenuOption* MenuOption::pressedChild()
 }
 
 MenuOption::MenuOption(const std::string & text, unsigned int charSize)
-	:Button(text, 0, 0, 0, 0, charSize, [this]() {
+	:Button(text, 0, 0, charSize, [this]() {
 		// the button is getting released after a click
 		if (isPressed()) {
 			active = !active;
@@ -43,7 +43,7 @@ MenuOption::MenuOption(const std::string & text, unsigned int charSize)
 }
 
 MenuOption::MenuOption(const std::string& text, unsigned int charSize, std::shared_ptr<Window> popup)
-	:Button(text, 0, 0, 0, 0, charSize, [this, popup]() {
+	:Button(text, 0, 0, charSize, [this, popup]() {
 		if (isPressed()) {
 			popup->setVisibility(true);
 		}
@@ -52,12 +52,10 @@ MenuOption::MenuOption(const std::string& text, unsigned int charSize, std::shar
 	init();
 }
 
-void MenuOption::addChildren(const std::vector<std::shared_ptr<MenuOption>>& children)
+void MenuOption::addChild(std::shared_ptr<MenuOption> child, unsigned px, unsigned py)
 {
-	for (auto child : children) {
-		GuiElement::addChildren({ child });
-		child->setVisibility(active);
-	}
+	child->setVisibility(active);
+	GuiElement::addChild( child, px, py );
 }
 
 void MenuOption::toggle(bool state)
@@ -106,8 +104,7 @@ std::shared_ptr<MenuOption> MenuOption::createMenu(
 		auto children = std::get<std::vector<OptionList>>(option.children);
 		for (auto child : children) {
 			auto newItem = createMenu(w, h, fontSize, child);
-			newItem->setPosition(startPos.x, startPos.y);
-			ret->addChildren({ newItem });
+			ret->addChild( newItem, startPos.x, startPos.y );
 			startPos += difPos;
 		}
 	}

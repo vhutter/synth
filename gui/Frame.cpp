@@ -50,21 +50,18 @@ void Frame::setCursor(unsigned x, unsigned y)
 	cursorY = y;
 }
 
-void Frame::addChildrenAutoPos(const std::vector<std::shared_ptr<GuiElement>>& children)
+void Frame::addChildAutoPos(std::shared_ptr<GuiElement> child)
 {
-	addChildren(children);
-	for (auto child : children) {
+	addChild(child, cursorX, cursorY);
+	const auto& aabb = child->AABB();
+	cursorX += aabb.width + childAlignment;
+	if (cursorX > getSize().x) {
+		cursorX = 0;
+		cursorY += rowHeight + childAlignment;
+		rowHeight = 0;
 		child->setPosition(cursorX, cursorY);
-		const auto& aabb = child->AABB();
-		cursorX += aabb.width + childAlignment;
-		if (cursorX > getSize().x) {
-			cursorX = 0;
-			cursorY += rowHeight + childAlignment;
-			rowHeight = 0;
-			child->setPosition(cursorX, cursorY);
-		}
-		rowHeight = std::max(rowHeight, unsigned(aabb.height));
 	}
+	rowHeight = std::max(rowHeight, unsigned(aabb.height));
 }
 
 void Frame::setCropping(bool crop)

@@ -8,13 +8,13 @@
 class Button : public TextDisplay
 {
 public:
-	Button(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
+	Button(const std::string& initialText, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
 
-	static std::unique_ptr<Button> DefaultButton(const std::string& s, SynthFloat px, SynthFloat py, std::function<void()> onClick) {
-		return std::make_unique<Button>(s, px, py, 100, 30, 16, onClick);
+	static std::unique_ptr<Button> DefaultButton(const std::string& s, std::function<void()> onClick) {
+		return std::make_unique<Button>(s, 100, 30, 16, onClick);
 	}
-	static std::unique_ptr<Button> DefaultButton(const std::string& s, SynthFloat px, SynthFloat py, std::atomic<bool>& val) {
-		return std::make_unique<Button>(s, px, py, 100, 30, 16, [&]() {val = !val; });
+	static std::unique_ptr<Button> DefaultButton(const std::string& s, std::atomic<bool>& val) {
+		return std::make_unique<Button>(s, 100, 30, 16, [&]() {val = !val; });
 	}
 
 	void setNormalColor(const sf::Color& col);

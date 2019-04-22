@@ -41,7 +41,7 @@ void TextDisplay::fitFrame(const SynthVec2& size)
 	});
 }
 
-TextDisplay::TextDisplay(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned int size)
+TextDisplay::TextDisplay(const std::string& initialText, SynthFloat sx, SynthFloat sy, unsigned int size)
 	: text()
 {
 	setFocusable(false);
@@ -58,23 +58,20 @@ TextDisplay::TextDisplay(const std::string& initialText, SynthFloat px, SynthFlo
 	fitFrame({ sx, sy });
 
 	const auto& boundingBox = text.getGlobalBounds();
-	setPosition(px, py);
+	//setPosition(px, py);
 
 	text.setPosition(sf::Vector2f(-topLeftAlignment()));
 }
 
 std::unique_ptr<TextDisplay> TextDisplay::DefaultText(
 	const std::string & initialText,
-	SynthFloat px, SynthFloat py,
 	unsigned int charSize)
 {
-	return std::make_unique<TextDisplay>(initialText, px, py, 0, 0, charSize);
+	return std::make_unique<TextDisplay>(initialText, 0, 0, charSize);
 }
 
 std::unique_ptr<TextDisplay> TextDisplay::Multiline(
 	const std::string initialText,
-	SynthFloat px,
-	SynthFloat py,
 	SynthFloat width,
 	unsigned int charSize
 )
@@ -82,7 +79,6 @@ std::unique_ptr<TextDisplay> TextDisplay::Multiline(
 	sf::Text dummyText;
 	dummyText.setFont(font);
 	dummyText.setCharacterSize(charSize);
-	dummyText.setPosition(px, py);
 
 	std::string row, result;
 	std::istringstream words(initialText);
@@ -105,7 +101,7 @@ std::unique_ptr<TextDisplay> TextDisplay::Multiline(
 		result.append(*wordIt);
 	}
 
-	return TextDisplay::DefaultText(result, px, py, charSize);
+	return TextDisplay::DefaultText(result, charSize);
 }
 
 void TextDisplay::setTextSize(unsigned newSize)

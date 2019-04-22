@@ -43,10 +43,16 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 	return ret;
 }
 
-void GuiElement::addChildren(const std::vector<std::shared_ptr<GuiElement>>& newChildren)
+void GuiElement::addChild(std::shared_ptr<GuiElement> child, unsigned px, unsigned py)
 {
-	children.insert(children.end(), newChildren.begin(), newChildren.end());
+	children.push_back(child);
+	child->setPosition(px, py);
 }
+
+//void GuiElement::addChild(std::shared_ptr<GuiElement> child)
+//{
+//	children.push_back(child);
+//}
 
 void GuiElement::removeChild(const std::shared_ptr<GuiElement>& child)
 {

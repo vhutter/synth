@@ -10,7 +10,7 @@ public:
 	enum Type : bool { White = true, Black = false };
 	enum State : bool { Pressed = true, Released = false };
 
-	SynthKey(Type t, SynthFloat px = 0, SynthFloat py = 0, const SynthVec2& size = SynthVec2(0, 0));
+	SynthKey(Type t, const SynthVec2& size = SynthVec2(0, 0));
 	SynthKey(const SynthKey& other) : sf::RectangleShape(other), type(other.type), pressed(other.pressed.load()) {}
 	void setPressed(bool p);
 
@@ -28,7 +28,7 @@ class SynthKeyboard : public GuiElement
 public:
 	using callback_t = std::function<void(unsigned, SynthKey::State)>;
 
-	SynthKeyboard(SynthFloat px, SynthFloat py, callback_t eventCallback);
+	SynthKeyboard(callback_t eventCallback);
 	void setSize(SynthKey::Type type, const SynthVec2& size);
 	void setOctaveCount(unsigned octaveCount);
 	virtual SynthRect AABB() const override;
