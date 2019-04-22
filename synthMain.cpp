@@ -17,34 +17,45 @@ int synthMain(int argc, char** argv)
 	mainWindow->setSize({ SynthFloat(wWidth), SynthFloat(wHeight - menuHeight) });
 	mainWindow->setMenuBar(menuHeight);
 
-	setupGui(*mainWindow, window);
+	setupGui(mainWindow, window);
 
 
 	std::shared_ptr gui = mainWindow->getContentFrame();
-	auto keyboard = KeyboardOutput();
-	gui->addChildren({ keyboard.getGuiElement() });
 
 	auto notes = generateNotes(0, 2);
 	auto tones = generateTones<Tone>(Sine13, notes);
 	auto generator = DynamicToneSum(tones, maxNotes);
-	auto glideEffect = Glider(*gui, Sine13, notes, maxNotes);
+
+	auto keyboard = KeyboardOutput();
+	auto glider = Glider(Sine13, notes, maxNotes);
+	auto pitchBender = PitchBender(generator);
+	auto echo = EchoEffect(sampleRate, 0.3, 0.6);
+	auto volume = VolumeControl();
+	auto debugFilter = DebugFilter();
+
 	keyboard.outputTo(
 		generator,
-		glideEffect
+		glider
 	);
 
-	generator.addBeforeCallback(PitchBender(*gui, generator));
+	gui->addChild( keyboard.getGuiElement(), 50, 700 );
+	gui->addChild( debugFilter.getWindow(), 600, 50 );
 
-	generator.addAfterCallback(glideEffect);
-	generator.addAfterCallback(EchoEffect(*gui, sampleRate, 0.3, 0.6));
-	generator.addAfterCallback(VolumeControl(*gui));
-	generator.addAfterCallback(DebugFilter(*gui));
+	gui->setChildAlignment(10);
+	gui->addChildAutoPos( volume.getWindow() );
+	gui->addChildAutoPos( pitchBender.getWindow() );
+	gui->addChildAutoPos( glider.getWindow() );
+
+	generator.addBeforeCallback(pitchBender);
+	generator.addAfterCallback(glider);
+	generator.addAfterCallback(echo);
+	generator.addAfterCallback(volume);
+	generator.addAfterCallback(debugFilter);
 
 	const auto& generateSample = [&](double t) -> double {
 		std::lock_guard<DynamicToneSum> lock(generator);
 		double sample = generator.getSample(t);
 		return sample;
-		return 0.;
 	};
 
 	SynthStream synth(sampleRate, 32, generateSample, generateSample);

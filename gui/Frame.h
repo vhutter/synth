@@ -19,7 +19,7 @@ public:
 	void fitToChildren();
 	void setChildAlignment(unsigned a);
 	void setCursor(unsigned x, unsigned y);
-	void addChildrenAutoPos(const std::vector<std::shared_ptr<GuiElement>>& children);
+	void addChildAutoPos(std::shared_ptr<GuiElement> child);
 	void setCropping(bool crop);
 
 	const sf::Color& getBgColor() const;

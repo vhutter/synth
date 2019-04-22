@@ -5,10 +5,9 @@
 const SynthVec2 SynthKey::whiteSizeDefault(100, 200);
 const SynthVec2 SynthKey::blackSizeDefault(40, 150);
 
-SynthKey::SynthKey(Type t, SynthFloat px, SynthFloat py, const SynthVec2& size)
+SynthKey::SynthKey(Type t, const SynthVec2& size)
 	:type(t)
 {
-	setPosition(px, py);
 	setSize(sf::Vector2f(size));
 
 	if (t == Type::Black) {
@@ -66,10 +65,9 @@ void SynthKeyboard::repositionKeys()
 	}
 }
 
-SynthKeyboard::SynthKeyboard(SynthFloat px, SynthFloat py, callback_t eventCallback)
+SynthKeyboard::SynthKeyboard(callback_t eventCallback)
 	: onKey(eventCallback)
 {
-	setPosition(px, py);
 	repositionKeys();
 }
 
@@ -223,7 +221,7 @@ bool SynthKeyboard::needsEvent(const SynthEvent & event) const
 
 KeyboardOutput::KeyboardOutput()
 {
-	kb = std::make_unique<SynthKeyboard>(50, 700, [this](unsigned keyIdx, SynthKey::State keyState) {
+	kb = std::make_unique<SynthKeyboard>([this](unsigned keyIdx, SynthKey::State keyState) {
 		if (keyState == SynthKey::State::Pressed) {
 			(*kb)[keyIdx].setPressed(true);
 		}

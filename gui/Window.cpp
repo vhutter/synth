@@ -8,7 +8,7 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 	headerPart(std::make_shared<Frame>()),
 	header(std::make_shared<TextDisplay>()),
 	menuBar(std::make_shared<Frame>()),
-	exitButton(std::make_shared<Button>("X", 0, 0, 0, 0, 0, [this]() {
+	exitButton(std::make_shared<Button>("X", 0, 0, 0, [this]() {
 		this->setVisibility(false);
 	}))
 {
@@ -19,13 +19,19 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 	content->setOutlineThickness(0);
 	content->setCropping(true);
 
-	headerPart->addChildren({ menuBar, header });
-	addChildren({ content, headerPart });
-	header->addChildren({ exitButton });
+	header->addChild( exitButton );
 	header->setOutlineColor(sf::Color::Black);
 	header->setOutlineThickness(-1);
 
+	header->setVisibility(false);
+	menuBar->setVisibility(false);
 	content->setFocusable(false);
+
+	headerPart->addChild(menuBar);
+	headerPart->addChild(header);
+
+	addChild(content);
+	addChild(headerPart);
 }
 
 void Window::onSfmlEvent(const sf::Event & event)
@@ -100,7 +106,7 @@ void Window::addMenuOption(std::shared_ptr<MenuOption> option)
 	if (!menuBar) return;
 	option->setSize({ option->getSize().x, menuBar->getSize().y });
 	option->centralize();
-	menuBar->addChildrenAutoPos({ option });
+	menuBar->addChildAutoPos( option );
 }
 
 void Window::addMenuOptions(const std::vector<std::shared_ptr<MenuOption>>& options)
@@ -131,6 +137,7 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 	// The window will be movable
 	setFocusable(true);
 
+	header->setVisibility(true);
 	header->setTextColor(sf::Color::Black);
 	header->setBgColor(sf::Color::White);
 
@@ -153,6 +160,7 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 
 void Window::setMenuBar(unsigned size)
 {
+	menuBar->setVisibility(true);
 	menuBar->setSize(SynthVec2(content->getSize().x, size));
 	menuBar->setPosition(0, header ? header->getSize().y : 0);
 

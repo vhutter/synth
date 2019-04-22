@@ -1,21 +1,27 @@
 #include "Slider.h"
 #include "TextDisplay.h"
 
+#include <string>
 #include <sstream>
 #include <iomanip>
 
 void Slider::refreshText()
 {
+	using namespace std::string_literals;
 	std::ostringstream oss;
 	oss << std::setprecision(2) << std::fixed << value;
-	title->setText(name + "\n[" + oss.str() + "]");
+	titleText->setText(name);
+	valueText->setText("["s + oss.str() + "]");
+	unsigned textSize = titleText->getTextSize();
 	const auto& s = mainRect.getSize();
-	const auto& p = SynthVec2(0, 0);
-	title->moveAroundPoint({ p.x + s.x / 2.f, p.y - 20 });
+	const auto& p = mainRect.getPosition();
+	titleText->moveAroundPoint({ std::round(p.x + s.x / 2.f), std::round(p.y - textSize * 2) });
+	valueText->moveAroundPoint({ std::round(p.x + s.x / 2.f), std::round(p.y - textSize * 1) });
 }
 
-Slider::Slider(const std::string& str, double from, double to, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::function<void()> callback)
-	:title(std::make_unique<TextDisplay>(str, 0, 0, 0, 0, titleSize)), 
+Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::function<void()> callback)
+	:titleText(std::make_unique<TextDisplay>(str, 0, 0, titleSize)), 
+	valueText(std::make_unique<TextDisplay>(str, 0, 0, titleSize)), 
 	from(from), 
 	to(to), 
 	name(str), 
@@ -34,24 +40,28 @@ Slider::Slider(const std::string& str, double from, double to, SynthFloat px, Sy
 		mainRect.setSize(sf::Vector2f(size.y, size.x));
 	}
 
-	setPosition(px, py);
-
 	mainRect.setPosition({ 0,0 });
 	mainRect.setOutlineColor(sf::Color(0x757575FF));
 	mainRect.setFillColor(sf::Color(0x660000FF));
-	mainRect.setOutlineThickness(1.);
+	mainRect.setOutlineThickness(-1.);
 
 	sliderRect.setSize(sf::Vector2f(sliderRectSize));
 	sliderRect.setPosition(mainRect.getSize().x / 2 - sliderRectSize.x / 2, mainRect.getSize().y / 2 - sliderRectSize.y / 2);
 	sliderRect.setOutlineColor(sf::Color(0x757575FF));
 	sliderRect.setFillColor(sf::Color(0x003366FF));
-	sliderRect.setOutlineThickness(2.);
+	sliderRect.setOutlineThickness(-2.);
 
 	refreshText();
+	const auto& aabb = AABB();
+	const auto& currentPos = sf::Vector2f(aabb.left, aabb.top);
+	titleText->move(-currentPos);
+	valueText->move(-currentPos);
+	mainRect.move(-currentPos);
+	sliderRect.move(-currentPos);
 }
 
-Slider::Slider(const std::string& str, double from, double to, SynthFloat px, SynthFloat py, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
-	: Slider(str, from, to, px, py, sx, sy, titleSize, ori, [&]() {val = getValue(); })
+Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
+	: Slider(str, from, to, sx, sy, titleSize, ori, [&]() {val = getValue(); })
 {
 }
 
@@ -105,10 +115,8 @@ void Slider::onSfmlEvent(const sf::Event& event)
 SynthRect Slider::AABB() const
 {
 	SynthRect
-		box1{ title->AABB() },
-		box2{ SynthVec2(getPosition()), SynthVec2(mainRect.getSize()) };
-	box1.left += getPosition().x;
-	box1.top += getPosition().y;
+		box1{ titleText->AABB() },
+		box2{ SynthVec2(mainRect.getPosition()), SynthVec2(mainRect.getSize()) };
 	SynthFloat left = std::min(box1.left, box2.left);
 	SynthFloat top = std::min(box1.top, box2.top);
 	SynthFloat right = std::max(box1.left + box1.width, box2.left + box2.width);
@@ -118,16 +126,16 @@ SynthRect Slider::AABB() const
 
 void Slider::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	target.draw(*title, states);
+	target.draw(*titleText, states);
+	target.draw(*valueText, states);
 	target.draw(mainRect, states);
 	target.draw(sliderRect, states);
 }
 
 bool Slider::containsPoint(const SynthVec2& p) const
 {
-	const auto& rect = sliderRect;
-	const auto& u = globalTransform * rect.getPosition();
-	const auto& v = u + rect.getSize();
+	const auto& u = globalTransform * sliderRect.getPosition();
+	const auto& v = u + sliderRect.getSize();
 
 	return u.x <= p.x && p.x <= v.x &&
 		u.y <= p.y && p.y <= v.y;

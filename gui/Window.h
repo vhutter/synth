@@ -29,7 +29,7 @@ public:
 	virtual SynthRect AABB() const override;
 
 private:
-	using GuiElement::addChildren;
+	using GuiElement::addChild;
 
 	void fixLayout();
 	unsigned defaultTextSize(unsigned frameSize);

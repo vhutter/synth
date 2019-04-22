@@ -6,16 +6,14 @@
 class TextDisplay : public Frame
 {
 public:
-	TextDisplay(const std::string& initialText, SynthFloat px, SynthFloat py, SynthFloat sx = 0, SynthFloat sy = 0, unsigned int charSize = 30);
-	TextDisplay() : TextDisplay("", 0, 0, 0, 0) {}
+	TextDisplay(const std::string& initialText, SynthFloat sx = 0, SynthFloat sy = 0, unsigned int charSize = 30);
+	TextDisplay() : TextDisplay("") {}
 	static std::unique_ptr<TextDisplay> DefaultText(
 		const std::string& initialText,
-		SynthFloat px, SynthFloat py,
 		unsigned int charSize = 30
 	);
 	static std::unique_ptr<TextDisplay> Multiline(
 		const std::string text,
-		SynthFloat px, SynthFloat py,
 		SynthFloat width,
 		unsigned int charSize = 24
 	);

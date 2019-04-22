@@ -2,16 +2,13 @@
 #include "gui/Button.h"
 #include "gui/Slider.h"
 
-//DebugFilter::Impl::Impl(decltype(oscilloscope) oscilloscope, double maxSamp)
-//	:oscilloscope(oscilloscope),
-//	maxSamp(maxSamp)
-//{
-//}
-
-DebugFilter::DebugFilter(GuiElement& gui)
+DebugFilter::DebugFilter()
 	:impl{ std::make_shared<Impl>() }
 {
-	gui.addChildren({ impl->oscilloscope });
+	auto aabb = impl->oscilloscope->AABB();
+	window->setSize(SynthVec2(aabb.width, aabb.height));
+	window->setHeader(30, "Debug");
+	window->getContentFrame()->addChild( impl->oscilloscope );
 }
 
 void DebugFilter::effectImpl(double t, double & sample) const
@@ -29,10 +26,12 @@ void DebugFilter::effectImpl(double t, double & sample) const
 	}
 }
 
-VolumeControl::VolumeControl(GuiElement & gui)
+VolumeControl::VolumeControl()
 	:impl{ std::make_shared<Impl>() }
 {
-	gui.addChildren({impl->sliderVolume});
+	auto aabb = impl->sliderVolume->AABB();
+	window->setSize(SynthVec2(aabb.width, aabb.height));
+	window->getContentFrame()->addChild( impl->sliderVolume );
 }
 
 void VolumeControl::effectImpl(double t, double & sample) const
@@ -48,9 +47,10 @@ EchoEffect::Impl::Impl(double coeff, unsigned bufSize)
 {
 }
 
-EchoEffect::EchoEffect(GuiElement & gui, unsigned sampleRate, double echoLength, double coeffArg)
+EchoEffect::EchoEffect(unsigned sampleRate, double echoLength, double coeffArg)
 	: impl(std::make_shared<Impl>(coeffArg, unsigned(sampleRate*echoLength)))
 {
+	// no window yet
 }
 
 void EchoEffect::effectImpl(double t, double & sample) const
@@ -62,12 +62,16 @@ void EchoEffect::effectImpl(double t, double & sample) const
 	++sampleId;
 }
 
-Glider::Glider(GuiElement & gui, const TimbreModel& model, const std::vector<Note>& notes, unsigned maxNotes)
+Glider::Glider(const TimbreModel& model, const std::vector<Note>& notes, unsigned maxNotes)
 	:maxNotes(maxNotes),
 	notes{ notes },
 	impl{ std::make_shared<Impl>(model) }
 {
-	gui.addChildren({ impl->glideSpeedSlider, impl->glideButton });
+	auto aabbSlider = impl->glideSpeedSlider->AABB();
+	auto aabbButton = impl->glideButton->AABB();
+	window->setSize(SynthVec2(std::max(aabbSlider.width, aabbButton.width), aabbSlider.height + aabbButton.height));
+	window->getContentFrame()->addChildAutoPos(impl->glideSpeedSlider);
+	window->getContentFrame()->addChildAutoPos(impl->glideButton);
 }
 
 void Glider::effectImpl(double t, double & sample) const
