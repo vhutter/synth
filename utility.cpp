@@ -14,26 +14,24 @@ sf::View getCroppedView(const sf::View& oldView, SynthFloat x, SynthFloat y, Syn
 	// Intersect the 2 rectangles (old and current origin window)
 	const auto& oldDim = oldView.getSize();
 	auto oldPos = oldView.getCenter() - oldDim / 2.f;
-	oldPos.x = std::floor(oldPos.x);
-	oldPos.y = std::floor(oldPos.y);
-	SynthFloat u = x + w;
-	SynthFloat v = y + h;
+	oldPos.x = oldPos.x;
+	oldPos.y = oldPos.y;
 	x = std::max(x, SynthFloat(oldPos.x));
 	y = std::max(y, SynthFloat(oldPos.y));
-	w = std::min(u, SynthFloat(oldPos.x + oldDim.x)) - x;
-	h = std::min(v, SynthFloat(oldPos.y + oldDim.y)) - y;
+	w = std::min(x + w, SynthFloat(oldPos.x) + oldDim.x) - x;
+	h = std::min(y + h, SynthFloat(oldPos.y) + oldDim.y) - y;
 	if (w < 0 || h < 0) {
 		return sf::View({ 0, 0 }, { 0,0 });
 	}
 
-	const auto center = SynthVec2{ std::round(x + w / 2), std::round(y + h / 2) };
+	const auto center = SynthVec2{ x + w / 2, y + h / 2 };
 	const auto size = SynthVec2{ w, h };
 	sf::View ret{ sf::Vector2f(center), sf::Vector2f(size) };
 
 	const auto& oldViewport = SynthRect{ oldView.getViewport() };
 	auto oldSize = SynthVec2{ oldView.getSize() };
-	oldSize.x = std::round(oldSize.x * 1.f / oldViewport.width);
-	oldSize.y = std::round(oldSize.y * 1.f / oldViewport.height);
+	oldSize.x = oldSize.x / oldViewport.width;
+	oldSize.y = oldSize.y / oldViewport.height;
 	const auto& ratio = SynthVec2{
 		size.x / oldSize.x,
 		size.y / oldSize.y

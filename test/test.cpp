@@ -1,6 +1,9 @@
 #include "test.h"
 #include "../gui.h"
 #include "../guiElements.h"
+#include "../effects.h"
+#include "../generators.h"
+#include "../tones.h"
 
 void testGui(std::shared_ptr<GuiElement> gui)
 {
@@ -8,7 +11,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	sf::Color bgcolor = sf::Color::Magenta;
 	bgcolor.a = 100;
 	std::shared_ptr outer1 = std::make_unique<Window>(700, 400, bgcolor);
-	std::shared_ptr outer2 = std::make_unique<Window>(700, 400, bgcolor);
+	std::shared_ptr outer2 = std::make_unique<Window>(700, 400, sf::Color(0x444444cc));
 	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 24);
 	std::shared_ptr inner1 = std::make_unique<Window>(200, 200, sf::Color::Black);
 	std::shared_ptr inner2 = std::make_unique<Window>(600, 200, sf::Color::Black);
@@ -56,6 +59,15 @@ void testGui(std::shared_ptr<GuiElement> gui)
 		}
 	);
 	outer2->getMenuFrame()->addChildAutoPos( q );
+	auto slidah = std::shared_ptr(Slider::DefaultSlider("Slidah", -100, 100));
+	outer2->getContentFrame()->addChildAutoPos(slidah);
+
+	auto glider = Glider(Sine13, generateNotes(0, 2), 5);
+	auto gliderWindow = std::make_shared<Window>(glider.getFrame());
+	std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
+	gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(100, 35));
+	gliderWindow->setHeader(20, "Glidah", 18);
+	outer2->getContentFrame()->addChildAutoPos(gliderWindow);
 
 ///// Text display
 	std::shared_ptr test = TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 50, 24);
@@ -71,18 +83,20 @@ void testGui(std::shared_ptr<GuiElement> gui)
 		if (std::holds_alternative<sf::Event>(eventArg)) {
 			const sf::Event& event = std::get<sf::Event>(eventArg);
 
+			const auto& gliderWindow = outer2;
 			switch (event.type) {
 			case sf::Event::KeyPressed: {
 				switch (event.key.code) {
 				case sf::Keyboard::X: {
 					// For testing
-					outer1->setSize(SynthVec2(10, 10) + outer1->getSize());
+					gliderWindow->setSize(gliderWindow->getSize()+SynthVec2(0,1));
+					std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 					break;
 				}
 				case sf::Keyboard::Z: {
 					// For testing
-					static int v = 0;
-					outer1->setVisibility((v++) % 2);
+					gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(1, 0));
+					std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 					break;
 				}
 				default:
@@ -103,7 +117,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	gui->addChild(test3);
 	gui->addChild(events);
 	gui->addChild(outer1, 50, 270);
-	gui->addChild(outer2, 50, 370);
+	gui->addChild(outer2, 800, 370);
 
 	test->moveAroundPoint({ 625,290 });
 	test2->moveAroundPoint({ 70,70 });
