@@ -39,12 +39,14 @@ int synthMain(int argc, char** argv)
 	);
 
 	gui->addChild( keyboard.getGuiElement(), 50, 700 );
-	gui->addChild( debugFilter.getWindow(), 600, 50 );
+	gui->addChild( debugFilter.getFrame(), 600, 50);
 
 	gui->setChildAlignment(10);
-	gui->addChildAutoPos( volume.getWindow() );
-	gui->addChildAutoPos( pitchBender.getWindow() );
-	gui->addChildAutoPos( glider.getWindow() );
+	gui->setCursor(10, 10);
+
+	gui->addChildAutoPos(volume.getFrame());
+	gui->addChildAutoPos(pitchBender.getFrame());
+	gui->addChildAutoPos(glider.getFrame() );
 
 	generator.addBeforeCallback(pitchBender);
 	generator.addAfterCallback(glider);
