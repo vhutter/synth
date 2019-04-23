@@ -8,7 +8,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	sf::Color bgcolor = sf::Color::Magenta;
 	bgcolor.a = 100;
 	std::shared_ptr outer1 = std::make_unique<Window>(700, 400, bgcolor);
-	std::shared_ptr outer2 = std::make_unique<Window>(700, 400, bgcolor);
+	std::shared_ptr outer2 = std::make_unique<Window>(700, 400, sf::Color(0x444444cc));
 	std::shared_ptr windowText = TextDisplay::DefaultText("WindowText", 24);
 	std::shared_ptr inner1 = std::make_unique<Window>(200, 200, sf::Color::Black);
 	std::shared_ptr inner2 = std::make_unique<Window>(600, 200, sf::Color::Black);
@@ -56,6 +56,8 @@ void testGui(std::shared_ptr<GuiElement> gui)
 		}
 	);
 	outer2->getMenuFrame()->addChildAutoPos( q );
+	auto slidah = std::shared_ptr(Slider::DefaultSlider("Slidah", -100, 100));
+	outer2->getContentFrame()->addChildAutoPos(slidah);
 
 ///// Text display
 	std::shared_ptr test = TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 50, 24);
@@ -76,13 +78,13 @@ void testGui(std::shared_ptr<GuiElement> gui)
 				switch (event.key.code) {
 				case sf::Keyboard::X: {
 					// For testing
-					outer1->setSize(SynthVec2(10, 10) + outer1->getSize());
+					slidah->move(1, 1);
 					break;
 				}
 				case sf::Keyboard::Z: {
 					// For testing
 					static int v = 0;
-					outer1->setVisibility((v++) % 2);
+					
 					break;
 				}
 				default:
@@ -103,7 +105,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	gui->addChild(test3);
 	gui->addChild(events);
 	gui->addChild(outer1, 50, 270);
-	gui->addChild(outer2, 50, 370);
+	gui->addChild(outer2, 800, 370);
 
 	test->moveAroundPoint({ 625,290 });
 	test2->moveAroundPoint({ 70,70 });
