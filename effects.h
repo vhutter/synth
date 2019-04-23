@@ -17,7 +17,7 @@ public:
 	EffectBase()
 		:frame(std::make_shared<Frame>())
 	{
-		frame->setBgColor(sf::Color(0x444444aa));
+		frame->setBgColor(sf::Color::Transparent);
 	}
 
 	void operator()(double t, param_t& sample) const

@@ -11,7 +11,7 @@ void Slider::refreshText()
 	std::ostringstream oss;
 	oss << std::setprecision(2) << std::fixed << value;
 	titleText->setText(name);
-	valueText->setText("["s + oss.str() + "]");
+	valueText->setText(oss.str());
 	unsigned textSize = titleText->getTextSize();
 	const auto& s = mainRect.getSize();
 	const auto& p = mainRect.getPosition();
@@ -54,11 +54,12 @@ Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, Sy
 	refreshText();
 	const auto& aabb = AABB();
 	const auto& currentPos = sf::Vector2f(aabb.left, aabb.top);
+
 	titleText->move(-currentPos);
 	valueText->move(-currentPos);
 	mainRect.move(-currentPos);
 	sliderRect.move(-currentPos);
-	refreshText();
+	//refreshText();
 }
 
 Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)

@@ -31,11 +31,6 @@ protected:
 	bool visible{ true }, // visible elements are drawed and they forward events recursively
 		focusable{ true };
 
-	static decltype(children)& getChildren(const std::shared_ptr<GuiElement>& element)
-	{
-		return element->children;
-	}
-
 private:
 	using sf::Transformable::rotate;
 	using sf::Transformable::scale;
