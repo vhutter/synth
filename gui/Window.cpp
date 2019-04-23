@@ -3,6 +3,19 @@
 
 #include <limits>
 
+void Window::initHeaderPart()
+{
+	header->addChild(exitButton);
+	header->setOutlineColor(sf::Color::Black);
+	header->setOutlineThickness(-1);
+	header->setVisibility(false);
+
+	menuBar->setVisibility(false);
+
+	headerPart->addChild(header);
+	headerPart->addChild(menuBar);
+}
+
 Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 	:content(std::make_shared<Frame>(sx, sy)),
 	headerPart(std::make_shared<Frame>()),
@@ -12,23 +25,31 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 		this->setVisibility(false);
 	}))
 {
-	setPosition(0, 0);
-
 	content->setSize({ sx, sy });
 	content->setBgColor(fillColor);
 	content->setOutlineThickness(0);
 	content->setCropping(true);
-
-	header->addChild( exitButton );
-	header->setOutlineColor(sf::Color::Black);
-	header->setOutlineThickness(-1);
-
-	header->setVisibility(false);
-	menuBar->setVisibility(false);
 	content->setFocusable(false);
 
-	headerPart->addChild(menuBar);
-	headerPart->addChild(header);
+	initHeaderPart();
+
+	addChild(content);
+	addChild(headerPart);
+}
+
+Window::Window(std::shared_ptr<Frame> frame)
+	:content(frame),
+	headerPart(std::make_shared<Frame>()),
+	header(std::make_shared<TextDisplay>()),
+	menuBar(std::make_shared<Frame>()),
+	exitButton(std::make_shared<Button>("X", 0, 0, 0, [this]() {
+		this->setVisibility(false);
+	}))
+{
+	content->setCropping(true);
+	content->setFocusable(false);
+
+	initHeaderPart();
 
 	addChild(content);
 	addChild(headerPart);

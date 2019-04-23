@@ -3,6 +3,7 @@
 
 #include "GuiElement.h"
 #include "MenuOption.h"
+#include "Frame.h"
 
 #include <memory>
 
@@ -14,6 +15,7 @@ class Window : public GuiElement
 {
 public:
 	Window(SynthFloat sx, SynthFloat sy, const sf::Color& fillColor);
+	Window(std::shared_ptr<Frame> frame);
 
 	void setSize(const SynthVec2& size);
 	SynthVec2 getSize() const;
@@ -31,6 +33,7 @@ public:
 private:
 	using GuiElement::addChild;
 
+	void initHeaderPart();
 	void fixLayout();
 	unsigned defaultTextSize(unsigned frameSize);
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
