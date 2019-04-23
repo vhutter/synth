@@ -1,6 +1,9 @@
 #include "test.h"
 #include "../gui.h"
 #include "../guiElements.h"
+#include "../effects.h"
+#include "../generators.h"
+#include "../tones.h"
 
 void testGui(std::shared_ptr<GuiElement> gui)
 {
@@ -59,6 +62,13 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	auto slidah = std::shared_ptr(Slider::DefaultSlider("Slidah", -100, 100));
 	outer2->getContentFrame()->addChildAutoPos(slidah);
 
+	auto glider = Glider(Sine13, generateNotes(0, 2), 5);
+	auto gliderWindow = std::make_shared<Window>(glider.getFrame());
+	std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
+	gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(100, 35));
+	gliderWindow->setHeader(20, "Glidah", 18);
+	outer2->getContentFrame()->addChildAutoPos(gliderWindow);
+
 ///// Text display
 	std::shared_ptr test = TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 50, 24);
 	std::shared_ptr test2 = TextDisplay::DefaultText("teeesztqq", 24);
@@ -73,18 +83,20 @@ void testGui(std::shared_ptr<GuiElement> gui)
 		if (std::holds_alternative<sf::Event>(eventArg)) {
 			const sf::Event& event = std::get<sf::Event>(eventArg);
 
+			const auto& gliderWindow = outer2;
 			switch (event.type) {
 			case sf::Event::KeyPressed: {
 				switch (event.key.code) {
 				case sf::Keyboard::X: {
 					// For testing
-					slidah->move(1, 1);
+					gliderWindow->setSize(gliderWindow->getSize()+SynthVec2(0,1));
+					std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 					break;
 				}
 				case sf::Keyboard::Z: {
 					// For testing
-					static int v = 0;
-					
+					gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(1, 0));
+					std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 					break;
 				}
 				default:
