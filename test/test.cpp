@@ -59,15 +59,19 @@ void testGui(std::shared_ptr<GuiElement> gui)
 		}
 	);
 	outer2->getMenuFrame()->addChildAutoPos( q );
-	auto slidah = std::shared_ptr(Slider::DefaultSlider("Slidah", -100, 100));
-	outer2->getContentFrame()->addChildAutoPos(slidah);
 
-	auto glider = Glider(Sine13, generateNotes(0, 2), 5);
+	auto notes = generateNotes(0, 2);
+	auto tones = generateTones<Tone>(Sine13, notes);
+
+	auto generator = DynamicToneSum(tones, 5);
+	auto pitch = PitchBender(generator);
+	auto pitchWindow = std::make_shared<Window>(pitch.getFrame());
+	outer2->getContentFrame()->addChildAutoPos(pitchWindow);
+
+	auto glider = Glider(Sine13, notes, 5);
 	auto gliderWindow = std::make_shared<Window>(glider.getFrame());
-	std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
-	gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(100, 35));
-	gliderWindow->setHeader(20, "Glidah", 18);
 	outer2->getContentFrame()->addChildAutoPos(gliderWindow);
+	
 
 ///// Text display
 	std::shared_ptr test = TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 50, 24);
@@ -83,7 +87,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 		if (std::holds_alternative<sf::Event>(eventArg)) {
 			const sf::Event& event = std::get<sf::Event>(eventArg);
 
-			const auto& gliderWindow = outer2;
+			//const auto& gliderWindow = outer2;
 			switch (event.type) {
 			case sf::Event::KeyPressed: {
 				switch (event.key.code) {
