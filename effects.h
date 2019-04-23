@@ -10,42 +10,34 @@
 #include "gui/Window.h"
 
 
-template <typename param_t, typename ...T>
-auto mergeEffects(T&& ...args)
-{
-	return[=](double t, param_t& sample) mutable
-	{
-		(args(t, sample), ...);
-	};
-}
-
-
 template<class T, class param_t>
 class EffectBase
 {
 public:
 	EffectBase()
-		:window(std::make_shared<Window>(0,0,sf::Color(0x222222aa))) // slightly transparent gray background
-	{}
+		:frame(std::make_shared<Frame>())
+	{
+		frame->setBgColor(sf::Color(0x444444aa));
+	}
 
 	void operator()(double t, param_t& sample) const
 	{
 		static_cast<const T*>(this)->effectImpl(t, sample);
 	}
 
-	const std::shared_ptr<Window> getWindow() const
+	const std::shared_ptr<Frame> getFrame() const
 	{
-		return window;
+		return frame;
 	}
 
 protected:
-	std::shared_ptr<Window> window;
+	std::shared_ptr<Frame> frame;
 };
 
 template<class T>
 using AfterEffectBase = EffectBase<T, double>;
 
-class DebugFilter: public EffectBase<DebugFilter, double>
+class DebugFilter: public AfterEffectBase<DebugFilter>
 {
 public:
 	DebugFilter();
@@ -61,7 +53,7 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class VolumeControl : public EffectBase<VolumeControl, double>
+class VolumeControl : public AfterEffectBase<VolumeControl>
 {
 public:
 	VolumeControl();
@@ -80,7 +72,7 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class EchoEffect: public EffectBase<EchoEffect, double>
+class EchoEffect: public AfterEffectBase<EchoEffect>
 {
 public:
 	EchoEffect( 
@@ -103,7 +95,7 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class Glider : public EffectBase<Glider, double>
+class Glider : public AfterEffectBase<Glider>
 {
 public:
 	Glider(
@@ -142,9 +134,9 @@ public:
 		:generator(generator)
 	{
 		auto aabb = sliderPitch->AABB();
-		const auto& window = EffectBase<PitchBender<SampleGenerator_T>, typename SampleGenerator_T::Base_t>::window;
-		window->setSize(SynthVec2(aabb.width, aabb.height));
-		window->getContentFrame()->addChild( sliderPitch );
+		const auto& frame = EffectBase<PitchBender<SampleGenerator_T>, typename SampleGenerator_T::Base_t>::frame;
+		frame->setSize(SynthVec2(aabb.width, aabb.height));
+		frame->addChild( sliderPitch );
 		sliderPitch->setFixed(true);
 	}
 	void operator()(double t, Base_t& sample) const

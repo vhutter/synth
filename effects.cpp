@@ -6,9 +6,8 @@ DebugFilter::DebugFilter()
 	:impl{ std::make_shared<Impl>() }
 {
 	auto aabb = impl->oscilloscope->AABB();
-	window->setSize(SynthVec2(aabb.width, aabb.height));
-	window->setHeader(30, "Debug");
-	window->getContentFrame()->addChild( impl->oscilloscope );
+	frame->setSize(SynthVec2(aabb.width, aabb.height));
+	frame->addChild( impl->oscilloscope );
 }
 
 void DebugFilter::effectImpl(double t, double & sample) const
@@ -30,8 +29,8 @@ VolumeControl::VolumeControl()
 	:impl{ std::make_shared<Impl>() }
 {
 	auto aabb = impl->sliderVolume->AABB();
-	window->setSize(SynthVec2(aabb.width, aabb.height));
-	window->getContentFrame()->addChild( impl->sliderVolume );
+	frame->setSize(SynthVec2(aabb.width, aabb.height));
+	frame->addChild( impl->sliderVolume );
 }
 
 void VolumeControl::effectImpl(double t, double & sample) const
@@ -69,9 +68,9 @@ Glider::Glider(const TimbreModel& model, const std::vector<Note>& notes, unsigne
 {
 	auto aabbSlider = impl->glideSpeedSlider->AABB();
 	auto aabbButton = impl->glideButton->AABB();
-	window->setSize(SynthVec2(std::max(aabbSlider.width, aabbButton.width), aabbSlider.height + aabbButton.height));
-	window->getContentFrame()->addChildAutoPos(impl->glideSpeedSlider);
-	window->getContentFrame()->addChildAutoPos(impl->glideButton);
+	frame->setSize(SynthVec2(std::max(aabbSlider.width, aabbButton.width), aabbSlider.height + aabbButton.height));
+	frame->addChildAutoPos(impl->glideSpeedSlider);
+	frame->addChildAutoPos(impl->glideButton);
 }
 
 void Glider::effectImpl(double t, double & sample) const
