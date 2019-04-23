@@ -58,6 +58,7 @@ Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, Sy
 	valueText->move(-currentPos);
 	mainRect.move(-currentPos);
 	sliderRect.move(-currentPos);
+	refreshText();
 }
 
 Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
@@ -116,11 +117,12 @@ SynthRect Slider::AABB() const
 {
 	SynthRect
 		box1{ titleText->AABB() },
-		box2{ SynthVec2(mainRect.getPosition()), SynthVec2(mainRect.getSize()) };
-	SynthFloat left = std::min(box1.left, box2.left);
-	SynthFloat top = std::min(box1.top, box2.top);
-	SynthFloat right = std::max(box1.left + box1.width, box2.left + box2.width);
-	SynthFloat bot = std::max(box1.top + box1.height, box2.top + box2.height);
+		box2{ valueText->AABB() },
+		box3{ SynthVec2(mainRect.getPosition()), SynthVec2(mainRect.getSize()) };
+	SynthFloat left = std::min({ box1.left, box2.left, box3.left });
+	SynthFloat top = std::min({ box1.top, box2.top, box3.top });
+	SynthFloat right = std::max({ box1.left + box1.width, box2.left + box2.width, box3.left + box3.width });
+	SynthFloat bot = std::max({ box1.top + box1.height, box2.top + box2.height, box3.top + box3.height });
 	return { left, top, right - left, bot - top };
 }
 
@@ -154,11 +156,11 @@ void Slider::moveSlider(const SynthVec2& p)
 
 	if (orientation == Vertical) {
 		sliderRect.setPosition(currentPos.x, std::clamp(p.y - sliderSize.y / 2, SynthFloat(minPos.y), SynthFloat(maxPos.y)));
-		newValueNormalized = (midPos.y - sliderRect.getPosition().y) / rectSize.y * 2;
+		newValueNormalized = (midPos.y - sliderRect.getPosition().y) / double(rectSize.y) * 2;
 	}
 	else {
 		sliderRect.setPosition(std::clamp(p.x - sliderSize.x / 2, SynthFloat(minPos.x), SynthFloat(maxPos.x)), currentPos.y);
-		newValueNormalized = (sliderRect.getPosition().x - midPos.x) / rectSize.x * 2;
+		newValueNormalized = (sliderRect.getPosition().x - midPos.x) / double(rectSize.x) * 2;
 	}
 
 	value = from + (newValueNormalized + 1) / 2. * (to - from);
