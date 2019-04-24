@@ -6,7 +6,7 @@
 class Oscilloscope : public GuiElement
 {
 public:
-	Oscilloscope(SynthFloat sx, SynthFloat sy, unsigned resolution, double speed);
+	Oscilloscope(SynthFloat sx, SynthFloat sy, unsigned resolution);
 
 	virtual SynthRect AABB() const override;
 

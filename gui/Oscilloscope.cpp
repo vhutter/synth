@@ -1,7 +1,7 @@
 #include "Oscilloscope.h"
 
-Oscilloscope::Oscilloscope(SynthFloat sx, SynthFloat sy, unsigned res, double speed)
-	: resolution(res), speed(speed)
+Oscilloscope::Oscilloscope(SynthFloat sx, SynthFloat sy, unsigned res)
+	: resolution(res)
 {
 	window.setSize(sf::Vector2f(sx, sy));
 	window.setOutlineColor(sf::Color::White);
