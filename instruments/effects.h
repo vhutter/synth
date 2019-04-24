@@ -4,10 +4,10 @@
 #include <memory>
 #include <tuple>
 #include "generators.h"
-#include "gui/Slider.h"
-#include "gui/Button.h"
-#include "gui/Oscilloscope.h"
-#include "gui/Window.h"
+#include "../gui/Slider.h"
+#include "../gui/Button.h"
+#include "../gui/Oscilloscope.h"
+#include "../gui/Window.h"
 
 
 template<class T, class param_t>
@@ -18,6 +18,7 @@ public:
 		:frame(std::make_shared<Frame>())
 	{
 		frame->setBgColor(sf::Color::Transparent);
+		frame->setChildAlignment(10);
 	}
 
 	void operator()(double t, param_t& sample) const
@@ -46,7 +47,8 @@ public:
 private:
 	struct Impl
 	{
-		std::shared_ptr<Oscilloscope> oscilloscope{ std::make_shared<Oscilloscope>(500, 200, 500, 1) };
+		std::shared_ptr<Oscilloscope> oscilloscope{ std::make_shared<Oscilloscope>(500, 200, 500) };
+		std::shared_ptr<TextDisplay> maxSampText;
 		double maxSamp;
 	};
 
@@ -114,9 +116,9 @@ private:
 		std::atomic<double> glideSpeed{ .5 }, lastTime{ 0. };
 		std::atomic<bool> glide{ false };
 		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, glideSpeed) };
-		std::shared_ptr<Button> glideButton{ Button::DefaultButton("Glide", glide) };
+		std::shared_ptr<Button> glideButton;
 
-		Impl(const TimbreModel& model) : glidingTone(model(100)) {}
+		Impl(const TimbreModel& model);
 	};
 
 	unsigned lastPressed, maxNotes;

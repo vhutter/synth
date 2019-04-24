@@ -1,9 +1,9 @@
-#include "test.h"
+#include "testMain.h"
+#include "../gui/GuiElements.h"
 #include "../gui.h"
-#include "../guiElements.h"
-#include "../effects.h"
-#include "../generators.h"
-#include "../tones.h"
+#include "../instruments/effects.h"
+#include "../instruments/generators.h"
+#include "../instruments/tones.h"
 
 void testGui(std::shared_ptr<GuiElement> gui)
 {

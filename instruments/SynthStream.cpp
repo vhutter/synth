@@ -1,4 +1,4 @@
-#include "synth.h"
+#include "SynthStream.h"
 
 #include <exception>
 #include <iostream>

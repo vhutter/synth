@@ -1,45 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="RtMidi">
-      <UniqueIdentifier>{effe7dda-01d4-4123-9624-dedbd2f522f3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests">
       <UniqueIdentifier>{78cd687e-4c68-4196-b697-40778d30abb9}</UniqueIdentifier>
     </Filter>
     <Filter Include="gui">
       <UniqueIdentifier>{0c409f2c-ea1c-49e0-8af0-43dbda359ce3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Instruments">
+      <UniqueIdentifier>{b8115da6-46bc-4414-9896-be0172be9820}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="gui\RtMidi">
+      <UniqueIdentifier>{effe7dda-01d4-4123-9624-dedbd2f522f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="generators.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="synth.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="gui.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tones.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="effects.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="test\test.cpp">
-      <Filter>Tests</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="gui\Button.cpp">
       <Filter>gui</Filter>
@@ -63,46 +47,40 @@
       <Filter>gui</Filter>
     </ClCompile>
     <ClCompile Include="utility.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="gui\events.cpp">
       <Filter>gui</Filter>
-    </ClCompile>
-    <ClCompile Include="RtMidi\RtMidi.cpp">
-      <Filter>RtMidi</Filter>
     </ClCompile>
     <ClCompile Include="gui\MenuOption.cpp">
       <Filter>gui</Filter>
     </ClCompile>
     <ClCompile Include="synthMain.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="gui\Frame.cpp">
       <Filter>gui</Filter>
     </ClCompile>
+    <ClCompile Include="instruments\effects.cpp">
+      <Filter>Instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="instruments\generators.cpp">
+      <Filter>Instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="instruments\tones.cpp">
+      <Filter>Instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\RtMidi\RtMidi.cpp">
+      <Filter>gui\RtMidi</Filter>
+    </ClCompile>
+    <ClCompile Include="instruments\SynthStream.cpp">
+      <Filter>Instruments</Filter>
+    </ClCompile>
+    <ClCompile Include="test\testMain.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="generators.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="synth.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="gui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tones.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="effects.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test\test.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="gui\Button.h">
       <Filter>gui</Filter>
     </ClInclude>
@@ -124,23 +102,44 @@
     <ClInclude Include="gui\GuiElement.h">
       <Filter>gui</Filter>
     </ClInclude>
-    <ClInclude Include="guiElements.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="gui\events.h">
       <Filter>gui</Filter>
-    </ClInclude>
-    <ClInclude Include="RtMidi\RtMidi.h">
-      <Filter>RtMidi</Filter>
     </ClInclude>
     <ClInclude Include="gui\MenuOption.h">
       <Filter>gui</Filter>
     </ClInclude>
-    <ClInclude Include="synthMain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="gui\Frame.h">
       <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="instruments\effects.h">
+      <Filter>Instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="instruments\generators.h">
+      <Filter>Instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="instruments\tones.h">
+      <Filter>Instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\GuiElements.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="synthMain.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="utility.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\RtMidi\RtMidi.h">
+      <Filter>gui\RtMidi</Filter>
+    </ClInclude>
+    <ClInclude Include="instruments\SynthStream.h">
+      <Filter>Instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="test\testMain.h">
+      <Filter>Tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

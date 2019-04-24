@@ -1,13 +1,18 @@
 #include "effects.h"
-#include "gui/Button.h"
-#include "gui/Slider.h"
+#include "../gui/Button.h"
+#include "../gui/Slider.h"
+#include "../gui/SynthKeyboard.h"
 
 DebugFilter::DebugFilter()
 	:impl{ std::make_shared<Impl>() }
 {
 	auto aabb = impl->oscilloscope->AABB();
-	frame->setSize(SynthVec2(aabb.width, aabb.height));
-	frame->addChild( impl->oscilloscope );
+	frame->setSize(SynthVec2(aabb.width+20, aabb.height+40));
+	frame->addChildAutoPos( impl->oscilloscope );
+	frame->addChildAutoPos( TextDisplay::DefaultText("Max sample:", 20) );
+	impl->maxSampText = TextDisplay::DefaultText("0       ", 20);
+	frame->addChildAutoPos( impl->maxSampText );
+	frame->setBgColor(sf::Color(0x222222cc));
 }
 
 void DebugFilter::effectImpl(double t, double & sample) const
@@ -18,10 +23,11 @@ void DebugFilter::effectImpl(double t, double & sample) const
 	if (sampleId == 500) {
 		impl->oscilloscope->newSamples(lastSamples);
 		sampleId = 0;
+		impl->maxSamp = 0;
 	}
 	if (sample > impl->maxSamp) {
 		impl->maxSamp = sample;
-		//std::cout << maxSamp << "\r";
+		impl->maxSampText->setText(std::to_string(impl->maxSamp));
 	}
 }
 
@@ -61,10 +67,21 @@ void EchoEffect::effectImpl(double t, double & sample) const
 	++sampleId;
 }
 
+Glider::Impl::Impl(const TimbreModel& model) :
+	glidingTone(model(100)),
+	glideButton{ Button::DefaultButton("Off", [this]() {
+		glide = !glide;
+		if (glide) glideButton->setText("On");
+		else glideButton->setText("Off");
+}) }
+{
+	glideButton->setFixedSize(true);
+}
+
 Glider::Glider(const TimbreModel& model, const std::vector<Note>& notes, unsigned maxNotes)
 	:maxNotes(maxNotes),
 	notes{ notes },
-	impl{ std::make_shared<Impl>(model) }
+	impl( std::make_shared<Impl>(model) )
 {
 	auto aabbSlider = impl->glideSpeedSlider->AABB();
 	auto aabbButton = impl->glideButton->AABB();

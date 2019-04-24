@@ -12,7 +12,7 @@
 #include <optional>
 #include <SFML/System.hpp>
 
-#include "gui/SynthKeyboard.h"
+#include "../gui/SynthKeyboard.h"
 
 namespace waves
 {

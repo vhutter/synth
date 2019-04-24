@@ -1,15 +1,13 @@
 #include "synthMain.h"
 
-#include "guiElements.h"
-#include "tones.h"
-#include "effects.h"
+#include "gui/GuiElements.h"
+#include "instruments/tones.h"
+#include "instruments/effects.h"
+#include "instruments/SynthStream.h"
 #include "gui.h"
-#include "synth.h"
 
 int synthMain(int argc, char** argv)
 {
-	const unsigned sampleRate(44100);
-	const unsigned maxNotes{ 5 };
 	const unsigned wWidth{ 1600 }, wHeight{ 1000 }, menuHeight{ 30 };
 	sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "Basic synth");
 
@@ -20,8 +18,11 @@ int synthMain(int argc, char** argv)
 	setupGui(mainWindow, window);
 
 
-	std::shared_ptr gui = mainWindow->getContentFrame();
+	auto gui = mainWindow->getContentFrame();
+	auto menu = mainWindow->getMenuFrame();
+	using pos_t = MenuOption::OptionList::ChildPos_t;
 
+	const unsigned maxNotes{ 5 }, sampleRate{ 44100 };
 	auto notes = generateNotes(0, 2);
 	auto tones = generateTones<Tone>(Sine13, notes);
 	auto generator = DynamicToneSum(tones, maxNotes);
@@ -38,8 +39,13 @@ int synthMain(int argc, char** argv)
 		glider
 	);
 
+	auto debugWindow = std::make_shared<Window>(debugFilter.getFrame());
+	debugWindow->setHeader(30, "Debug");
+	debugWindow->setVisibility(false);
+
+
 	gui->addChild( keyboard.getGuiElement(), 50, 700 );
-	gui->addChild( debugFilter.getFrame(), 600, 50);
+	gui->addChild( debugWindow, 600, 50);
 
 	gui->setChildAlignment(10);
 	gui->setCursor(10, 10);
@@ -47,6 +53,15 @@ int synthMain(int argc, char** argv)
 	gui->addChildAutoPos(volume.getFrame());
 	gui->addChildAutoPos(pitchBender.getFrame());
 	gui->addChildAutoPos(glider.getFrame() );
+
+	menu->addChildAutoPos(MenuOption::createMenu(
+		100, 30, 15, {
+			"View", pos_t::Down, {{
+				"Debug", debugWindow},
+			}
+		}
+	));
+	
 
 	generator.addBeforeCallback(pitchBender);
 	generator.addAfterCallback(glider);

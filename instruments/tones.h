@@ -6,7 +6,6 @@
 #include <array>
 
 #include "generators.h"
-#include "guiElements.h"
 
 static const std::array<Note, 12> baseNotes = {
 	Note::C,

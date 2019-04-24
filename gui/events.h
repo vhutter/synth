@@ -3,7 +3,7 @@
 
 #include <SFML/Window.hpp>
 
-#include "../RtMidi/RtMidi.h"
+#include "RtMidi/RtMidi.h"
 #include <queue>
 #include <mutex>
 #include <variant>

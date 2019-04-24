@@ -144,8 +144,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="effects.cpp" />
-    <ClCompile Include="generators.cpp" />
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="gui\Button.cpp" />
     <ClCompile Include="gui\events.cpp" />
@@ -153,38 +151,40 @@
     <ClCompile Include="gui\GuiElement.cpp" />
     <ClCompile Include="gui\MenuOption.cpp" />
     <ClCompile Include="gui\Oscilloscope.cpp" />
+    <ClCompile Include="gui\RtMidi\RtMidi.cpp" />
     <ClCompile Include="gui\Slider.cpp" />
     <ClCompile Include="gui\SynthKeyboard.cpp" />
     <ClCompile Include="gui\TextDisplay.cpp" />
     <ClCompile Include="gui\Window.cpp" />
+    <ClCompile Include="instruments\effects.cpp" />
+    <ClCompile Include="instruments\generators.cpp" />
+    <ClCompile Include="instruments\SynthStream.cpp" />
+    <ClCompile Include="instruments\tones.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="RtMidi\RtMidi.cpp" />
-    <ClCompile Include="synth.cpp" />
     <ClCompile Include="synthMain.cpp" />
-    <ClCompile Include="test\test.cpp" />
-    <ClCompile Include="tones.cpp" />
+    <ClCompile Include="test\testMain.cpp" />
     <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="effects.h" />
-    <ClInclude Include="generators.h" />
-    <ClInclude Include="guiElements.h" />
     <ClInclude Include="gui.h" />
     <ClInclude Include="gui\Button.h" />
     <ClInclude Include="gui\events.h" />
     <ClInclude Include="gui\Frame.h" />
     <ClInclude Include="gui\GuiElement.h" />
+    <ClInclude Include="gui\GuiElements.h" />
     <ClInclude Include="gui\MenuOption.h" />
     <ClInclude Include="gui\Oscilloscope.h" />
+    <ClInclude Include="gui\RtMidi\RtMidi.h" />
     <ClInclude Include="gui\Slider.h" />
     <ClInclude Include="gui\SynthKeyboard.h" />
     <ClInclude Include="gui\TextDisplay.h" />
     <ClInclude Include="gui\Window.h" />
-    <ClInclude Include="RtMidi\RtMidi.h" />
-    <ClInclude Include="synth.h" />
+    <ClInclude Include="instruments\effects.h" />
+    <ClInclude Include="instruments\generators.h" />
+    <ClInclude Include="instruments\SynthStream.h" />
+    <ClInclude Include="instruments\tones.h" />
     <ClInclude Include="synthMain.h" />
-    <ClInclude Include="test\test.h" />
-    <ClInclude Include="tones.h" />
+    <ClInclude Include="test\testMain.h" />
     <ClInclude Include="utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
