@@ -60,6 +60,7 @@ void Frame::addChildAutoPos(std::shared_ptr<GuiElement> child)
 		cursorY += rowHeight + childAlignment;
 		rowHeight = 0;
 		child->setPosition(cursorX, cursorY);
+		cursorX += aabb.width + childAlignment;
 	}
 	rowHeight = std::max(rowHeight, unsigned(aabb.height));
 }
