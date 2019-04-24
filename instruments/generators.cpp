@@ -1,4 +1,5 @@
 #include "generators.h"
+#include "../Instruments/tones.h"
 
 namespace waves
 {
@@ -162,13 +163,17 @@ const double Tone::getMainFreqImpl() const
 	return note.getInitialFreq();
 }
 
-DynamicToneSum::DynamicToneSum(const Base_t& tones, unsigned maxTones)
-	:Base_t(tones),
+DynamicToneSum::DynamicToneSum(
+	const TimbreModel& timbreModel,
+	const std::vector<Note>& notes,
+	unsigned maxTones
+)
+	:CompoundGenerator(generateTones<Tone>(timbreModel, notes)),
 	maxTones(maxTones),
-	mainId(std::this_thread::get_id())
+	timbreModel(timbreModel)
 {}
 DynamicToneSum::DynamicToneSum(const DynamicToneSum& that)
-	:DynamicToneSum(Base_t(that.initialComponents), that.maxTones)
+	:DynamicToneSum(that.timbreModel, that.getNotes(), that.maxTones)
 {}
 
 void DynamicToneSum::lock() const { mtx.lock(); }
@@ -205,7 +210,16 @@ unsigned DynamicToneSum::getMaxTones() const
 	return maxTones;
 }
 
-unsigned DynamicToneSum::addAfterCallback(Base_t::after_t callback) 
+std::vector<Note> DynamicToneSum::getNotes() const
+{
+	std::vector<Note> ret;
+	ret.reserve(initialComponents.size());
+	for (const auto& component : initialComponents)
+		ret.push_back(component.getMainFreq());
+	return ret;
+}
+
+unsigned DynamicToneSum::addAfterCallback(after_t callback) 
 { 
 	return addCallback(afterSample, afterSampleCallbacks, callback); 
 }
@@ -213,9 +227,9 @@ void DynamicToneSum::removeAfterCallback(unsigned id)
 { 
 	removeCallback(afterSampleCallbacks, id); 
 }
-unsigned DynamicToneSum::addBeforeCallback(Base_t::before_t callback)
+unsigned DynamicToneSum::addBeforeCallback(before_t callback)
 { 
-	return addCallback(beforeSample, beforeSampleCallbacks, callback); 
+	return addCallback(beforeSample, beforeSampleCallbacks, callback);
 }
 void DynamicToneSum::removeBeforeCallback(unsigned id) 
 { 

@@ -158,6 +158,7 @@
     <ClCompile Include="gui\Window.cpp" />
     <ClCompile Include="instruments\effects.cpp" />
     <ClCompile Include="instruments\generators.cpp" />
+    <ClCompile Include="instruments\Instrument.cpp" />
     <ClCompile Include="instruments\SynthStream.cpp" />
     <ClCompile Include="instruments\tones.cpp" />
     <ClCompile Include="main.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="gui\Window.h" />
     <ClInclude Include="instruments\effects.h" />
     <ClInclude Include="instruments\generators.h" />
+    <ClInclude Include="instruments\Instrument.h" />
     <ClInclude Include="instruments\SynthStream.h" />
     <ClInclude Include="instruments\tones.h" />
     <ClInclude Include="synthMain.h" />

@@ -35,8 +35,8 @@ protected:
 	std::shared_ptr<Frame> frame;
 };
 
-template<class T>
-using AfterEffectBase = EffectBase<T, double>;
+template<class Effect_t>
+using AfterEffectBase = EffectBase<Effect_t, double>;
 
 class DebugFilter: public AfterEffectBase<DebugFilter>
 {
@@ -127,21 +127,20 @@ private:
 };
 
 template<class SampleGenerator_T>
-class PitchBender:public EffectBase<PitchBender<SampleGenerator_T>, typename SampleGenerator_T::Base_t>
+class PitchBender:public EffectBase<PitchBender<SampleGenerator_T>, typename SampleGenerator_T>
 {
-	using Base_t = DynamicToneSum::Base_t;
 
 public:
 	PitchBender(SampleGenerator_T& generator)
 		:generator(generator)
 	{
 		auto aabb = sliderPitch->AABB();
-		const auto& frame = EffectBase<PitchBender<SampleGenerator_T>, typename SampleGenerator_T::Base_t>::frame;
+		const auto& frame = EffectBase<PitchBender<SampleGenerator_T>, SampleGenerator_T>::frame;
 		frame->setSize(SynthVec2(aabb.width, aabb.height));
 		frame->addChild( sliderPitch );
 		sliderPitch->setFixed(true);
 	}
-	void operator()(double t, Base_t& sample) const
+	void operator()(double t, SampleGenerator_T& sample) const
 	{
 		generator.modifyMainPitch(
 			generator.time(),

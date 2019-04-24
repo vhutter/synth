@@ -79,6 +79,9 @@
     <ClCompile Include="test\testMain.cpp">
       <Filter>Tests</Filter>
     </ClCompile>
+    <ClCompile Include="instruments\Instrument.cpp">
+      <Filter>Instruments</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gui\Button.h">
@@ -140,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="test\testMain.h">
       <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="instruments\Instrument.h">
+      <Filter>Instruments</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -16,7 +16,7 @@
 
 namespace waves
 {
-    typedef std::function<double(double,double,double,double)> wave_t;
+    using wave_t = std::function<double(double,double,double,double)>;
 
     double sine(double time, double amp, double freq, double phase=0);
     double square(double time, double amp, double freq, double phase);
@@ -93,7 +93,7 @@ template<class T>
 class SampleGenerator
 {
 public:
-	typedef std::function<void(double, double&)> after_t;
+	using after_t = std::function<void(double, double&)>;
 
 	SampleGenerator(
 		std::function<void(double, T&)> before = {},
@@ -138,7 +138,7 @@ class Tone : public SampleGenerator<Tone>
 		friend class SampleGenerator<Tone>;
 
     public:
-		typedef std::function<void(double, Tone&)> before_t;
+		using before_t = std::function<void(double, Tone&)>;
 
         Note note;
         double intensity;
@@ -165,7 +165,7 @@ class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
 {
 	friend class SampleGenerator<CompoundGenerator<T>>;
     public:
-		typedef std::function<void(double, CompoundGenerator<T>&)> before_t;
+		using before_t = std::function<void(double, CompoundGenerator<T>&)>;
 
 		CompoundGenerator();
         CompoundGenerator(
@@ -293,31 +293,56 @@ std::optional<double> DynamicCompoundGenerator<T>::getSample(double t) const
 	}
 }
 
+struct TimbreModel
+{
+	struct ToneSkeleton {
+		double relativeFreq;
+		double intensity;
+		waves::wave_t waveform;
+	};
+
+	TimbreModel(
+		std::vector<ToneSkeleton> components,
+		Tone::before_t         beforeTone = {},
+		Tone::after_t          afterTone = {},
+		CompoundGenerator<Tone>::before_t before = {},
+		CompoundGenerator<Tone>::after_t  after = {}
+	);
+	CompoundGenerator<Tone> operator()(const double& baseFreq) const;
+
+	std::vector<ToneSkeleton> components;
+	Tone::before_t         beforeTone;
+	Tone::after_t          afterTone;
+	CompoundGenerator<Tone>::before_t before;
+	CompoundGenerator<Tone>::after_t  after;
+};
+
 class DynamicToneSum : public CompoundGenerator<DynamicCompoundGenerator<Tone>>
 {
-
-	template<class param_t>
-	using callback_t = std::function<void(double, param_t&)>;
-
 	public:
-		using Base_t = CompoundGenerator<DynamicCompoundGenerator<Tone>>;
 		friend class std::lock_guard<DynamicToneSum>;
+		using before_t = std::function<void(double, DynamicToneSum&)>;
 
-		DynamicToneSum(const Base_t& tones, unsigned maxTones);
+		DynamicToneSum(
+			const TimbreModel& timbreModel, 
+			const std::vector<Note>& notes, 
+			unsigned maxTones
+		);
 		DynamicToneSum(const DynamicToneSum& that);
 
 		double time() const;
 		double getSample(double t) const;
 		unsigned getMaxTones() const;
+		std::vector<Note> getNotes() const;
 
-		unsigned addAfterCallback(Base_t::after_t callback);
+		unsigned addAfterCallback(after_t callback);
 		void removeAfterCallback(unsigned id);
-		unsigned addBeforeCallback(Base_t::before_t callback);
+		unsigned addBeforeCallback(before_t callback);
 		void removeBeforeCallback(unsigned id);
 
 		void onKeyEvent(unsigned key, SynthKey::State keyState);
 
-	protected:
+	private:
 
 		void lock() const;
 		void unlock() const;
@@ -330,10 +355,13 @@ class DynamicToneSum : public CompoundGenerator<DynamicCompoundGenerator<Tone>>
 		};
 
 		template<class param_t>
+		using callback_t = std::function<void(double, param_t&)>;
+
+		template<class param_t> // what kind of callback do we add
 		unsigned addCallback(
-			callback_t<param_t>& raw_callback,
-			std::vector<give_id<callback_t<param_t>>>& arr,
-			callback_t<param_t>& callback
+			callback_t<param_t>& raw_callback, // on what object did we call the callbacks so far
+			std::vector<give_id<callback_t<param_t>>>& arr, // all callbacks so far
+			callback_t<param_t>& callback // new callback
 		)
 		{
 			if (!raw_callback) {
@@ -366,34 +394,11 @@ class DynamicToneSum : public CompoundGenerator<DynamicCompoundGenerator<Tone>>
 		const unsigned maxTones;
 		mutable std::atomic<double> lastTime{ 0 };
 		mutable std::mutex mtx;
-		const std::thread::id mainId;
-		std::vector<give_id<Base_t::after_t>> afterSampleCallbacks;
-		std::vector<give_id<Base_t::before_t>> beforeSampleCallbacks;
+		std::vector<give_id<after_t>> afterSampleCallbacks;
+		std::vector<give_id<before_t>> beforeSampleCallbacks;
+		TimbreModel timbreModel;
+		before_t beforeSample; // shadowing base class' beforeSample, because of its type
 };
 
-
-struct TimbreModel
-{
-	struct ToneSkeleton {
-		double relativeFreq;
-		double intensity;
-		waves::wave_t waveform;
-	};
-
-	TimbreModel(
-		std::vector<ToneSkeleton> components,
-		Tone::before_t         beforeTone = {},
-		Tone::after_t          afterTone = {},
-		CompoundGenerator<Tone>::before_t before = {},
-		CompoundGenerator<Tone>::after_t  after = {}
-	);
-	CompoundGenerator<Tone> operator()(const double& baseFreq) const;
-
-	std::vector<ToneSkeleton> components;
-	Tone::before_t         beforeTone;
-	Tone::after_t          afterTone;
-	CompoundGenerator<Tone>::before_t before;
-	CompoundGenerator<Tone>::after_t  after;
-};
 
 #endif // GENERATORS_H_INCLUDED

@@ -24,12 +24,12 @@ int synthMain(int argc, char** argv)
 
 	const unsigned maxNotes{ 5 }, sampleRate{ 44100 };
 	auto notes = generateNotes(0, 2);
-	auto tones = generateTones<Tone>(Sine13, notes);
-	auto generator = DynamicToneSum(tones, maxNotes);
+	//auto tones = generateTones<Tone>(Sine13, notes);
+	auto generator = DynamicToneSum(Sine13, notes, maxNotes);
 
 	auto keyboard = KeyboardOutput();
-	auto glider = Glider(Sine13, notes, maxNotes);
 	auto pitchBender = PitchBender(generator);
+	auto glider = Glider(Sine13, notes, maxNotes);
 	auto echo = EchoEffect(sampleRate, 0.3, 0.6);
 	auto volume = VolumeControl();
 	auto debugFilter = DebugFilter();
