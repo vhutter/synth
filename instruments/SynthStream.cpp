@@ -1,5 +1,6 @@
 #include "SynthStream.h"
 
+#include <algorithm>
 #include <exception>
 #include <iostream>
 #include <ctime>
@@ -24,7 +25,7 @@ int SynthStream::PaStreamCallbackData::callbackFunction(
     auto* out = static_cast<float*>( outputBuffer );
 
     for (unsigned i=0; i<framesPerBuffer; i++) {
-        float sample1 = data->generator1(data->sampleTime);
+        float sample1 = std::clamp(data->generator1(data->sampleTime), -1., 1.);
         float sample2 = sample1;
         *out++ = sample1;
 		*out++ = sample2;
