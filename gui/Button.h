@@ -14,7 +14,32 @@ public:
 		return std::make_unique<Button>(s, 100, 30, 16, onClick);
 	}
 	static std::unique_ptr<Button> DefaultButton(const std::string& s, std::atomic<bool>& val) {
-		return std::make_unique<Button>(s, 100, 30, 16, [&]() {val = !val; });
+		return DefaultButton(s, [&]() {val = !val; });
+	}
+	static std::unique_ptr<Button> OnOffButton(std::atomic<bool>& val) {
+		auto ret = DefaultButton("", [&]() {});
+
+		auto setState = [button = ret.get()](bool val) {
+			if (val) {
+				button->setText("On");
+				button->setNormalColor(sf::Color(0xA52A2AFF));
+			}
+			else {
+				button->setText("Off");
+				button->setNormalColor(sf::Color::Black);
+			}
+			button->centralize();
+		};
+
+		ret->setSize(SynthVec2(40, 40));
+		ret->setFixedSize(true);
+		setState(val);
+		ret->clickCallback = [button = ret.get(), &val, setState ]() {
+			val = !val;
+			setState(val);
+		};
+
+		return ret;
 	}
 
 	void setNormalColor(const sf::Color& col);
