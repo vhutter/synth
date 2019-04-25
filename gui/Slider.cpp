@@ -124,7 +124,7 @@ SynthRect Slider::AABB() const
 	SynthFloat top = std::min({ box1.top, box2.top, box3.top });
 	SynthFloat right = std::max({ box1.left + box1.width, box2.left + box2.width, box3.left + box3.width });
 	SynthFloat bot = std::max({ box1.top + box1.height, box2.top + box2.height, box3.top + box3.height });
-	return { left, top, right - left, bot - top };
+	return SynthRect{ SynthVec2{left, top} + SynthVec2(getPosition()), {right - left, bot - top } };
 }
 
 void Slider::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
