@@ -24,9 +24,10 @@ int SynthStream::PaStreamCallbackData::callbackFunction(
     auto* out = static_cast<float*>( outputBuffer );
 
     for (unsigned i=0; i<framesPerBuffer; i++) {
-        float sample = data->generator1(data->sampleTime);
-        *out++ = sample;
-        *out++ = sample;
+        float sample1 = data->generator1(data->sampleTime);
+        float sample2 = sample1;
+        *out++ = sample1;
+		*out++ = sample2;
         data->sampleTime += data->sampleTimeDif;
     }
 

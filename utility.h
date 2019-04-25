@@ -12,4 +12,7 @@ sf::View getCroppedView(const sf::View& oldView, SynthFloat x, SynthFloat y, Syn
 sf::View getCroppedView(const sf::View& oldView, const SynthVec2& p, const SynthVec2& s);
 sf::View getCroppedView(const sf::View& oldView, const SynthRect& box);
 
+struct Note;
+std::vector<Note> generateNotes(int fromOctave, int toOctave);
+
 #endif

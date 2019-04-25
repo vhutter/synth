@@ -3,26 +3,8 @@
 
 #include <vector>
 #include <atomic>
-#include <array>
 
 #include "generators.h"
-
-static const std::array<Note, 12> baseNotes = {
-	Note::C,
-	Note::Cis,
-	Note::D,
-	Note::Dis,
-	Note::E,
-	Note::F,
-	Note::Fis,
-	Note::G,
-	Note::Gis,
-	Note::A,
-	Note::Ais,
-	Note::B
-};
-
-std::vector<Note> generateNotes(int fromOctave, int toOctave);
 
 static TimbreModel Sine13{
 	{

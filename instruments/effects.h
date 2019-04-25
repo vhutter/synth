@@ -74,10 +74,10 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-class EchoEffect: public AfterEffectBase<EchoEffect>
+class DelayEffect: public AfterEffectBase<DelayEffect>
 {
 public:
-	EchoEffect( 
+	DelayEffect( 
 		unsigned sampleRate, 
 		double echoLength,
 		double echoCoeff
@@ -87,11 +87,14 @@ public:
 private:
 	struct Impl
 	{
-		const double coeff;
-		const unsigned bufSize;
+		std::atomic<bool> on{ false };
+		std::atomic<double> coeff;
+		std::atomic<double> length;
+		unsigned sampleRate;
 		std::vector<double> echoBuf;
-
-		Impl(double coeff, unsigned bufSize);
+		std::shared_ptr<Slider> sliderCoeff = Slider::DefaultSlider("Intensity", 0, 1, coeff);
+		std::shared_ptr<Button> effectOn;
+		std::shared_ptr<Slider> sliderTime;
 	};
 
 	std::shared_ptr<Impl> impl;
@@ -122,7 +125,7 @@ private:
 	};
 
 	unsigned lastPressed, maxNotes;
-	const std::vector<Note>& notes;
+	std::vector<Note> notes;
 	std::shared_ptr<Impl> impl;
 };
 
@@ -131,8 +134,7 @@ class PitchBender:public EffectBase<PitchBender<SampleGenerator_T>, typename Sam
 {
 
 public:
-	PitchBender(SampleGenerator_T& generator)
-		:generator(generator)
+	PitchBender()
 	{
 		auto aabb = sliderPitch->AABB();
 		const auto& frame = EffectBase<PitchBender<SampleGenerator_T>, SampleGenerator_T>::frame;
@@ -140,7 +142,7 @@ public:
 		frame->addChild( sliderPitch );
 		sliderPitch->setFixed(true);
 	}
-	void operator()(double t, SampleGenerator_T& sample) const
+	void operator()(double t, SampleGenerator_T& generator) const
 	{
 		generator.modifyMainPitch(
 			generator.time(),
@@ -149,8 +151,6 @@ public:
 	}
 
 private:
-
-	SampleGenerator_T& generator;
 	std::shared_ptr<Slider> sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1) };
 
 };

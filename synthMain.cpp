@@ -4,6 +4,8 @@
 #include "instruments/tones.h"
 #include "instruments/effects.h"
 #include "instruments/SynthStream.h"
+#include "instruments/Instrument.h"
+
 #include "gui.h"
 
 int synthMain(int argc, char** argv)
@@ -21,62 +23,50 @@ int synthMain(int argc, char** argv)
 	auto gui = mainWindow->getContentFrame();
 	auto menu = mainWindow->getMenuFrame();
 	using pos_t = MenuOption::OptionList::ChildPos_t;
-
-	const unsigned maxNotes{ 5 }, sampleRate{ 44100 };
-	auto notes = generateNotes(0, 2);
-	//auto tones = generateTones<Tone>(Sine13, notes);
-	auto generator = DynamicToneSum(Sine13, notes, maxNotes);
-
-	auto keyboard = KeyboardOutput();
-	auto pitchBender = PitchBender(generator);
-	auto glider = Glider(Sine13, notes, maxNotes);
-	auto echo = EchoEffect(sampleRate, 0.3, 0.6);
-	auto volume = VolumeControl();
-	auto debugFilter = DebugFilter();
-
-	keyboard.outputTo(
-		generator,
-		glider
-	);
-
-	auto debugWindow = std::make_shared<Window>(debugFilter.getFrame());
-	debugWindow->setHeader(30, "Debug");
-	debugWindow->setVisibility(false);
-
-
-	gui->addChild( keyboard.getGuiElement(), 50, 700 );
-	gui->addChild( debugWindow, 600, 50);
-
 	gui->setChildAlignment(10);
 	gui->setCursor(10, 10);
 
+	const unsigned maxNotes{ 5 }, sampleRate{ 44100 }, bufferSize{ 16 };
+	auto notes = generateNotes(0, 2);
+
+	Instrument1 inst(sampleRate, bufferSize, Sine13, notes, maxNotes);
+	gui->addChild(inst.getGuiElement(), 50, 50);
+
+
+
+	auto volume = VolumeControl();
 	gui->addChildAutoPos(volume.getFrame());
-	gui->addChildAutoPos(pitchBender.getFrame());
-	gui->addChildAutoPos(glider.getFrame() );
+
+	auto delay = DelayEffect(sampleRate, 0.3, 0.6);
+	auto delayWindow = std::make_shared<Window>(delay.getFrame());
+	delayWindow->setHeader(30, "Delay");
+	delayWindow->setVisibility(false);
+	gui->addChildAutoPos(delayWindow);
+
+	auto debugFilter = DebugFilter();
+	auto debugWindow = std::make_shared<Window>(debugFilter.getFrame());
+	debugWindow->setHeader(30, "Debug");
+	debugWindow->setVisibility(false);
+	gui->addChildAutoPos(debugWindow);
+	
+
 
 	menu->addChildAutoPos(MenuOption::createMenu(
 		100, 30, 15, {
 			"View", pos_t::Down, {{
-				"Debug", debugWindow},
+				"Debug", debugWindow}, {
+				"Effects", {{
+					"Delay", delayWindow},
+				}}
 			}
 		}
 	));
-	
 
-	generator.addBeforeCallback(pitchBender);
-	generator.addAfterCallback(glider);
-	generator.addAfterCallback(echo);
-	generator.addAfterCallback(volume);
-	generator.addAfterCallback(debugFilter);
+	inst.getGenerator().addAfterCallback(delay);
+	inst.getGenerator().addAfterCallback(volume);
+	inst.getGenerator().addAfterCallback(debugFilter);
 
-	const auto& generateSample = [&](double t) -> double {
-		std::lock_guard<DynamicToneSum> lock(generator);
-		double sample = generator.getSample(t);
-		return sample;
-	};
-
-	SynthStream synth(sampleRate, 32, generateSample, generateSample);
-	synth.play();
+	inst.play();
 
 	MidiContext midiContext;
 

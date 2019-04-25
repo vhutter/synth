@@ -1,4 +1,5 @@
 #include "utility.h"
+#include "instruments/generators.h"
 
 sf::Font loadCourierNew()
 {
@@ -53,4 +54,13 @@ sf::View getCroppedView(const sf::View& oldView, const SynthVec2& p, const Synth
 sf::View getCroppedView(const sf::View& oldView, const SynthRect& box)
 {
 	return getCroppedView(oldView, box.left, box.top, box.width, box.height);
+}
+
+std::vector<Note> generateNotes(int from, int to)
+{
+	std::vector<Note> notes;
+	for (int i = from; i <= to; ++i)
+		for (auto note : Note::baseNotes) notes.push_back(note * pow(2, i));
+	notes.push_back(Note::baseNotes[0] * pow(2, to + 1));
+	return notes;
 }

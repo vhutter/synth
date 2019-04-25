@@ -119,8 +119,8 @@ Note::Note(double f)
 const Note Note::C  (523.25);
 const Note Note::Cis(554.37);
 const Note Note::D  (587.33);
-const Note Note::E  (659.25);
 const Note Note::Dis(622.25);
+const Note Note::E  (659.25);
 const Note Note::F  (698.46);
 const Note Note::Fis(739.99);
 const Note Note::G  (783.99);
@@ -128,6 +128,8 @@ const Note Note::Gis(830.61);
 const Note Note::A  (880.00);
 const Note Note::Ais(932.33);
 const Note Note::B  (987.77);
+
+const std::array<Note, 12> Note::baseNotes{ C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B };
 
 Tone::Tone(
 	const Note& note,
@@ -217,6 +219,11 @@ std::vector<Note> DynamicToneSum::getNotes() const
 	for (const auto& component : initialComponents)
 		ret.push_back(component.getMainFreq());
 	return ret;
+}
+
+const TimbreModel& DynamicToneSum::getTimbreModel() const
+{
+	return timbreModel;
 }
 
 unsigned DynamicToneSum::addAfterCallback(after_t callback) 

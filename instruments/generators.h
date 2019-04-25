@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <atomic>
 #include <mutex>
+#include <array>
 #include <optional>
 #include <SFML/System.hpp>
 
@@ -80,6 +81,8 @@ class Note
 		static const Note Fis;
 		static const Note G;
 		static const Note Gis;
+
+		static const std::array<Note, 12> baseNotes;
 		
     private:
         double freq;
@@ -334,6 +337,7 @@ class DynamicToneSum : public CompoundGenerator<DynamicCompoundGenerator<Tone>>
 		double getSample(double t) const;
 		unsigned getMaxTones() const;
 		std::vector<Note> getNotes() const;
+		const TimbreModel& getTimbreModel() const;
 
 		unsigned addAfterCallback(after_t callback);
 		void removeAfterCallback(unsigned id);

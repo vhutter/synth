@@ -63,7 +63,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	auto notes = generateNotes(0, 2);
 
 	auto generator = DynamicToneSum(Sine13, notes, 5);
-	auto pitch = PitchBender(generator);
+	auto pitch = PitchBender<DynamicToneSum>();
 	auto pitchWindow = std::make_shared<Window>(pitch.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(pitchWindow);
 
