@@ -188,6 +188,11 @@ void Window::setMenuBar(unsigned size)
 	fixLayout();
 }
 
+void Window::addEmptyListener(std::shared_ptr<EmptyGuiElement> listener)
+{
+	GuiElement::addChild(listener);
+}
+
 const std::shared_ptr<Frame>& Window::getContentFrame() const
 {
 	return content;

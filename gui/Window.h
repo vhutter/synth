@@ -24,6 +24,7 @@ public:
 	
 	void setHeader(unsigned size, const std::string& title, unsigned textSize=0);
 	void setMenuBar(unsigned size);
+	void addEmptyListener(std::shared_ptr<EmptyGuiElement> listener);
 
 	const std::shared_ptr<Frame>& getContentFrame() const;
 	const std::shared_ptr<Frame>& getMenuFrame() const;
