@@ -3,11 +3,12 @@
 
 #include <utility>
 #include <functional>
-#include "SynthStream.h"
+
 #include "../gui/Window.h"
 #include "generators.h"
-#include "effects.h"
 #include "tones.h"
+#include "effects.h"
+#include "SynthStream.h"
 
 template<class Generator>
 class Instrument
@@ -23,6 +24,7 @@ public:
 		GeneratorParams&& ...params
 	)
 		:sampleRate{ sampleRate },
+		bufferSize{ bufferSize },
 		generator{ std::forward<GeneratorParams>(params)... },
 		left{ [this](double t) {return generator.getSample(t); } },
 		right{ [this](double t) {return generator.getSample(t); } },
@@ -32,6 +34,8 @@ public:
 	}
 
 	Generator& getGenerator() { return generator; }
+	unsigned getSampleRate() const { return sampleRate; }
+	unsigned getBufferSize() const { return bufferSize; }
 	void play() { stream.play(); }
 	void stop() { stream.stop(); }
 
@@ -39,7 +43,7 @@ public:
 
 protected:
 
-	const unsigned sampleRate{ 44100 };
+	const unsigned sampleRate{ 44100 }, bufferSize{ 64 };
 	Generator generator;
 	std::function<double(double)> left, right;
 	SynthStream stream;
@@ -58,40 +62,12 @@ public:
 		pitchBender{},
 		glider{ generator.getTimbreModel(), generator.getNotes(), generator.getMaxTones() }
 	{
-		const unsigned wWidth{ 800 }, wHeight{ 400 }, menuHeight{ 30 };
-		using pos_t = MenuOption::OptionList::ChildPos_t;
-		window->setSize(SynthVec2(wWidth,wHeight));
-		window->setHeader(menuHeight, "Instrument1");
-		window->setMenuBar(menuHeight);
-		auto gui = window->getContentFrame();
-		auto menu = window->getMenuFrame();
-		gui->setChildAlignment(10);
-		gui->setCursor(10, 10);
-
-		keyboard.outputTo(
-			generator,
-			glider
-		);
-
-		gui->addChildAutoPos(pitchBender.getFrame());
-		gui->addChildAutoPos(glider.getFrame());
-
-		auto kbAABB = keyboard.getGuiElement()->AABB();
-		gui->addChild(keyboard.getGuiElement(), 0, wHeight-kbAABB.height);
-		
-		menu->addChildAutoPos(MenuOption::createMenu(
-			100, 30, 15, {
-				"Settings", pos_t::Down, {
-				}
-			}
-		));
-
-
-		generator.addBeforeCallback(pitchBender);
-		generator.addAfterCallback(glider);
+		init();
 	}
 
 private:
+	void init();
+
 	KeyboardOutput keyboard;
 	PitchBender<DynamicToneSum> pitchBender;
 	Glider glider;
