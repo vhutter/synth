@@ -20,23 +20,18 @@ void Frame::setEventCallback(const std::variant<sfCallback_t, midiCallback_t>& c
 
 void Frame::fitToChildren()
 {
-	float x1 = getPosition().x;
-	float y1 = getPosition().y;
-	float x2 = x1 + getSize().x;
-	float y2 = x1 + getSize().y;
+	float x2 = std::numeric_limits<float>::lowest();//x1 + getSize().x;
+	float y2 = std::numeric_limits<float>::lowest();//x1 + getSize().y;
 	for (auto child : children) {
 		const auto& aabb = child->AABB();
 		float cx1 = aabb.left;
 		float cy1 = aabb.top;
 		float cx2 = cx1 + aabb.width;
 		float cy2 = cy1 + aabb.height;
-		x1 = std::min(x1, cx1);
-		y1 = std::min(y1, cy1);
 		x2 = std::max(x2, cx2);
 		y2 = std::max(y2, cy2);
 	}
-	setPosition(x1, y1);
-	setSize({ x2 - x1, y2 - y1 });
+	setSize({ x2, y2 });
 }
 
 void Frame::setChildAlignment(unsigned a)
