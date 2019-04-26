@@ -15,15 +15,17 @@ class EffectBase
 {
 public:
 	EffectBase()
-		:frame(std::make_shared<Frame>())
+		:frame{ std::make_shared<Frame>() }
 	{
-		frame->setBgColor(sf::Color::Transparent);
-		frame->setChildAlignment(10);
+		frame->setBgColor(sf::Color(0x555555aa));
+		frame->setSize(SynthVec2(300, 300));
 	}
 
 	void operator()(double t, param_t& sample) const
 	{
-		static_cast<const T*>(this)->effectImpl(t, sample);
+		if (*active) {
+			static_cast<const T*>(this)->effectImpl(t, sample);
+		}
 	}
 
 	const std::shared_ptr<Frame> getFrame() const
@@ -33,6 +35,21 @@ public:
 
 protected:
 	std::shared_ptr<Frame> frame;
+
+	void addToggleButton()
+	{
+		*active = false;
+		std::shared_ptr<Button> activateButton{ Button::OnOffButton(*active) };
+		frame->addChildAutoPos(activateButton);
+	}
+
+	void setWidth(unsigned width)
+	{
+		frame->setSize(SynthVec2(width, 0));
+	}
+
+private:
+	std::shared_ptr< std::atomic<bool> > active{ std::make_shared<std::atomic<bool>>(true) };
 };
 
 template<class Effect_t>
@@ -45,6 +62,7 @@ public:
 	void effectImpl(double t, double& sample) const;
 
 private:
+
 	struct Impl
 	{
 		std::shared_ptr<Oscilloscope> oscilloscope{ std::make_shared<Oscilloscope>(500, 200, 500) };
@@ -87,13 +105,11 @@ public:
 private:
 	struct Impl
 	{
-		std::atomic<bool> on{ false };
 		std::atomic<double> coeff;
 		std::atomic<double> length;
 		unsigned sampleRate;
 		std::vector<double> echoBuf;
-		std::shared_ptr<Slider> sliderCoeff = Slider::DefaultSlider("Intensity", 0, 1, coeff);
-		std::shared_ptr<Button> effectOn;
+		std::shared_ptr<Slider> sliderCoeff;
 		std::shared_ptr<Slider> sliderTime;
 	};
 
@@ -117,9 +133,7 @@ private:
 		DynamicCompoundGenerator<Tone> glidingTone;
 		ContinuousFunction glidePitch{ 100 };
 		std::atomic<double> glideSpeed{ .5 }, lastTime{ 0. };
-		std::atomic<bool> glide{ false };
 		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, glideSpeed) };
-		std::shared_ptr<Button> glideButton;
 
 		Impl(const TimbreModel& model);
 	};
@@ -132,17 +146,20 @@ private:
 template<class SampleGenerator_T>
 class PitchBender:public EffectBase<PitchBender<SampleGenerator_T>, typename SampleGenerator_T>
 {
-
+	using base = EffectBase<PitchBender<SampleGenerator_T>, SampleGenerator_T>;
 public:
 	PitchBender()
+		:base()
 	{
 		auto aabb = sliderPitch->AABB();
-		const auto& frame = EffectBase<PitchBender<SampleGenerator_T>, SampleGenerator_T>::frame;
-		frame->setSize(SynthVec2(aabb.width, aabb.height));
-		frame->addChild( sliderPitch );
+		const auto& frame = base::frame;
+		base::addToggleButton();
+		base::setWidth(aabb.width);
+		frame->addChildAutoPos( sliderPitch );
+		frame->fitToChildren();
 		sliderPitch->setFixed(true);
 	}
-	void operator()(double t, SampleGenerator_T& generator) const
+	void effectImpl(double t, SampleGenerator_T& generator) const
 	{
 		generator.modifyMainPitch(
 			generator.time(),
