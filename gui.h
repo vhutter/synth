@@ -3,8 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
-class GuiElement;
+class Window;
 
-void setupGui(std::shared_ptr<GuiElement> gui, sf::RenderWindow& window);
+void setupGui(std::shared_ptr<Window> gui, sf::RenderWindow& window);
 
 #endif // GUI_H_INCLUDED
