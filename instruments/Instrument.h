@@ -59,7 +59,7 @@ public:
 	Instrument1(BaseParams&& ...params) 
 		:Instrument(std::forward<BaseParams>(params)...),
 		keyboard{},
-		pitchBender{},
+		pitchBender{ generator },
 		glider{ generator.getTimbreModel(), generator.getNotes(), generator.getMaxTones() }
 	{
 		init();

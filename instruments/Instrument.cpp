@@ -30,7 +30,5 @@ void Instrument1::init()
 		}
 	));
 
-
-	generator.addBeforeCallback(pitchBender);
 	generator.addAfterCallback(glider);
 }
