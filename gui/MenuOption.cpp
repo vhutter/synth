@@ -46,6 +46,7 @@ MenuOption::MenuOption(const std::string& text, unsigned int charSize, std::shar
 	:Button(text, 0, 0, charSize, [this, popup]() {
 		if (isPressed()) {
 			popup->setVisibility(true);
+			popup->focus();
 		}
 	})
 {

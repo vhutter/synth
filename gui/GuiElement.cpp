@@ -28,12 +28,7 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 			for (auto child = children.rbegin(); child != children.rend(); ++child) {
 				if ((*child)->forwardEvent(event, globalTransform)) {
 					auto clickedChild = std::next(child).base();
-					if ((*child)->focusable) {
-						// set the element in focus
-						auto pElem = *child;
-						children.erase(clickedChild);
-						children.push_back(pElem);
-					}
+					(*clickedChild)->focus(clickedChild - children.begin());
 					ret = true;
 					break;
 				}
@@ -45,14 +40,13 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 
 void GuiElement::addChild(std::shared_ptr<GuiElement> child, unsigned px, unsigned py)
 {
+	if (child->parent) {
+		child->parent->removeChild(child);
+	}
+	child->parent = this;
 	children.push_back(child);
 	child->setPosition(px, py);
 }
-
-//void GuiElement::addChild(std::shared_ptr<GuiElement> child)
-//{
-//	children.push_back(child);
-//}
 
 void GuiElement::removeChild(const std::shared_ptr<GuiElement>& child)
 {
@@ -60,6 +54,7 @@ void GuiElement::removeChild(const std::shared_ptr<GuiElement>& child)
 	if (found != children.end()) {
 		children.erase(found);
 	}
+	child->parent = nullptr;
 }
 
 void GuiElement::onEvent(const SynthEvent & eventArg)
@@ -80,6 +75,22 @@ void GuiElement::setVisibility(bool v)
 void GuiElement::setFocusable(bool d)
 {
 	focusable = d;
+}
+
+void GuiElement::focus(unsigned ownIdx)
+{
+	if (!parent) return;
+	if (focusable) {
+		auto& siblings = parent->children;
+		auto myself = shared_from_this();
+		auto myIt = siblings.end();
+
+		if (ownIdx != -1u) myIt = siblings.begin() + ownIdx;
+		else myIt = std::find(siblings.begin(), siblings.end(), myself);
+
+		siblings.erase(myIt);
+		siblings.push_back(myself);
+	}
 }
 
 void GuiElement::moveAroundPoint(const SynthVec2 & center)

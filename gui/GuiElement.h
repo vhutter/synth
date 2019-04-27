@@ -5,7 +5,7 @@
 #include "../utility.h"
 #include "events.h"
 
-class GuiElement : public sf::Drawable, public sf::Transformable
+class GuiElement : public sf::Drawable, public sf::Transformable, public std::enable_shared_from_this<GuiElement>
 {
 public:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override final;
@@ -20,6 +20,7 @@ public:
 	void onEvent(const SynthEvent& event);
 	void setVisibility(bool v);
 	void setFocusable(bool d);
+	void focus(unsigned ownIdx=-1u);
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const = 0;
@@ -36,6 +37,8 @@ private:
 	using sf::Transformable::scale;
 	using sf::Transformable::setRotation;
 	using sf::Transformable::setScale;
+
+	GuiElement* parent{ nullptr };
 };
 
 class EmptyGuiElement : public GuiElement
