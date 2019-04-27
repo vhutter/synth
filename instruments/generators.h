@@ -352,10 +352,10 @@ class DynamicToneSum : public Composite<Dynamic<Composite<WaveGenerator>>>
 
 		void onKeyEvent(unsigned key, SynthKey::State keyState);
 
-	private:
-
 		void lock() const;
 		void unlock() const;
+
+	private:
 
 		template<class T>
 		struct give_id
@@ -403,7 +403,7 @@ class DynamicToneSum : public Composite<Dynamic<Composite<WaveGenerator>>>
 
 		const unsigned maxTones;
 		mutable std::atomic<double> lastTime{ 0 };
-		mutable std::mutex mtx;
+		mutable std::recursive_mutex mtx;
 		std::vector<give_id<after_t>> afterSampleCallbacks;
 		std::vector<give_id<before_t>> beforeSampleCallbacks;
 		TimbreModel timbreModel;

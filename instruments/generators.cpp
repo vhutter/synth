@@ -190,7 +190,7 @@ double DynamicToneSum::time() const { return lastTime.load(); }
 
 double DynamicToneSum::getSample(double t) const
 {
-	// The application of effects looks ugly
+	std::lock_guard lock(*this);
 	lastTime.store(t);
 	if (beforeSample) beforeSample(t, *const_cast<DynamicToneSum*>(this));
 	double result{ 0. };

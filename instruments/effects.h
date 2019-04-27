@@ -163,6 +163,7 @@ public:
 private:
 	SampleGenerator_T& generator;
 	std::shared_ptr<Slider> sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, [this](Slider & sliderPitch) {
+		std::lock_guard lock(generator);
 		generator.modifyMainPitch(
 			generator.time(),
 			generator.getMainFreq() + sliderPitch.getValue() * 1 / 9 * generator.getMainFreq()
