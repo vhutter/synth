@@ -81,7 +81,7 @@ void DelayEffect::effectImpl(double t, double & sample) const
 }
 
 Glider::Impl::Impl(const TimbreModel& model) 
-	:glidingTone(model(100))
+	:glidingTone(model(1))
 {
 }
 
