@@ -144,7 +144,7 @@ Tone::Tone(
 	waveform(waveform)
 {}
 
-void Tone::modifyMainPitch(double t, double f2)
+void Tone::modifyMainPitchImpl(double t, double f2)
 {
 	auto& component = *this;
 	double f1 = component.note;
@@ -170,7 +170,7 @@ DynamicToneSum::DynamicToneSum(
 	const std::vector<Note>& notes,
 	unsigned maxTones
 )
-	:CompoundGenerator(generateTones<Tone>(timbreModel, notes)),
+	:base_t(generateTones<Tone>(timbreModel, notes)),
 	maxTones(maxTones),
 	timbreModel(timbreModel)
 {}
@@ -257,8 +257,8 @@ TimbreModel::TimbreModel(
 	std::vector<TimbreModel::ToneSkeleton> components,
 	Tone::before_t         beforeTone,
 	Tone::after_t          afterTone,
-	CompoundGenerator<Tone>::before_t before,
-	CompoundGenerator<Tone>::after_t  after
+	CompositeGenerator<Tone>::before_t before,
+	CompositeGenerator<Tone>::after_t  after
 )
 	:components(components),
 	beforeTone(beforeTone),
@@ -267,7 +267,7 @@ TimbreModel::TimbreModel(
 	after(after)
 {}
 
-CompoundGenerator<Tone> TimbreModel::operator()(const double& baseFreq) const
+CompositeGenerator<Tone> TimbreModel::operator()(const double& baseFreq) const
 {
 	std::vector<Tone> tones;
 	tones.reserve(components.size());
@@ -285,5 +285,5 @@ CompoundGenerator<Tone> TimbreModel::operator()(const double& baseFreq) const
 		);
 	}
 	);
-	return CompoundGenerator(tones, before, after);
+	return CompositeGenerator(tones, before, after);
 }

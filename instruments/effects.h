@@ -19,6 +19,7 @@ public:
 	{
 		frame->setBgColor(sf::Color(0x555555aa));
 		frame->setSize(SynthVec2(300, 300));
+		frame->setFocusable(false);
 	}
 
 	void operator()(double t, param_t& sample) const
@@ -65,8 +66,10 @@ private:
 
 	struct Impl
 	{
-		std::shared_ptr<Oscilloscope> oscilloscope{ std::make_shared<Oscilloscope>(500, 200, 500) };
+		const unsigned resolution = 500;
+		std::shared_ptr<Oscilloscope> oscilloscope{ std::make_shared<Oscilloscope>(500, 200, resolution) };
 		std::shared_ptr<TextDisplay> maxSampText;
+		std::vector<double> lastSamples = std::vector<double>( resolution, 0. );
 		double maxSamp;
 	};
 
@@ -130,7 +133,7 @@ public:
 private:
 	struct Impl
 	{
-		DynamicCompoundGenerator<Tone> glidingTone;
+		DynamicGenerator<CompositeGenerator<Tone>> glidingTone;
 		ContinuousFunction glidePitch{ 100 };
 		std::atomic<double> glideSpeed{ .5 }, lastTime{ 0. };
 		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, glideSpeed) };

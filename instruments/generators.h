@@ -126,6 +126,10 @@ public:
 			return 1;
 		}
 	}
+	void modifyMainPitch(double t, double f2)
+	{
+		static_cast<T*>(this)->modifyMainPitchImpl(t, f2);
+	}
 	
 	const double getMainFreq() const
 	{
@@ -156,32 +160,32 @@ class Tone : public SampleGenerator<Tone>
 			after_t  after = {}
 		);
 
-		void modifyMainPitch(double t, double dest);
 
     private:
+		void modifyMainPitchImpl(double t, double dest);
         double getSampleImpl(double t) const;
 		const double getMainFreqImpl() const;
 };
 
 template<class T>
-class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
+class CompositeGenerator: public SampleGenerator<CompositeGenerator<T>>
 {
-	friend class SampleGenerator<CompoundGenerator<T>>;
+	friend class SampleGenerator<CompositeGenerator<T>>;
     public:
-		using before_t = std::function<void(double, CompoundGenerator<T>&)>;
+		using before_t = std::function<void(double, CompositeGenerator<T>&)>;
 
-		CompoundGenerator();
-        CompoundGenerator(
+		CompositeGenerator();
+        CompositeGenerator(
 			const std::vector<T>&,
 			before_t before = {},
-			typename SampleGenerator<CompoundGenerator<T>>::after_t after = {}
+			typename SampleGenerator<CompositeGenerator<T>>::after_t after = {}
 		);
 
         void addComponent(const T& desc);
-        void modifyMainPitch(double t, double dest);
 		const T& operator[](std::size_t idx) const;
 
     protected:
+        void modifyMainPitchImpl(double t, double dest);
         double getSampleImpl(double t) const;
 		const double getMainFreqImpl() const;
 
@@ -190,27 +194,27 @@ class CompoundGenerator: public SampleGenerator<CompoundGenerator<T>>
 };
 
 template<class T>
-CompoundGenerator<T>::CompoundGenerator()
+CompositeGenerator<T>::CompositeGenerator()
 {}
 
 template<class T>
-CompoundGenerator<T>::CompoundGenerator(
+CompositeGenerator<T>::CompositeGenerator(
 	const std::vector<T>& comps,
 	before_t before,
-	typename SampleGenerator<CompoundGenerator<T>>::after_t after)
-	: SampleGenerator<CompoundGenerator>(before, after),
+	typename SampleGenerator<CompositeGenerator<T>>::after_t after)
+	: SampleGenerator<CompositeGenerator>(before, after),
 	initialComponents(comps.begin(), comps.end()),
 	components(initialComponents)
 {}
 
 template<class T>
-void CompoundGenerator<T>::addComponent(const T& td)
+void CompositeGenerator<T>::addComponent(const T& td)
 {
 	components.push_back(td);
 }
 
 template<class T>
-void CompoundGenerator<T>::modifyMainPitch(double t, double dest)
+void CompositeGenerator<T>::modifyMainPitchImpl(double t, double dest)
 {
 	const double changeRate = dest / initialComponents.front().getMainFreq();
 	for (unsigned i = 0; i < components.size(); ++i) {
@@ -222,7 +226,7 @@ void CompoundGenerator<T>::modifyMainPitch(double t, double dest)
 }
 
 template<class T>
-double CompoundGenerator<T>::getSampleImpl(double t) const
+double CompositeGenerator<T>::getSampleImpl(double t) const
 {
 	double result = 0.;
 	double intensitySum = 0.;
@@ -237,23 +241,23 @@ double CompoundGenerator<T>::getSampleImpl(double t) const
 }
 
 template<class T>
-const T& CompoundGenerator<T>::operator[](std::size_t idx) const
+const T& CompositeGenerator<T>::operator[](std::size_t idx) const
 {
 	return components[idx];
 }
 
 template<class T>
-const double CompoundGenerator<T>::getMainFreqImpl() const
+const double CompositeGenerator<T>::getMainFreqImpl() const
 {
 	return initialComponents.front().getMainFreq();
 }
 
-template<class T>
-class DynamicCompoundGenerator: public CompoundGenerator<T>
+template<class BaseGenerator>
+class DynamicGenerator: public BaseGenerator
 {
 	public:
-		DynamicCompoundGenerator(
-			const CompoundGenerator<T>& cTone,
+		DynamicGenerator(
+			const BaseGenerator& baseGen,
 			ADSREnvelope env = {}
 		);
 		void start(double t) const;
@@ -265,31 +269,31 @@ class DynamicCompoundGenerator: public CompoundGenerator<T>
 };
 
 template<class T>
-DynamicCompoundGenerator<T>::DynamicCompoundGenerator(
-	const CompoundGenerator<T>& cTone,
+DynamicGenerator<T>::DynamicGenerator(
+	const T& baseGen,
 	ADSREnvelope env
 ) :
-	CompoundGenerator<T>(cTone),
+	T(baseGen),
 	envelope(env)
 {}
 
 template<class T>
-void DynamicCompoundGenerator<T>::start(double t) const
+void DynamicGenerator<T>::start(double t) const
 {
 	envelope.start(t);
 }
 
 template<class T>
-void DynamicCompoundGenerator<T>::stop(double t) const
+void DynamicGenerator<T>::stop(double t) const
 {
 	envelope.stop(t);
 }
 
 template<class T>
-std::optional<double> DynamicCompoundGenerator<T>::getSample(double t) const
+std::optional<double> DynamicGenerator<T>::getSample(double t) const
 {
 	if (envelope.isNonZero()) {
-		return CompoundGenerator<T>::getSample(t) * envelope.getAmplitude(t);
+		return T::getSample(t) * envelope.getAmplitude(t);
 	}
 	else {
 		return std::nullopt;
@@ -308,20 +312,22 @@ struct TimbreModel
 		std::vector<ToneSkeleton> components,
 		Tone::before_t         beforeTone = {},
 		Tone::after_t          afterTone = {},
-		CompoundGenerator<Tone>::before_t before = {},
-		CompoundGenerator<Tone>::after_t  after = {}
+		CompositeGenerator<Tone>::before_t before = {},
+		CompositeGenerator<Tone>::after_t  after = {}
 	);
-	CompoundGenerator<Tone> operator()(const double& baseFreq) const;
+	CompositeGenerator<Tone> operator()(const double& baseFreq) const;
 
 	std::vector<ToneSkeleton> components;
 	Tone::before_t         beforeTone;
 	Tone::after_t          afterTone;
-	CompoundGenerator<Tone>::before_t before;
-	CompoundGenerator<Tone>::after_t  after;
+	CompositeGenerator<Tone>::before_t before;
+	CompositeGenerator<Tone>::after_t  after;
 };
 
-class DynamicToneSum : public CompoundGenerator<DynamicCompoundGenerator<Tone>>
+class DynamicToneSum : public CompositeGenerator<DynamicGenerator<CompositeGenerator<Tone>>>
 {
+	using base_t = CompositeGenerator<DynamicGenerator<CompositeGenerator<Tone>>>;
+
 	public:
 		friend class std::lock_guard<DynamicToneSum>;
 		using before_t = std::function<void(double, DynamicToneSum&)>;

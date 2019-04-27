@@ -20,7 +20,7 @@ DebugFilter::DebugFilter()
 void DebugFilter::effectImpl(double t, double & sample) const
 {
 	static auto sampleId = 0u;
-	static std::vector<double> lastSamples(impl->oscilloscope->getResolution());
+	auto& lastSamples = impl->lastSamples;
 	lastSamples[sampleId++] = sample;
 	if (sampleId == 500) {
 		impl->oscilloscope->newSamples(lastSamples);
