@@ -16,13 +16,13 @@ static TimbreModel Sine13{
 	}
 };
 
-template<typename Tone>
-std::vector<typename DynamicGenerator<CompositeGenerator<Tone>>> generateTones(
+template<typename WaveGenerator>
+std::vector<typename Dynamic<Composite<WaveGenerator>>> generateTones(
 	TimbreModel model,
 	const std::vector<Note>& notes
 )
 {
-	std::vector<DynamicGenerator<CompositeGenerator<Tone>>> tones;
+	std::vector<Dynamic<Composite<WaveGenerator>>> tones;
 	tones.reserve(notes.size());
 	for (auto& note : notes) {
 		tones.emplace_back(model(note));

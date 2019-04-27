@@ -131,38 +131,38 @@ const Note Note::B  (987.77);
 
 const std::array<Note, 12> Note::baseNotes{ C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B };
 
-Tone::Tone(
+WaveGenerator::WaveGenerator(
 	const Note& note,
 	double intensity,
 	waves::wave_t waveform,
 	before_t before,
 	after_t  after
 )
-	:SampleGenerator<Tone>(before, after),
-	note(note),
+	:SampleGenerator<WaveGenerator>(before, after),
+	freq(note),
 	intensity(intensity),
 	waveform(waveform)
 {}
 
-void Tone::modifyMainPitchImpl(double t, double f2)
+void WaveGenerator::modifyMainPitchImpl(double t, double f2)
 {
 	auto& component = *this;
-	double f1 = component.note;
+	double f1 = component.freq;
 	double p = (t + component.phase) * f1 / f2 - t;
 	p = fmod(p, 2 * M_PI*f2);
 	component.phase = p;
-	component.note = f2;
+	component.freq = f2;
 }
 
-double Tone::getSampleImpl(double t) const
+double WaveGenerator::getSampleImpl(double t) const
 {
-    double result = waveform(t, this->intensity, this->note, this->phase);
+    double result = waveform(t, this->intensity, this->freq, this->phase);
     return result;
 }
 
-const double Tone::getMainFreqImpl() const
+const double WaveGenerator::getMainFreqImpl() const
 {
-	return note.getInitialFreq();
+	return freq.getInitialFreq();
 }
 
 DynamicToneSum::DynamicToneSum(
@@ -170,7 +170,7 @@ DynamicToneSum::DynamicToneSum(
 	const std::vector<Note>& notes,
 	unsigned maxTones
 )
-	:base_t(generateTones<Tone>(timbreModel, notes)),
+	:base_t(generateTones<WaveGenerator>(timbreModel, notes)),
 	maxTones(maxTones),
 	timbreModel(timbreModel)
 {}
@@ -255,10 +255,10 @@ void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 
 TimbreModel::TimbreModel(
 	std::vector<TimbreModel::ToneSkeleton> components,
-	Tone::before_t         beforeTone,
-	Tone::after_t          afterTone,
-	CompositeGenerator<Tone>::before_t before,
-	CompositeGenerator<Tone>::after_t  after
+	WaveGenerator::before_t         beforeTone,
+	WaveGenerator::after_t          afterTone,
+	Composite<WaveGenerator>::before_t before,
+	Composite<WaveGenerator>::after_t  after
 )
 	:components(components),
 	beforeTone(beforeTone),
@@ -267,16 +267,16 @@ TimbreModel::TimbreModel(
 	after(after)
 {}
 
-CompositeGenerator<Tone> TimbreModel::operator()(const double& baseFreq) const
+Composite<WaveGenerator> TimbreModel::operator()(const double& baseFreq) const
 {
-	std::vector<Tone> tones;
+	std::vector<WaveGenerator> tones;
 	tones.reserve(components.size());
 	std::transform(
 		components.begin(),
 		components.end(),
 		std::back_inserter(tones),
 		[&baseFreq, this](const ToneSkeleton& component) {
-		return Tone(
+		return WaveGenerator(
 			baseFreq * component.relativeFreq,
 			component.intensity,
 			component.waveform,
@@ -285,5 +285,5 @@ CompositeGenerator<Tone> TimbreModel::operator()(const double& baseFreq) const
 		);
 	}
 	);
-	return CompositeGenerator(tones, before, after);
+	return Composite(tones, before, after);
 }

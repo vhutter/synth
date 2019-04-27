@@ -133,7 +133,7 @@ public:
 private:
 	struct Impl
 	{
-		DynamicGenerator<CompositeGenerator<Tone>> glidingTone;
+		Dynamic<Composite<WaveGenerator>> glidingTone;
 		ContinuousFunction glidePitch{ 100 };
 		std::atomic<double> glideSpeed{ .5 }, lastTime{ 0. };
 		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, glideSpeed) };
