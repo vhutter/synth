@@ -1,6 +1,5 @@
 #include "testMain.h"
 #include "../gui/GuiElements.h"
-#include "../gui.h"
 #include "../instruments/effects.h"
 #include "../instruments/generators.h"
 #include "../instruments/tones.h"
@@ -133,14 +132,13 @@ int testMain(int argc, char** argv)
 	auto gui = std::make_shared<EmptyGuiElement>();
 	auto keyboard = KeyboardOutput();
 
-	MidiContext midiContext;
-
 	testGui(gui);
 
 	sf::RenderWindow window(sf::VideoMode(1600, 1000), "Basic synth");
-	setupGui(gui, window);
+
 	window.setKeyRepeatEnabled(false);
 	window.setVerticalSyncEnabled(true);
+	MidiContext midiContext;
 	while (window.isOpen()) {
 		static sf::Event event;
 		static MidiEvent midiEvent;
@@ -149,6 +147,25 @@ int testMain(int argc, char** argv)
 			gui->forwardEvent(midiEvent);
 		}
 		while (window.pollEvent(event)) {
+			switch (event.type) {
+			case sf::Event::Closed: {
+				window.close();
+				break;
+			}
+			case sf::Event::KeyPressed: {
+				switch (event.key.code) {
+				case sf::Keyboard::Escape: {
+					window.close();
+					break;
+				}
+				default:
+					break;
+				}
+				break;
+			}
+			default:
+				break;
+			}
 			gui->forwardEvent(event);
 		}
 
