@@ -61,8 +61,8 @@ void testGui(std::shared_ptr<GuiElement> gui)
 
 	auto notes = generateNotes(0, 2);
 
-	auto generator = DynamicToneSum(Sine13, notes, 5);
-	auto pitch = PitchBender<DynamicToneSum>(generator);
+	static auto generator = DynamicToneSum(Sine13, notes, 5);
+	static auto pitch = PitchBender<DynamicToneSum>(generator);
 	auto pitchWindow = std::make_shared<Window>(pitch.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(pitchWindow);
 
@@ -81,9 +81,9 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	test->fitFrame();
 
 ///// Event handling
-	auto events = std::make_shared<EmptyGuiElement>([=](const SynthEvent & eventArg) {
-		if (std::holds_alternative<sf::Event>(eventArg)) {
-			const sf::Event& event = std::get<sf::Event>(eventArg);
+	auto events = std::make_shared<EmptyGuiElement>([=](const sf::Event & event) {
+		//if (std::holds_alternative<sf::Event>(eventArg)) {
+		//	const sf::Event& event = std::get<sf::Event>(eventArg);
 
 			//const auto& gliderWindow = outer2;
 			switch (event.type) {
@@ -91,14 +91,14 @@ void testGui(std::shared_ptr<GuiElement> gui)
 				switch (event.key.code) {
 				case sf::Keyboard::X: {
 					// For testing
-					gliderWindow->setSize(gliderWindow->getSize()+SynthVec2(0,1));
-					std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
+					//gliderWindow->setSize(gliderWindow->getSize()+SynthVec2(0,1));
+					//std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 					break;
 				}
 				case sf::Keyboard::Z: {
 					// For testing
-					gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(1, 0));
-					std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
+					//gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(1, 0));
+					//std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 					break;
 				}
 				default:
@@ -111,7 +111,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 			}
 					 break;
 			}
-		}
+		//}
 		});
 	
 	gui->addChild(test);
