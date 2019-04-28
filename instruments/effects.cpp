@@ -3,21 +3,31 @@
 #include "../gui/Slider.h"
 #include "../gui/SynthKeyboard.h"
 
-DebugFilter::DebugFilter()
+#include <bitset>
+#include <sstream>
+
+DebugEffect::DebugEffect()
 	:impl{ std::make_shared<Impl>() }
 {
 	auto aabb = impl->oscilloscope->AABB();
 	frame->setSize(SynthVec2(aabb.width+20, aabb.height+40));
+	impl->maxSampText = TextDisplay::DefaultText("0                  \n", 20);
+	impl->eventText = TextDisplay::DefaultText(getMidiEventInfo(MidiEvent()), 20);
+	addToggleButton();
+	frame->setBgColor(sf::Color(0x222222cc));
+
 	frame->addChildAutoPos( impl->oscilloscope );
 	frame->addChildAutoPos( TextDisplay::DefaultText("Max sample:", 20) );
-	impl->maxSampText = TextDisplay::DefaultText("0       ", 20);
 	frame->addChildAutoPos( impl->maxSampText );
-	addToggleButton();
+	frame->addChildAutoPos( impl->eventText );
+	frame->addChild(std::make_unique<EmptyGuiElement>([impl = this->impl](const MidiEvent & event) {
+		impl->eventText->setText(getMidiEventInfo(event));
+	}));
+
 	frame->fitToChildren();
-	frame->setBgColor(sf::Color(0x222222cc));
 }
 
-void DebugFilter::effectImpl(double t, double & sample) const
+void DebugEffect::effectImpl(double t, double & sample) const
 {
 	static auto sampleId = 0u;
 	auto& lastSamples = impl->lastSamples;
@@ -31,6 +41,18 @@ void DebugFilter::effectImpl(double t, double & sample) const
 	if (sample > impl->maxSamp) {
 		impl->maxSamp = sample;
 	}
+}
+
+std::string DebugEffect::getMidiEventInfo(const MidiEvent& event)
+{
+	std::ostringstream output;
+	output << 
+		"Max. wheel value: " << MidiEvent::wheelValueMax() << "\n" <<
+		"Current wheel value: " << event.getWheelValue() << "\n" <<
+		"Event type: " << std::bitset<8>(uint8_t(event.getType())) << "\n" <<
+		"Key code: " << unsigned(event.getKey()) << "\n" <<
+		"Velocity: " << unsigned(event.getVelocity());
+	return output.str();
 }
 
 VolumeControl::VolumeControl()

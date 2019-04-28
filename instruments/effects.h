@@ -53,19 +53,21 @@ public:
 template<class Effect_t>
 using PostSampleEffect = PerSampleEffectBase<Effect_t, double>;
 
-class DebugFilter: public PostSampleEffect<DebugFilter>
+class DebugEffect: public PostSampleEffect<DebugEffect>
 {
 public:
-	DebugFilter();
+	DebugEffect();
 	void effectImpl(double t, double& sample) const;
 
 private:
+
+	static std::string getMidiEventInfo(const MidiEvent& event);
 
 	struct Impl
 	{
 		const unsigned resolution = 500;
 		std::shared_ptr<Oscilloscope> oscilloscope{ std::make_shared<Oscilloscope>(500, 200, resolution) };
-		std::shared_ptr<TextDisplay> maxSampText;
+		std::shared_ptr<TextDisplay> maxSampText, eventText;
 		std::vector<double> lastSamples = std::vector<double>( resolution, 0. );
 		double maxSamp;
 	};

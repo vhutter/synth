@@ -36,8 +36,8 @@ namespace
 		delayWindow->setVisibility(false);
 		gui->addChildAutoPos(delayWindow);
 
-		auto debugFilter = DebugFilter();
-		auto debugWindow = std::make_shared<Window>(debugFilter.getFrame());
+		auto debugEffect = DebugEffect();
+		auto debugWindow = std::make_shared<Window>(debugEffect.getFrame());
 		debugWindow->setHeader(30, "Debug");
 		debugWindow->setVisibility(false);
 		gui->addChildAutoPos(debugWindow);
@@ -55,7 +55,7 @@ namespace
 
 		afterCallbacks.push_back(delay);
 		afterCallbacks.push_back(volume);
-		afterCallbacks.push_back(debugFilter);
+		afterCallbacks.push_back(debugEffect);
 	}	
 
 	template<class T>
@@ -111,7 +111,7 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 		settings["sampleRate"].value(), 
 		settings["bufferSize"].value(), 
 		Sine13, 
-		generateNotes(2, 6), 
+		generateNotes(2, 5), 
 		settings["maxNoteCount"].value()
 	);
 
