@@ -1,7 +1,6 @@
 #include "SynthKeyboard.h"
 
 #include <optional>
-#include <bitset>
 
 const SynthVec2 SynthKey::whiteSizeDefault(100, 200);
 const SynthVec2 SynthKey::blackSizeDefault(40, 150);
@@ -98,15 +97,17 @@ void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 	uint8_t most = message[2] & 0b0111'1111;
 	uint16_t all = least + (most << 7);
 
+	/*
 	static int msgId = 0;
-	std::cout << msgId++ << event.getRawMessage().size() << ": " <<
-		MidiEvent::wheelValueMax() << " " <<
-		event.getWheelValue() << " " <<
-		std::bitset<8>(eventType) << " " <<
-		std::bitset<8>(keyCode) << " " <<
-		std::bitset<8>(intensity) << "\n";
+	std::cout << msgId++ << ".\n" <<
+		"Max. wheel value: " << MidiEvent::wheelValueMax() << "\n" <<
+		"Current wheel value: " << event.getWheelValue() << "\n" <<
+		"Event type: " << std::bitset<8>(uint8_t(event.getType())) << "\n" <<
+		"Key code: " << unsigned(event.getKey()) << "\n" <<
+		"Velocity: " << unsigned(event.getVelocity()) << "\n\n";
+	*/
 
-	unsigned char middleC = 6 * 8; //48
+	unsigned char middleC = 48;
 	unsigned char value = keyCode - middleC;
 	if (value >= keys.size())
 		return;

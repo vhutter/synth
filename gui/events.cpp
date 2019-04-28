@@ -18,25 +18,38 @@ const std::vector<unsigned char>& MidiEvent::getRawMessage() const
 
 const MidiEvent::Type MidiEvent::getType() const
 {
-	return Type(message.at(0) & 0b1111'0000);
+	if(message.size() > 0)
+		return Type(message.at(0) & 0b1111'0000);
+	else
+		return Type(0);
 }
 
 const MidiEvent::Key_t MidiEvent::getKey() const
 {
-	return Key_t(message.at(1) & 0b0111'1111);
+	if (message.size() > 1)
+		return Key_t(message.at(1) & 0b0111'1111);
+	else
+		return Key_t(0);
 }
 
 const MidiEvent::Velocity_t MidiEvent::getVelocity() const
 {
-	return Velocity_t(message.at(2) & 0b0111'1111);
+	if (message.size() > 2)
+		return Velocity_t(message.at(2) & 0b0111'1111);
+	else
+		return Velocity_t(0);
 }
 
 const MidiEvent::WheelValue_t MidiEvent::getWheelValue() const
 {
-	uint8_t least = message[1] & 0b0111'1111;
-	uint8_t most = message[2] & 0b0111'1111;
-	uint16_t all = least + (most << 7);
-	return WheelValue_t(all);
+	if (message.size() > 2) {
+		uint8_t least = message[1] & 0b0111'1111;
+		uint8_t most = message[2] & 0b0111'1111;
+		uint16_t all = least + (most << 7);
+		return WheelValue_t(all);
+	}
+	else
+		return WheelValue_t(0);
 }
 
 bool MidiContext::openPort(unsigned p)
