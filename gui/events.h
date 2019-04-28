@@ -12,9 +12,23 @@
 class MidiEvent
 {
 public:
+	enum class Type : uint8_t {
+		KEYUP = 0b1000'0000,
+		KEYDOWN = 0b1001'0000,
+		KNOB = 0b1011'0000,
+		WHEEL = 0b1110'0000,
+	};
+	using Key_t = uint8_t;
+	using Velocity_t = uint8_t;
+	using WheelValue_t = uint16_t;
+
 	MidiEvent(double t = 0., const std::vector<unsigned char>& msg = {});
 	double getTime() const;
-	const std::vector<unsigned char>& getMessage() const;
+	const std::vector<unsigned char>& getRawMessage() const;
+	const Type getType() const;
+	const Key_t getKey() const;
+	const Velocity_t getVelocity() const;
+	const WheelValue_t getWheelValue() const;
 
 private:
 	double timestamp;

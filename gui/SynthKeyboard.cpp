@@ -89,35 +89,27 @@ void SynthKeyboard::setSize(SynthKey::Type type, const SynthVec2& size)
 
 void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 {
-	unsigned char eventType = event.getMessage()[0];
-	unsigned char keyCode = event.getMessage()[1];
-	unsigned char intensity = event.getMessage()[2];
+	unsigned char eventType = event.getRawMessage()[0];
+	unsigned char keyCode = event.getRawMessage()[1];
+	unsigned char intensity = event.getRawMessage()[2];
 
 	static int msgId = 0;
-	std::cout << msgId++ << event.getMessage().size() << ": " <<
+	std::cout << msgId++ << event.getRawMessage().size() << ": " <<
 		std::bitset<8>(eventType) << " " <<
 		std::bitset<8>(keyCode) << " " <<
 		std::bitset<8>(intensity) << "\n";
-
-	enum class MsgType : uint8_t {
-		KEYDOWN = 0b1001'0000,
-		KEYUP = 0b1000'0000,
-		KNOB = 0b1011'0000,
-		WHEEL = 0b1110'0000,
-	};
 
 	unsigned char middleC = 6 * 8; //48
 	unsigned char value = keyCode - middleC;
 	if (value >= keys.size())
 		return;
 
-	eventType &= 0b1111'0000;
-	switch (static_cast<MsgType>(eventType))
+	switch (event.getType())
 	{
-	case MsgType::KEYDOWN:
+	case MidiEvent::Type::KEYDOWN:
 		onKey(value, SynthKey::State::Pressed);
 		break;
-	case MsgType::KEYUP:
+	case MidiEvent::Type::KEYUP:
 		onKey(value, SynthKey::State::Released);
 		break;
 	default:

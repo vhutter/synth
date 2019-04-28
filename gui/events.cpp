@@ -11,9 +11,32 @@ double MidiEvent::getTime() const
 	return timestamp; 
 }
 
-const std::vector<unsigned char>& MidiEvent::getMessage() const 
+const std::vector<unsigned char>& MidiEvent::getRawMessage() const 
 { 
 	return message; 
+}
+
+const MidiEvent::Type MidiEvent::getType() const
+{
+	return Type(message.at(0) & 0b1111'0000);
+}
+
+const MidiEvent::Key_t MidiEvent::getKey() const
+{
+	return Key_t(message.at(1) & 0b0111'1111);
+}
+
+const MidiEvent::Velocity_t MidiEvent::getVelocity() const
+{
+	return Velocity_t(message.at(2) & 0b0111'1111);
+}
+
+const MidiEvent::WheelValue_t MidiEvent::getWheelValue() const
+{
+	return WheelValue_t(
+		message.at(1) & 0b0111'1111 + 		// least significant 7 bits
+		(message.at(2) & 0b0111'1111) << 7	// most significant 7 bits
+	);
 }
 
 bool MidiContext::openPort(unsigned p)
