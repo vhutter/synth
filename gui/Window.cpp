@@ -22,6 +22,7 @@ Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
 	header(std::make_shared<TextDisplay>()),
 	menuBar(std::make_shared<Frame>()),
 	exitButton(std::make_shared<Button>("X", 0, 0, 0, [this]() {
+		if (onCloseCb) onCloseCb();
 		this->setVisibility(false);
 	}))
 {
@@ -191,6 +192,11 @@ void Window::setMenuBar(unsigned size)
 void Window::addEmptyListener(std::shared_ptr<EmptyGuiElement> listener)
 {
 	GuiElement::addChild(listener);
+}
+
+void Window::setOnClose(std::function<void()> cb)
+{
+	onCloseCb = cb;
 }
 
 const std::shared_ptr<Frame>& Window::getContentFrame() const

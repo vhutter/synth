@@ -5,10 +5,7 @@ void Instrument1::init()
 	const unsigned wWidth{ 800 }, wHeight{ 400 }, menuHeight{ 30 };
 	using pos_t = MenuOption::OptionList::ChildPos_t;
 	window->setSize(SynthVec2(wWidth, wHeight));
-	window->setHeader(menuHeight, "Instrument1");
-	window->setMenuBar(menuHeight);
 	auto gui = window->getContentFrame();
-	auto menu = window->getMenuFrame();
 	gui->setChildAlignment(10);
 	gui->setCursor(10, 10);
 
@@ -20,15 +17,40 @@ void Instrument1::init()
 	gui->addChildAutoPos(pitchBender.getFrame());
 	gui->addChildAutoPos(glider.getFrame());
 
-	auto kbAABB = keyboard.getGuiElement()->AABB();
-	gui->addChild(keyboard.getGuiElement(), 0, wHeight - kbAABB.height);
+	generator.addAfterCallback(glider);
 
-	menu->addChildAutoPos(MenuOption::createMenu(
+	auto kbAABB = keyboard.getSynthKeyboard()->AABB();
+	gui->addChild(keyboard.getSynthKeyboard(), 0, wHeight - kbAABB.height);
+
+	window->addEmptyListener(std::make_unique<EmptyGuiElement>([this](const sf::Event & event) {
+		if (event.type == sf::Event::KeyPressed) {
+
+			auto synthKeyboard = keyboard.getSynthKeyboard();
+			unsigned shift = synthKeyboard->getOctaveShift();
+			switch(event.key.code) {
+				case sf::Keyboard::Up:
+					keyboard.stopAll();
+					++shift;
+					break;
+				case sf::Keyboard::Down:
+					keyboard.stopAll();
+					--shift;
+					break;
+				default:
+					break;
+			};
+			synthKeyboard->setOctaveShift(shift);
+		}
+	}));
+
+	gui->fitToChildren();
+	window->setHeader(menuHeight, "Instrument1");
+	window->setMenuBar(menuHeight);
+	window->setOnClose([this]() {keyboard.stopAll(); });
+	window->getMenuFrame()->addChildAutoPos(MenuOption::createMenu(
 		100, 30, 15, {
 			"Settings", pos_t::Down, {
 			}
 		}
 	));
-
-	generator.addAfterCallback(glider);
 }

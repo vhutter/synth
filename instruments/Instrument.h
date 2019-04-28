@@ -54,11 +54,10 @@ protected:
 class Instrument1 : public Instrument<DynamicToneSum>
 {
 public:
-	//using Instrument::Instrument;
 	template<class ...BaseParams>
 	Instrument1(BaseParams&& ...params) 
 		:Instrument(std::forward<BaseParams>(params)...),
-		keyboard{},
+		keyboard{ generator.getNotesCount() },
 		pitchBender{ generator },
 		glider{ generator.getTimbreModel(), generator.getNotes(), generator.getMaxTones() }
 	{

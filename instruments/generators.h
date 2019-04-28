@@ -343,6 +343,7 @@ class DynamicToneSum : public Composite<Dynamic<Composite<WaveGenerator>>>
 		double getSample(double t) const;
 		unsigned getMaxTones() const;
 		std::vector<Note> getNotes() const;
+		unsigned getNotesCount() const;
 		const TimbreModel& getTimbreModel() const;
 
 		unsigned addAfterCallback(after_t callback);

@@ -23,36 +23,40 @@ private:
 
 };
 
+class KeyboardOutput;
+
 class SynthKeyboard : public GuiElement
 {
+	friend class KeyboardOutput;
 public:
 	using callback_t = std::function<void(unsigned, SynthKey::State)>;
 
-	SynthKeyboard(callback_t eventCallback);
+	SynthKeyboard(unsigned keyCount, callback_t eventCallback);
 	void setSize(SynthKey::Type type, const SynthVec2& size);
-	void setOctaveCount(unsigned octaveCount);
 	virtual SynthRect AABB() const override;
 	virtual bool needsEvent(const SynthEvent& event) const override;
-	SynthKey& operator[] (std::size_t i) { return keys[i]; }
-
+	SynthKey& operator[] (std::size_t i);
+	void setOctaveShift(unsigned n);
+	unsigned getOctaveShift();
 
 private:
 	virtual void onMidiEvent(const MidiEvent& event) override;
 	virtual void onSfmlEvent(const sf::Event& event) override;
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;
-	void repositionKeys();
+	void repositionKeys(unsigned keyCount);
 
 	std::vector<SynthKey> keys;
 	callback_t onKey;
 	SynthVec2 blackSize{ SynthKey::blackSizeDefault }, whiteSize{ SynthKey::whiteSizeDefault };
-	unsigned short octaveCount{ 2 };
+	unsigned octaveShift{ 0 };
 };
 
 class KeyboardOutput
 {
 public:
-	KeyboardOutput();
-	std::shared_ptr<SynthKeyboard> getGuiElement() const;
+	KeyboardOutput(unsigned keyCount);
+	std::shared_ptr<SynthKeyboard> getSynthKeyboard() const;
+	void stopAll();
 
 	template<typename ...T>
 	void outputTo(T&... other)

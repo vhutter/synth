@@ -4,20 +4,33 @@
 #include "gui/Slider.h"
 #include "instruments/Instrument.h"
 
+#include <unordered_map>
+#include <optional>
+#include <vector>
+
 namespace
 {
+	std::vector<SampleGenerator<void*>::after_t> afterCallbacks;
+	std::unordered_map<std::string, std::optional<unsigned>> settings = {
+		{"sampleRate", 44100},
+		{"bufferSize", 64},
+		{"maxNoteCount", 5},
+	};
 
-	template<class T>
-	void addAfterEffects(std::shared_ptr<Window> mainWindow, Instrument<T>& inst)
+	void addAfterEffects(std::shared_ptr<Window> mainWindow)
 	{
+		if (afterCallbacks.size()) {
+			throw std::logic_error("This function should not be called more than once.");
+		}
+
 		auto gui = mainWindow->getContentFrame();
 		auto menu = mainWindow->getMenuFrame();
 		using pos_t = MenuOption::OptionList::ChildPos_t;
 
-		static auto volume = VolumeControl();
+		auto volume = VolumeControl();
 		gui->addChildAutoPos(volume.getFrame());
 
-		auto delay = DelayEffect(inst.getSampleRate(), 1., 0.6);
+		auto delay = DelayEffect(settings["sampleRate"].value(), 1., 0.6);
 		auto delayWindow = std::make_shared<Window>(delay.getFrame());
 		delayWindow->setHeader(30, "Delay");
 		delayWindow->setVisibility(false);
@@ -40,10 +53,20 @@ namespace
 			}
 		));
 
-		inst.getGenerator().addAfterCallback(delay);
-		inst.getGenerator().addAfterCallback(volume);
-		inst.getGenerator().addAfterCallback(debugFilter);
+		afterCallbacks.push_back(delay);
+		afterCallbacks.push_back(volume);
+		afterCallbacks.push_back(debugFilter);
 	}	
+
+	template<class T>
+	void attachAfterCallbacks(T& inst)
+	{
+		for (auto callback : afterCallbacks) {
+			inst.getGenerator().addAfterCallback(callback);
+		}
+	}
+
+
 
 }
 
@@ -82,15 +105,18 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 
 	auto gui = mainWindow->getContentFrame();
 	auto menu = mainWindow->getMenuFrame();
-	using pos_t = MenuOption::OptionList::ChildPos_t;
+	addAfterEffects(mainWindow);
+	
+	static Instrument1 inst(
+		settings["sampleRate"].value(), 
+		settings["bufferSize"].value(), 
+		Sine13, 
+		generateNotes(2, 6), 
+		settings["maxNoteCount"].value()
+	);
 
-	const unsigned maxNotes{ 5 }, sampleRate{ 44100 }, bufferSize{ 16 };
-	auto notes = generateNotes(0, 2);
-
-	static Instrument1 inst(sampleRate, bufferSize, Sine13, notes, maxNotes);
+	attachAfterCallbacks(inst);
 	gui->addChild(inst.getGuiElement(), 50, 50);
-
-	addAfterEffects(mainWindow, inst);
-
+	inst.getGuiElement()->focus();
 	inst.play();
 }

@@ -62,7 +62,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	auto notes = generateNotes(0, 2);
 
 	auto generator = DynamicToneSum(Sine13, notes, 5);
-	auto pitch = PitchBender<DynamicToneSum>();
+	auto pitch = PitchBender<DynamicToneSum>(generator);
 	auto pitchWindow = std::make_shared<Window>(pitch.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(pitchWindow);
 
@@ -130,7 +130,6 @@ void testGui(std::shared_ptr<GuiElement> gui)
 int testMain(int argc, char** argv)
 {
 	auto gui = std::make_shared<EmptyGuiElement>();
-	auto keyboard = KeyboardOutput();
 
 	testGui(gui);
 

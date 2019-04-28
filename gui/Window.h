@@ -25,6 +25,7 @@ public:
 	void setHeader(unsigned size, const std::string& title, unsigned textSize=0);
 	void setMenuBar(unsigned size);
 	void addEmptyListener(std::shared_ptr<EmptyGuiElement> listener);
+	void setOnClose(std::function<void()> cb);
 
 	const std::shared_ptr<Frame>& getContentFrame() const;
 	const std::shared_ptr<Frame>& getMenuFrame() const;
@@ -48,6 +49,7 @@ private:
 
 	sf::Vector2f lastMousePos;
 	bool moving{ false };
+	std::function<void()> onCloseCb;
 };
 
 #endif //WINDOW_H_INCLUDED

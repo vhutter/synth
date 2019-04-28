@@ -116,18 +116,31 @@ Note::Note(double f)
     :freq(f), initialFreq(freq)
 {}
 
-const Note Note::C  (523.25);
-const Note Note::Cis(554.37);
-const Note Note::D  (587.33);
-const Note Note::Dis(622.25);
-const Note Note::E  (659.25);
-const Note Note::F  (698.46);
-const Note Note::Fis(739.99);
-const Note Note::G  (783.99);
-const Note Note::Gis(830.61);
-const Note Note::A  (880.00);
-const Note Note::Ais(932.33);
-const Note Note::B  (987.77);
+//const Note Note::C  (523.25);
+//const Note Note::Cis(554.37);
+//const Note Note::D  (587.33);
+//const Note Note::Dis(622.25);
+//const Note Note::E  (659.25);
+//const Note Note::F  (698.46);
+//const Note Note::Fis(739.99);
+//const Note Note::G  (783.99);
+//const Note Note::Gis(830.61);
+//const Note Note::A  (880.00);
+//const Note Note::Ais(932.33);
+//const Note Note::B  (987.77);
+
+const Note Note::C  (16.35);
+const Note Note::Cis(17.32);
+const Note Note::D  (18.35);
+const Note Note::Dis(19.45);
+const Note Note::E  (20.60);
+const Note Note::F  (21.83);
+const Note Note::Fis(23.12);
+const Note Note::G  (24.50);
+const Note Note::Gis(25.96);
+const Note Note::A  (27.50);
+const Note Note::Ais(29.14);
+const Note Note::B  (30.87);
 
 const std::array<Note, 12> Note::baseNotes{ C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B };
 
@@ -221,6 +234,11 @@ std::vector<Note> DynamicToneSum::getNotes() const
 	return ret;
 }
 
+unsigned DynamicToneSum::getNotesCount() const
+{
+	return initialComponents.size();
+}
+
 const TimbreModel& DynamicToneSum::getTimbreModel() const
 {
 	return timbreModel;
@@ -246,10 +264,10 @@ void DynamicToneSum::removeBeforeCallback(unsigned id)
 void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 {
 	if (keyState == SynthKey::State::Pressed) {
-		components[keyIdx].start(this->time());
+		components.at(keyIdx).start(this->time());
 	}
 	else {
-		components[keyIdx].stop(this->time());
+		components.at(keyIdx).stop(this->time());
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "SynthKeyboard.h"
 
+#include <optional>
 #include <bitset>
 
 const SynthVec2 SynthKey::whiteSizeDefault(100, 200);
@@ -36,12 +37,12 @@ void SynthKey::setPressed(bool p)
 	}
 }
 
-void SynthKeyboard::repositionKeys()
+void SynthKeyboard::repositionKeys(unsigned keyCount)
 {
 	unsigned whitesCount = 0;
 	const auto& w = SynthKey::White;
 	const auto& b = SynthKey::Black;
-	unsigned n = octaveCount * 12 + 1;
+	unsigned n = keyCount;
 	keys.clear();
 	keys.reserve(n);
 	std::basic_string<SynthKey::Type> orderedKeys = { w, b, w, b, w, w, b, w, b, w, b, w };
@@ -65,10 +66,14 @@ void SynthKeyboard::repositionKeys()
 	}
 }
 
-SynthKeyboard::SynthKeyboard(callback_t eventCallback)
-	: onKey(eventCallback)
+SynthKeyboard::SynthKeyboard(unsigned keyCount, callback_t eventCallback)
+	: onKey([this, eventCallback](unsigned keyIdx, SynthKey::State keyState) {
+		if (keyIdx < keys.size()) {
+			eventCallback(keyIdx, keyState);
+		}
+	})
 {
-	repositionKeys();
+	repositionKeys(keyCount);
 }
 
 void SynthKeyboard::setSize(SynthKey::Type type, const SynthVec2& size)
@@ -79,13 +84,7 @@ void SynthKeyboard::setSize(SynthKey::Type type, const SynthVec2& size)
 	else {
 		blackSize = size;
 	}
-	repositionKeys();
-}
-
-void SynthKeyboard::setOctaveCount(unsigned count)
-{
-	octaveCount = count;
-	repositionKeys();
+	repositionKeys(keys.size());
 }
 
 void SynthKeyboard::onMidiEvent(const MidiEvent & event)
@@ -107,7 +106,8 @@ void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 		WHEEL = 0b1110'0000,
 	};
 
-	unsigned char value = keyCode - 48;
+	unsigned char middleC = 6 * 8; //48
+	unsigned char value = keyCode - middleC;
 	if (value >= keys.size())
 		return;
 
@@ -129,60 +129,62 @@ void SynthKeyboard::onSfmlEvent(const sf::Event & event)
 {
 	const auto& key = event.key.code;
 
-	int value = -1;
+	std::optional<unsigned> keyIdx;
 	switch (key)
 	{
 	case sf::Keyboard::Z:
-		value = 0;
+		keyIdx = 0;
 		break;
 	case sf::Keyboard::S:
-		value = 1;
+		keyIdx = 1;
 		break;
 	case sf::Keyboard::X:
-		value = 2;
+		keyIdx = 2;
 		break;
 	case sf::Keyboard::D:
-		value = 3;
+		keyIdx = 3;
 		break;
 	case sf::Keyboard::C:
-		value = 4;
+		keyIdx = 4;
 		break;
 	case sf::Keyboard::V:
-		value = 5;
+		keyIdx = 5;
 		break;
 	case sf::Keyboard::G:
-		value = 6;
+		keyIdx = 6;
 		break;
 	case sf::Keyboard::B:
-		value = 7;
+		keyIdx = 7;
 		break;
 	case sf::Keyboard::H:
-		value = 8;
+		keyIdx = 8;
 		break;
 	case sf::Keyboard::N:
-		value = 9;
+		keyIdx = 9;
 		break;
 	case sf::Keyboard::J:
-		value = 10;
+		keyIdx = 10;
 		break;
 	case sf::Keyboard::M:
-		value = 11;
+		keyIdx = 11;
 		break;
 	default:
 		break;
 	}
 
-	if (value == -1)
+	if (!keyIdx)
 		return;
+
+	keyIdx = 12 * octaveShift + keyIdx.value();
 
 	switch (event.type)
 	{
 	case sf::Event::KeyPressed: {
-		onKey(value, SynthKey::State::Pressed);
+		onKey(keyIdx.value(), SynthKey::State::Pressed);
 		break;
 	}
 	case sf::Event::KeyReleased: {
-		onKey(value, SynthKey::State::Released);
+		onKey(keyIdx.value(), SynthKey::State::Released);
 		break;
 	}
 	default:
@@ -219,9 +221,24 @@ bool SynthKeyboard::needsEvent(const SynthEvent & event) const
 	return false;
 }
 
-KeyboardOutput::KeyboardOutput()
+SynthKey& SynthKeyboard::operator[](std::size_t i)
 {
-	kb = std::make_unique<SynthKeyboard>([this](unsigned keyIdx, SynthKey::State keyState) {
+	return keys.at(i);
+}
+
+void SynthKeyboard::setOctaveShift(unsigned n)
+{
+	if (n * 12u < keys.size())
+		octaveShift = n;
+}
+
+unsigned SynthKeyboard::getOctaveShift()
+{
+	return octaveShift;
+}
+
+KeyboardOutput::KeyboardOutput(unsigned keyCount)
+	:kb(std::make_unique<SynthKeyboard>(keyCount, [this](unsigned keyIdx, SynthKey::State keyState) {
 		if (keyState == SynthKey::State::Pressed) {
 			(*kb)[keyIdx].setPressed(true);
 		}
@@ -231,14 +248,25 @@ KeyboardOutput::KeyboardOutput()
 		for (auto callback : callbacks) {
 			callback(keyIdx, keyState);
 		}
-	});
-	kb->setSize(SynthKey::Black, {SynthKey::blackSizeDefault/SynthFloat(2)});
-	kb->setSize(SynthKey::White, {SynthKey::whiteSizeDefault/SynthFloat(2)});
-	kb->setOctaveCount(4);
+	}))
+{
+	kb->setSize(SynthKey::Black, {SynthKey::blackSizeDefault/SynthFloat(4)});
+	kb->setSize(SynthKey::White, {SynthKey::whiteSizeDefault/SynthFloat(4)});
 }
 
-std::shared_ptr<SynthKeyboard> KeyboardOutput::getGuiElement() const
+std::shared_ptr<SynthKeyboard> KeyboardOutput::getSynthKeyboard() const
 {
 	return kb;
-};
+}
+
+void KeyboardOutput::stopAll()
+{
+	for (unsigned i = 0; i < kb->keys.size(); ++i) {
+		(*kb)[i].setPressed(false);
+		for (auto callback : callbacks) {
+			callback(i, SynthKey::State::Released);
+		}
+	}
+}
+
 
