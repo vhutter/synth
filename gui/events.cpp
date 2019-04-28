@@ -33,10 +33,10 @@ const MidiEvent::Velocity_t MidiEvent::getVelocity() const
 
 const MidiEvent::WheelValue_t MidiEvent::getWheelValue() const
 {
-	return WheelValue_t(
-		message.at(1) & 0b0111'1111 + 		// least significant 7 bits
-		(message.at(2) & 0b0111'1111) << 7	// most significant 7 bits
-	);
+	uint8_t least = message[1] & 0b0111'1111;
+	uint8_t most = message[2] & 0b0111'1111;
+	uint16_t all = least + (most << 7);
+	return WheelValue_t(all);
 }
 
 bool MidiContext::openPort(unsigned p)

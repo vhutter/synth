@@ -21,6 +21,7 @@ public:
 	using Key_t = uint8_t;
 	using Velocity_t = uint8_t;
 	using WheelValue_t = uint16_t;
+	static constexpr WheelValue_t wheelValueMax() { return WheelValue_t{0b00111111'11111111}; }
 
 	MidiEvent(double t = 0., const std::vector<unsigned char>& msg = {});
 	double getTime() const;

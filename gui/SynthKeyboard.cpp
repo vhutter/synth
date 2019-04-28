@@ -93,8 +93,15 @@ void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 	unsigned char keyCode = event.getRawMessage()[1];
 	unsigned char intensity = event.getRawMessage()[2];
 
+	const auto& message = event.getRawMessage();
+	uint8_t least = message[1] & 0b0111'1111;
+	uint8_t most = message[2] & 0b0111'1111;
+	uint16_t all = least + (most << 7);
+
 	static int msgId = 0;
 	std::cout << msgId++ << event.getRawMessage().size() << ": " <<
+		MidiEvent::wheelValueMax() << " " <<
+		event.getWheelValue() << " " <<
 		std::bitset<8>(eventType) << " " <<
 		std::bitset<8>(keyCode) << " " <<
 		std::bitset<8>(intensity) << "\n";
