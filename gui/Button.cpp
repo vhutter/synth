@@ -3,6 +3,7 @@
 Button::Button(const std::string& initialText, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick)
 	:TextDisplay(initialText, sx, sy, charSize), clickCallback(onClick)
 {
+	setFixedSize(true);
 	setFocusable(true);
 	centralize();
 	frame.setOutlineColor(sf::Color::White);

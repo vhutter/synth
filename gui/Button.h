@@ -17,7 +17,7 @@ public:
 		return DefaultButton(s, [&]() {val = !val; });
 	}
 	static std::unique_ptr<Button> OnOffButton(std::atomic<bool>& val) {
-		auto ret = DefaultButton("", [&]() {});
+		auto ret = std::make_unique<Button>("", 40, 40, 16, [&]() {});
 
 		auto setState = [button = ret.get()](bool val) {
 			if (val) {
@@ -31,8 +31,6 @@ public:
 			button->centralize();
 		};
 
-		ret->setSize(SynthVec2(40, 40));
-		ret->setFixedSize(true);
 		setState(val);
 		ret->clickCallback = [button = ret.get(), &val, setState ]() {
 			val = !val;
