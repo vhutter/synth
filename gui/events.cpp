@@ -52,6 +52,16 @@ const MidiEvent::WheelValue_t MidiEvent::getWheelValue() const
 		return WheelValue_t(0);
 }
 
+const double MidiEvent::getVelocityNorm() const
+{
+	return double(getVelocity()) / velocityMax();
+}
+
+const double MidiEvent::getWheelValueNorm() const
+{
+	return double(getWheelValue()) / wheelValueMax();
+}
+
 bool MidiContext::openPort(unsigned p)
 {
 	try {

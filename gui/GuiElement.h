@@ -48,10 +48,13 @@ class EmptyGuiElement : public GuiElement
 	using synthCallback_t = std::function<void(const SynthEvent&)>;
 
 public:
+	EmptyGuiElement() = default;
 	EmptyGuiElement(const sfmlCallback_t& sfml, const midiCallback_t& midi);
 	EmptyGuiElement(const sfmlCallback_t& sfml);
 	EmptyGuiElement(const midiCallback_t& midi);
-	EmptyGuiElement() = default;
+
+	void setSfmlCallback(const sfmlCallback_t& sfml);
+	void setMidiCallback(const midiCallback_t& midi);
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override {}

@@ -8,6 +8,7 @@
 #include "../gui/Button.h"
 #include "../gui/Oscilloscope.h"
 #include "../gui/Window.h"
+#include "../gui/events.h"
 
 class EffectBase
 {
@@ -160,16 +161,24 @@ public:
 		frame->addChildAutoPos( sliderPitch );
 		frame->fitToChildren();
 		sliderPitch->setFixed(true);
+
+		frame->addChild(std::make_unique<EmptyGuiElement>([sliderPitch = this->sliderPitch](const MidiEvent & event) {
+			if (event.getType() == MidiEvent::Type::WHEEL) {
+				sliderPitch->setValue(event.getWheelValueNorm() * 2. - 1);
+			}
+		}));
 	}
 
 private:
 	SampleGenerator_T& generator;
 	std::shared_ptr<Slider> sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, [this](Slider & sliderPitch) {
-		std::lock_guard lock(generator);
-		generator.modifyMainPitch(
-			generator.time(),
-			generator.getMainFreq() + sliderPitch.getValue() * 1 / 9 * generator.getMainFreq()
-		);
+		if (isActive()) {
+			std::lock_guard lock(generator);
+			generator.modifyMainPitch(
+				generator.time(),
+				generator.getMainFreq() + sliderPitch.getValue() * 1 / 9 * generator.getMainFreq()
+			);
+		}
 	}) };
 
 };

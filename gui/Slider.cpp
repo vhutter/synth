@@ -166,3 +166,18 @@ void Slider::moveSlider(const SynthVec2& p)
 
 	value = from + (newValueNormalized + 1) / 2. * (to - from);
 }
+
+void Slider::setValue(double newVal)
+{
+	newVal = std::clamp(newVal, from, to);
+	double newValueNormalized = -(newVal - from) / (to - from) + 1.f;
+	auto length = mainRect.getSize() - sliderRect.getSize();
+	auto newPos = mainRect.getPosition() + length * float(newValueNormalized);
+	const auto& currentPos = sliderRect.getPosition();
+	if (orientation == Vertical)
+		sliderRect.setPosition(currentPos.x, newPos.y);
+	else
+		sliderRect.setPosition(newPos.x, currentPos.y);
+	value = newVal;
+	if(onMove) onMove();
+}

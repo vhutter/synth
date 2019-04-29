@@ -68,6 +68,7 @@ public:
 	virtual SynthRect AABB() const override;
 
 	double getValue() const { return value; }
+	void setValue(double newVal);
 
 private:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override;

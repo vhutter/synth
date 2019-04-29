@@ -19,17 +19,15 @@ EmptyGuiElement::EmptyGuiElement(const midiCallback_t& midi)
 	setFocusable(false);
 }
 
-//EmptyGuiElement::EmptyGuiElement(const sfmlCallback_t& sfml)
-//	:sfmlCallback(sfml)
-//{
-//	setFocusable(false);
-//}
-//
-//EmptyGuiElement::EmptyGuiElement(const midiCallback_t& midi)
-//	:midiCallback(midi)
-//{
-//	setFocusable(false);
-//}
+void EmptyGuiElement::setSfmlCallback(const sfmlCallback_t& sfml)
+{
+	sfmlCallback = sfml;
+}
+
+void EmptyGuiElement::setMidiCallback(const midiCallback_t& midi)
+{
+	midiCallback = midi;
+}
 
 // The return value indicates if the mouse click event was used
 bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& transform)

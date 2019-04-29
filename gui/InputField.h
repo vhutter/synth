@@ -12,12 +12,32 @@ public:
 
 	virtual bool needsEvent(const SynthEvent& event) const override;
 
-private:
+protected:
 	void activate();
 	void deactivate();
 
+	std::shared_ptr<EmptyGuiElement> eventHandler;
 	bool active{ false };
+
+private:
 	std::function<void()> onEndCallback;
+};
+
+class InputRecord : public InputField
+{
+public:
+	enum Type : int {
+		KeyboardButton = 0,
+		MidiKey        = 4,
+		MidiWheelKnob  = 5,
+	};
+
+	InputRecord(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize = 16);
+
+	virtual bool needsEvent(const SynthEvent& event) const override;
+
+private:
+	SynthEvent lastEvent;
 
 };
 

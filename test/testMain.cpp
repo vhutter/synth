@@ -72,6 +72,13 @@ void testGui(std::shared_ptr<GuiElement> gui)
 
 	auto input = std::make_shared<InputField>(100, 30);
 	outer2->getContentFrame()->addChildAutoPos(input);
+
+	auto randomSlider = std::shared_ptr(Slider::DefaultSlider("RandomSlider", -1, 1));
+	outer2->getContentFrame()->addChild(randomSlider, 300, 140);
+
+	auto inputRec = std::make_shared<InputRecord>(InputRecord::Type::MidiKey, 150, 30, 13);
+	outer2->getContentFrame()->addChild(inputRec, 100, 100);
+
 	
 
 ///// Text display
@@ -87,38 +94,40 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	test->fitFrame();
 
 ///// Event handling
-	auto events = std::make_shared<EmptyGuiElement>([=](const sf::Event & event) {
-		//if (std::holds_alternative<sf::Event>(eventArg)) {
-		//	const sf::Event& event = std::get<sf::Event>(eventArg);
-
-			//const auto& gliderWindow = outer2;
-			switch (event.type) {
-			case sf::Event::KeyPressed: {
-				switch (event.key.code) {
-				case sf::Keyboard::X: {
-					// For testing
-					//gliderWindow->setSize(gliderWindow->getSize()+SynthVec2(0,1));
-					//std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
-					break;
-				}
-				case sf::Keyboard::Z: {
-					// For testing
-					//gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(1, 0));
-					//std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
-					break;
-				}
-				default:
-					break;
-				}
+	auto events = std::make_shared<EmptyGuiElement>(
+	[=](const sf::Event & event) {
+		//const auto& gliderWindow = outer2;
+		switch (event.type) {
+		case sf::Event::KeyPressed: {
+			switch (event.key.code) {
+			case sf::Keyboard::X: {
+				// For testing
+				//gliderWindow->setSize(gliderWindow->getSize()+SynthVec2(0,1));
+				//std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 				break;
 			}
-			default: {
+			case sf::Keyboard::Z: {
+				// For testing
+				//gliderWindow->setSize(gliderWindow->getSize() + SynthVec2(1, 0));
+				//std::cout << gliderWindow->getSize().x << " " << gliderWindow->getSize().y << "\n";
 				break;
 			}
-					 break;
+			default:
+				break;
 			}
-		//}
-		});
+			break;
+		}
+		default: {
+			break;
+		}
+					break;
+		}
+	}, [=](const MidiEvent& event) {
+		if (event.getType() == MidiEvent::Type::WHEEL) {
+			double newValue = double(event.getWheelValue()) / MidiEvent::wheelValueMax() * 2. - 1;
+			randomSlider->setValue(newValue);
+		}
+	});
 	
 	gui->addChild(test);
 	gui->addChild(test2);

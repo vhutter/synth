@@ -22,14 +22,18 @@ public:
 	using Velocity_t = uint8_t;
 	using WheelValue_t = uint16_t;
 	static constexpr WheelValue_t wheelValueMax() { return WheelValue_t{0b00111111'11111111}; }
+	static constexpr WheelValue_t velocityMax()   { return Velocity_t  {0b01111111}; }
+	static constexpr Key_t        keyMax()        { return Key_t       {0b01111111}; }
 
 	MidiEvent(double t = 0., const std::vector<unsigned char>& msg = {});
 	double getTime() const;
 	const std::vector<unsigned char>& getRawMessage() const;
-	const Type getType() const;
-	const Key_t getKey() const;
-	const Velocity_t getVelocity() const;
+	const Type         getType() const;
+	const Key_t        getKey() const;
+	const Velocity_t   getVelocity() const;
 	const WheelValue_t getWheelValue() const;
+	const double       getVelocityNorm() const;
+	const double       getWheelValueNorm() const;
 
 private:
 	double timestamp;
