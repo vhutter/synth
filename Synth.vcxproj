@@ -65,7 +65,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;D:\SDKs\frozen\frozen-master\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>__WINDOWS_MM__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -82,7 +82,7 @@
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;D:\SDKs\frozen\frozen-master\include</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>__WINDOWS_MM__;__TEST__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -101,6 +101,7 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <OmitFramePointers>false</OmitFramePointers>
       <PreprocessorDefinitions>__WINDOWS_MM__</PreprocessorDefinitions>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>D:/SDKs/portaudio-msvc/Release;D:\SDKs\SFML-2.5.1-msvc\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -114,6 +115,7 @@
     <ClCompile Include="gui\events.cpp" />
     <ClCompile Include="gui\Frame.cpp" />
     <ClCompile Include="gui\GuiElement.cpp" />
+    <ClCompile Include="gui\InputField.cpp" />
     <ClCompile Include="gui\MenuOption.cpp" />
     <ClCompile Include="gui\Oscilloscope.cpp" />
     <ClCompile Include="gui\RtMidi\RtMidi.cpp" />
@@ -142,6 +144,7 @@
     <ClInclude Include="gui\Frame.h" />
     <ClInclude Include="gui\GuiElement.h" />
     <ClInclude Include="gui\GuiElements.h" />
+    <ClInclude Include="gui\InputField.h" />
     <ClInclude Include="gui\MenuOption.h" />
     <ClInclude Include="gui\Oscilloscope.h" />
     <ClInclude Include="gui\RtMidi\RtMidi.h" />

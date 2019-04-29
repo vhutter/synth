@@ -109,11 +109,6 @@ void TextDisplay::setTextSize(unsigned newSize)
 	text.setCharacterSize(newSize);
 }
 
-const std::string & TextDisplay::getText() const
-{
-	return content;
-}
-
 const sf::Color & TextDisplay::getTextColor() const
 {
 	return text.getFillColor();
@@ -131,6 +126,12 @@ void TextDisplay::drawImpl(sf::RenderTarget& target, sf::RenderStates states) co
 }
 
 void TextDisplay::setText(const std::string& content)
+{
+	text.setString(content);
+	fitFrame();
+}
+
+void TextDisplay::setText(const sf::String& content)
 {
 	text.setString(content);
 	fitFrame();

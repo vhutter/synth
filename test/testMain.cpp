@@ -69,12 +69,18 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	auto glider = Glider(Sine13, notes, 5);
 	auto gliderWindow = std::make_shared<Window>(glider.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(gliderWindow);
+
+	auto input = std::make_shared<InputField>(100, 30);
+	outer2->getContentFrame()->addChildAutoPos(input);
 	
 
 ///// Text display
 	std::shared_ptr test = TextDisplay::Multiline("The quick brown fox jumps over the lazy dog", 50, 24);
 	std::shared_ptr test2 = TextDisplay::DefaultText("teeesztqq", 24);
 	std::shared_ptr test3 = std::make_unique<TextDisplay>("qweasd", 100, 100, 24);
+
+	sf::String asd("asd");
+	std::string sasd(asd);
 
 	test2->centralize();
 	test->setBgColor({ 0,0,0,0 });

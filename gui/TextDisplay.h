@@ -18,11 +18,16 @@ public:
 		unsigned int charSize = 24
 	);
 
-	const std::string& getText() const;
+	template<class string_t=sf::String>
+	const string_t getText() const
+	{
+		return text.getString();
+	}
 	const sf::Color& getTextColor() const;
 	const unsigned getTextSize() const;
 
 	void setText(const std::string& text);
+	void setText(const sf::String& text);
 	void setTextColor(const sf::Color& color);
 	void setTextSize(unsigned newSize);
 
@@ -35,7 +40,6 @@ protected:
 	const SynthVec2 topLeftAlignment() const;
 
 	sf::Text text;
-	std::string content;
 	bool fixedFrame{ false };
 
 	static sf::Font font;

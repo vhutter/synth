@@ -82,6 +82,9 @@
     <ClCompile Include="instruments\Instrument.cpp">
       <Filter>Instruments</Filter>
     </ClCompile>
+    <ClCompile Include="gui\InputField.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gui\Button.h">
@@ -146,6 +149,9 @@
     </ClInclude>
     <ClInclude Include="instruments\Instrument.h">
       <Filter>Instruments</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\InputField.h">
+      <Filter>gui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

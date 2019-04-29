@@ -2,6 +2,7 @@
 #define BUTTON_H_INCLUDED
 
 #include <atomic>
+#include <string>
 
 #include "TextDisplay.h"
 
@@ -19,13 +20,14 @@ public:
 	static std::unique_ptr<Button> OnOffButton(std::atomic<bool>& val) {
 		auto ret = std::make_unique<Button>("", 40, 40, 16, [&]() {});
 
+		using namespace std::string_literals;
 		auto setState = [button = ret.get()](bool val) {
 			if (val) {
-				button->setText("On");
+				button->setText("On"s);
 				button->setNormalColor(sf::Color(0xA52A2AFF));
 			}
 			else {
-				button->setText("Off");
+				button->setText("Off"s);
 				button->setNormalColor(sf::Color::Black);
 			}
 			button->centralize();
