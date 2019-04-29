@@ -15,4 +15,8 @@ sf::View getCroppedView(const sf::View& oldView, const SynthRect& box);
 struct Note;
 std::vector<Note> generateNotes(int fromOctave, int toOctave);
 
+bool isAlpha(const sf::Keyboard::Key& key);
+bool isNumeric(const sf::Keyboard::Key& key);
+bool isAlnum(const sf::Keyboard::Key& key);
+
 #endif

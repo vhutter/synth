@@ -1,6 +1,8 @@
 #include "utility.h"
 #include "instruments/generators.h"
 
+#include <unordered_set>
+
 sf::Font loadCourierNew()
 {
 	sf::Font tmpFont;
@@ -63,4 +65,61 @@ std::vector<Note> generateNotes(int from, int to)
 		for (auto note : Note::baseNotes) notes.push_back(note * pow(2, i));
 	notes.push_back(Note::baseNotes[0] * pow(2, to + 1));
 	return notes;
+}
+
+bool isAlpha(const sf::Keyboard::Key& key)
+{
+	using K = sf::Keyboard::Key;
+	static std::unordered_set<sf::Keyboard::Key> set{
+		K::A,
+		K::B,
+		K::C,
+		K::D,
+		K::E,
+		K::F,
+		K::G,
+		K::H,
+		K::I,
+		K::J,
+		K::K,
+		K::L,
+		K::M,
+		K::N,
+		K::O,
+		K::P,
+		K::Q,
+		K::R,
+		K::S,
+		K::T,
+		K::U,
+		K::V,
+		K::W,
+		K::X,
+		K::Y,
+		K::Z,
+	};
+	return set.find(key) != set.end();
+}
+
+bool isNumeric(const sf::Keyboard::Key& key)
+{
+	using K = sf::Keyboard::Key;
+	static std::unordered_set<sf::Keyboard::Key> set{
+		K::Num0,
+		K::Num1,
+		K::Num2,
+		K::Num3,
+		K::Num4,
+		K::Num5,
+		K::Num6,
+		K::Num7,
+		K::Num8,
+		K::Num9,
+	};
+	return set.find(key) != set.end();
+}
+
+bool isAlnum(const sf::Keyboard::Key& key)
+{
+	return isNumeric(key) || isAlpha(key);
 }
