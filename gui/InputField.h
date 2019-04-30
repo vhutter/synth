@@ -26,18 +26,30 @@ private:
 class InputRecord : public InputField
 {
 public:
-	enum Type : int {
-		KeyboardButton = 0,
-		MidiKey        = 4,
-		MidiWheelKnob  = 5,
+	using Type = uint8_t;
+	enum : Type {
+		KeyboardButton = 0b0000'0001,
+		MouseWheel     = 0b0000'0010,
+		MouseButton    = 0b0000'0100,
+		Mouse          = MouseWheel | MouseButton,
+		Sfml           = KeyboardButton | Mouse,
+
+		MidiKnob       = 0b0000'1000,
+		MidiKey        = 0b0001'0000,
+		MidiWheel      = 0b0010'0000,
+		Midi           = MidiKnob | MidiKey | MidiWheel,
+
+		Any            = Sfml | Midi,
 	};
 
 	InputRecord(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize = 16);
+	const SynthEvent& getLastEvent() const;
 
 	virtual bool needsEvent(const SynthEvent& event) const override;
 
 private:
 	SynthEvent lastEvent;
+	const Type type;
 
 };
 

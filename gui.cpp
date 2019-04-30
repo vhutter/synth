@@ -10,7 +10,7 @@
 
 namespace
 {
-	std::vector<SampleGenerator<void*>::after_t> afterCallbacks;
+	std::vector<SampleGenerator<void*>::after_t> afterEffects;
 	std::unordered_map<std::string, std::optional<unsigned>> settings = {
 		{"sampleRate", 44100},
 		{"bufferSize", 64},
@@ -19,7 +19,7 @@ namespace
 
 	void addAfterEffects(std::shared_ptr<Window> mainWindow)
 	{
-		if (afterCallbacks.size()) {
+		if (afterEffects.size()) {
 			throw std::logic_error("This function should not be called more than once.");
 		}
 
@@ -42,31 +42,41 @@ namespace
 		debugWindow->setVisibility(false);
 		gui->addChildAutoPos(debugWindow);
 
+		auto configFrame = std::make_shared<Frame>();
+		configFrame->setBgColor(sf::Color::Black);
+		configFrame->setChildAlignment(15);
+		configFrame->addChildAutoPos(volume.getConfigFrame());
+		configFrame->addChildAutoPos(delay.getConfigFrame());
+		configFrame->fitToChildren();
+		auto configWindow = std::make_shared<Window>(configFrame);
+		configWindow->setHeader(30, "Effect config");
+		configWindow->setVisibility(false);
+		gui->addChildAutoPos(configWindow);
+
 		menu->addChildAutoPos(MenuOption::createMenu(
 			100, 30, 15, {
 				"View", pos_t::Down, {{
 					"Debug", debugWindow}, {
 					"Effects", {{
 						"Delay", delayWindow},
-					}}
+					}},
+					{"Settings", configWindow}
 				}
 			}
 		));
 
-		afterCallbacks.push_back(delay);
-		afterCallbacks.push_back(volume);
-		afterCallbacks.push_back(debugEffect);
+		afterEffects.push_back(delay);
+		afterEffects.push_back(volume);
+		afterEffects.push_back(debugEffect);
 	}	
 
 	template<class T>
 	void attachAfterCallbacks(T& inst)
 	{
-		for (auto callback : afterCallbacks) {
+		for (auto callback : afterEffects) {
 			inst.getGenerator().addAfterCallback(callback);
 		}
 	}
-
-
 
 }
 

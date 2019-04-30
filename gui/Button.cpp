@@ -12,13 +12,13 @@ Button::Button(const std::string& initialText, SynthFloat sx, SynthFloat sy, uns
 
 	setEventCallback([this](const sf::Event& event){
 		lastEvent = event;
-		if (event.type == sf::Event::MouseButtonPressed) {
+		if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Button::Left) {
 			if (isPressedOrReleased(event)) {
 				pressed = true;
 				refreshCol();
 			}
 		}
-		else if (event.type == sf::Event::MouseButtonReleased) {
+		else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Button::Left) {
 			if(pressed || passesAllClicks) clickCallback();
 			pressed = false;
 			refreshCol();

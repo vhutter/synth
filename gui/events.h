@@ -34,6 +34,7 @@ public:
 	const WheelValue_t getWheelValue() const;
 	const double       getVelocityNorm() const;
 	const double       getWheelValueNorm() const;
+	const double       getWheelKnobNorm() const;
 
 private:
 	double timestamp;

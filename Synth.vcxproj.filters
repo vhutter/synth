@@ -85,6 +85,9 @@
     <ClCompile Include="gui\InputField.cpp">
       <Filter>gui</Filter>
     </ClCompile>
+    <ClCompile Include="gui\Configurable.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gui\Button.h">
@@ -153,5 +156,10 @@
     <ClInclude Include="gui\InputField.h">
       <Filter>gui</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gui\Configurable.h">
+      <Filter>gui</Filter>
+    </None>
   </ItemGroup>
 </Project>

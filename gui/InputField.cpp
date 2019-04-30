@@ -49,7 +49,6 @@ InputField::InputField(SynthFloat sx, SynthFloat sy, unsigned int charSize)
 	setOutlineColor(sf::Color::White);
 	setNormalColor(sf::Color(0x330017ff));
 	setPressedColor(sf::Color(0x330017ff));
-	setCropping(false);	
 	setOutlineThickness(0);
 }
 
@@ -76,55 +75,101 @@ bool InputField::needsEvent(const SynthEvent& event) const
 }
 
 InputRecord::InputRecord(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize)
-	:InputField(sx, sy, charSize)
+	:InputField(sx, sy, charSize),
+	type(type)
 {
-	using T = InputRecord::Type;
-	if (type == T::KeyboardButton) {
-		eventHandler->setSfmlCallback([this, type](const sf::Event & event) {
+	eventHandler->setCallback(EmptyGuiElement::sfmlCallback_t{});
+	eventHandler->setCallback(EmptyGuiElement::midiCallback_t{});
+
+	if (type & Sfml) {
+		eventHandler->setCallback([this, type](const sf::Event & event) {
 			if (active) {
-				if (event.type == sf::Event::KeyPressed) {
-					setTextCentered("KeyCode: " + std::to_string(event.key.code));
-					deactivate();
-				}
 				lastEvent = event;
+				switch (event.type)
+				{
+					case sf::Event::KeyPressed:
+						if (type & KeyboardButton) {
+							setTextCentered("Keyboard: " + std::to_string(event.key.code));
+							deactivate();
+						}
+						break;
+					case sf::Event::MouseButtonPressed:
+						if (type & MouseButton) {
+							if (event.mouseButton.button != sf::Mouse::Button::Left || !isPressed()) {
+								setTextCentered("Mouse: " + std::to_string(event.mouseButton.button));
+								deactivate();
+							}
+						}
+						break;
+					case sf::Event::MouseWheelScrolled:
+						if (type & MouseWheel) {
+							setTextCentered("MouseWheel");
+							deactivate();
+						}
+						break;
+					default:
+						;
+				}
 			}
-		});
+			});
 	}
-	else {
-		eventHandler->setSfmlCallback([](const sf::Event&) {});
-		eventHandler->setMidiCallback([this, type](const MidiEvent & event) {
+	if (type & Midi) { // anything except T::KeyboardButton
+		eventHandler->setCallback([this, type](const MidiEvent & event) {
 			if (active) {
-				if (type == T::MidiKey && event.getType() == MidiEvent::Type::KEYDOWN) {
-					setTextCentered("KeyCode: " + std::to_string(event.getKey()));
-					deactivate();
-				}
-				else if (type == T::MidiWheelKnob) {
-					if (event.getType() == MidiEvent::Type::WHEEL) {
-						setTextCentered("Wheel");
-						deactivate();
-					}
-					else if (event.getType() == MidiEvent::Type::KNOB) {
-						setTextCentered("Knob: " + std::to_string(event.getKey()));
-						deactivate();
-					}
-				}
-				else if (type == T::MidiKey && event.getType() == MidiEvent::Type::KEYDOWN) {
-					setTextCentered("Key: " + std::to_string(event.getKey()));
-					deactivate();
-				}
 				lastEvent = event;
+				switch (event.getType())
+				{
+					case MidiEvent::Type::KEYDOWN:
+						if (type & MidiKey) {
+							setTextCentered("Key: " + std::to_string(event.getKey()));
+							deactivate();
+						}
+						break;
+					case MidiEvent::Type::KNOB:
+						if (type & MidiKnob) {
+							setTextCentered("Knob: " + std::to_string(event.getKey()));
+							deactivate();
+						}
+						break;
+					case MidiEvent::Type::WHEEL:
+						if (type & MidiWheel) {
+							setTextCentered("Wheel");
+							deactivate();
+						}
+						break;
+					default:
+						;
+				}
 			}
 		});
 	}
 }
 
+const SynthEvent& InputRecord::getLastEvent() const
+{
+	return lastEvent;
+}
+
 bool InputRecord::needsEvent(const SynthEvent& event) const
 {
-	if (std::holds_alternative<MidiEvent>(event)) return true;
-	const auto& sfEvent = std::get<sf::Event>(event);
-	if (sfEvent.type == sf::Event::MouseButtonPressed ||
-		sfEvent.type == sf::Event::MouseButtonReleased ||
-		sfEvent.type == sf::Event::KeyPressed)
-		return true;
+	if (!active)
+		return InputField::needsEvent(event);
+	if (std::holds_alternative<MidiEvent>(event)) {
+		const auto& e = std::get<MidiEvent>(event);
+		return (
+			((type & MidiKnob )  && e.getType() == MidiEvent::Type::KNOB)    ||
+			((type & MidiKey  )  && e.getType() == MidiEvent::Type::KEYDOWN) ||
+			((type & MidiWheel)  && e.getType() == MidiEvent::Type::WHEEL)
+		);
+	}
+	else {
+		const auto& e = std::get<sf::Event>(event);
+		return (
+			((type & KeyboardButton) && e.type == sf::Event::MouseButtonPressed)  ||
+			((type & MouseWheel    ) && e.type == sf::Event::MouseButtonReleased) ||
+			((type & MouseButton   ) && e.type == sf::Event::MouseWheelScrolled)  ||
+			((type & Mouse         ) && e.type == sf::Event::KeyPressed)
+		);
+	}
 	return false;
 }

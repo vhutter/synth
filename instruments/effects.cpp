@@ -23,7 +23,6 @@ DebugEffect::DebugEffect()
 	frame->addChild(std::make_unique<EmptyGuiElement>([impl = this->impl](const MidiEvent & event) {
 		impl->eventText->setText(getMidiEventInfo(event));
 	}));
-
 	frame->fitToChildren();
 }
 
@@ -61,6 +60,10 @@ VolumeControl::VolumeControl()
 	auto aabb = impl->sliderVolume->AABB();
 	frame->addChildAutoPos( impl->sliderVolume );
 	frame->fitToChildren();
+
+	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Volume settings", 0, 30, 16));
+	configFrame->addChildAutoPos(impl->sliderVolume->getConfigFrame());
+	configFrame->fitToChildren();
 }
 
 void VolumeControl::effectImpl(double t, double & sample) const
@@ -88,8 +91,12 @@ DelayEffect::DelayEffect(unsigned sampleRate, double echoLength, double coeffArg
 	frame->addChildAutoPos(_impl.sliderTime);
 	addToggleButton();
 	frame->fitToChildren();
-
 	frame->setBgColor(sf::Color::Black);
+
+	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Delay settings", 0, 30, 16));
+	configFrame->addChildAutoPos(_impl.sliderCoeff->getConfigFrame());
+	configFrame->addChildAutoPos(_impl.sliderTime->getConfigFrame());
+	configFrame->fitToChildren();
 }
 
 void DelayEffect::effectImpl(double t, double & sample) const
@@ -117,6 +124,10 @@ Glider::Glider(const TimbreModel& model, const std::vector<Note>& notes, unsigne
 	addToggleButton();
 	frame->addChildAutoPos(impl->glideSpeedSlider);
 	frame->fitToChildren();
+
+	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Glider settings", 0, 30, 16));
+	configFrame->addChildAutoPos(impl->glideSpeedSlider->getConfigFrame());
+	configFrame->fitToChildren();
 }
 
 void Glider::effectImpl(double t, double & sample) const

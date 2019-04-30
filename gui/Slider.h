@@ -4,10 +4,11 @@
 #include <atomic>
 
 #include "GuiElement.h"
+#include "Configurable.h"
 
 class TextDisplay;
 
-class Slider : public GuiElement
+class Slider : public GuiElement, public Configurable
 {
 public:
 	enum Orientation : bool { Vertical = true, Horizontal = false };

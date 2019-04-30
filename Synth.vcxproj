@@ -69,6 +69,7 @@
       <PreprocessorDefinitions>__WINDOWS_MM__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
@@ -86,13 +87,14 @@
       <PreprocessorDefinitions>__WINDOWS_MM__;__TEST__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
+      <ConformanceMode>true</ConformanceMode>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;D:\SDKs\frozen\frozen-master\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <ConformanceMode>false</ConformanceMode>
+      <ConformanceMode>true</ConformanceMode>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
@@ -112,6 +114,7 @@
   <ItemGroup>
     <ClCompile Include="gui.cpp" />
     <ClCompile Include="gui\Button.cpp" />
+    <ClCompile Include="gui\Configurable.cpp" />
     <ClCompile Include="gui\events.cpp" />
     <ClCompile Include="gui\Frame.cpp" />
     <ClCompile Include="gui\GuiElement.cpp" />
@@ -160,6 +163,9 @@
     <ClInclude Include="synthMain.h" />
     <ClInclude Include="test\testMain.h" />
     <ClInclude Include="utility.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="gui\Configurable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

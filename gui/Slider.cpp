@@ -59,7 +59,24 @@ Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, Sy
 	valueText->move(-currentPos);
 	mainRect.move(-currentPos);
 	sliderRect.move(-currentPos);
-	//refreshText();
+	refreshText();
+
+	setupConfig(
+		str,
+		InputRecord::MidiWheel | InputRecord::MidiKnob,
+		[this](const SynthEvent& event) {
+			// This will surely be a midi event because of the arguments above
+			auto midi = std::get<MidiEvent>(event);
+			auto type = midi.getType();
+			auto key  = midi.getKey();
+
+			getListener()->setCallback([type, key, this](const MidiEvent & event) {
+				if (type == event.getType() && key == event.getKey()) {
+					setValue(event.getWheelKnobNorm() * (this->to- this->from) + this->from);
+				}
+			});
+		}
+	);
 }
 
 Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
@@ -69,7 +86,8 @@ Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, Sy
 
 bool Slider::needsEvent(const SynthEvent & event) const
 {
-	if (std::holds_alternative<MidiEvent>(event)) return false;
+	if (std::holds_alternative<MidiEvent>(event))
+		return false;
 	const auto& sfEvent = std::get<sf::Event>(event);
 	if (sfEvent.type == sf::Event::MouseButtonPressed ||
 		sfEvent.type == sf::Event::MouseButtonReleased ||
@@ -94,7 +112,6 @@ void Slider::onSfmlEvent(const sf::Event& event)
 			auto[px, py] = mainRect.getPosition();
 			sliderRect.setPosition(px + mainRect.getSize().x / 2 - sliderRectSize.x / 2, py + mainRect.getSize().y / 2 - sliderRectSize.y / 2);
 			moveSlider(SynthVec2(px + mainRect.getSize().x / 2, py + mainRect.getSize().y / 2));
-			refreshText();
 			if (onMove) onMove();
 		}
 		break;
@@ -103,7 +120,6 @@ void Slider::onSfmlEvent(const sf::Event& event)
 		if (clicked) {
 			const auto& mousePos = globalTransform.getInverse() * sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
 			moveSlider(SynthVec2(mousePos));
-			refreshText();
 			if (onMove) onMove();
 		}
 		break;
@@ -165,6 +181,7 @@ void Slider::moveSlider(const SynthVec2& p)
 	}
 
 	value = from + (newValueNormalized + 1) / 2. * (to - from);
+	refreshText();
 }
 
 void Slider::setValue(double newVal)
@@ -180,4 +197,5 @@ void Slider::setValue(double newVal)
 		sliderRect.setPosition(newPos.x, currentPos.y);
 	value = newVal;
 	if(onMove) onMove();
+	refreshText();
 }

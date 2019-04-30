@@ -14,14 +14,18 @@ class EffectBase
 {
 public:
 	EffectBase()
-		:frame{ std::make_shared<Frame>() }
+		:frame{ std::make_shared<Frame>() },
+		configFrame{ std::make_shared<Frame>() }
 	{
 		frame->setBgColor(sf::Color(0x555555aa));
 		frame->setSize(SynthVec2(300, 300));
 		frame->setFocusable(false);
+
+		configFrame->setBgColor(sf::Color::Black);
 	}
 
 	const std::shared_ptr<Frame> getFrame() const { return frame; }
+	const std::shared_ptr<Frame> getConfigFrame() const { return configFrame; }
 	bool isActive() const { return *active; }
 
 protected:
@@ -33,7 +37,7 @@ protected:
 	}
 	void setWidth(unsigned width) { frame->setSize(SynthVec2(width, 0)); }
 
-	std::shared_ptr<Frame> frame;
+	std::shared_ptr<Frame> frame, configFrame;
 
 private:
 	std::shared_ptr< std::atomic<bool> > active{ std::make_shared<std::atomic<bool>>(true) };
@@ -167,6 +171,10 @@ public:
 				sliderPitch->setValue(event.getWheelValueNorm() * 2. - 1);
 			}
 		}));
+
+		configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Pitch bend settings", 0, 30, 16));
+		configFrame->addChildAutoPos(sliderPitch->getConfigFrame());
+		configFrame->fitToChildren();
 	}
 
 private:

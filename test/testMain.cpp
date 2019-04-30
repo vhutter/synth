@@ -62,6 +62,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	auto notes = generateNotes(0, 2);
 
 	static auto generator = DynamicToneSum(Sine13, notes, 5);
+	
 	static auto pitch = PitchBender<DynamicToneSum>(generator);
 	auto pitchWindow = std::make_shared<Window>(pitch.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(pitchWindow);
@@ -75,8 +76,10 @@ void testGui(std::shared_ptr<GuiElement> gui)
 
 	auto randomSlider = std::shared_ptr(Slider::DefaultSlider("RandomSlider", -1, 1));
 	outer2->getContentFrame()->addChild(randomSlider, 300, 140);
+	outer2->getContentFrame()->addChild(randomSlider->getConfigFrame(), 300, 140);
 
-	auto inputRec = std::make_shared<InputRecord>(InputRecord::Type::MidiKey, 150, 30, 13);
+
+	auto inputRec = std::make_shared<InputRecord>(InputRecord::Any, 60, 30, 15);
 	outer2->getContentFrame()->addChild(inputRec, 100, 100);
 
 	
@@ -125,7 +128,7 @@ void testGui(std::shared_ptr<GuiElement> gui)
 	}, [=](const MidiEvent& event) {
 		if (event.getType() == MidiEvent::Type::WHEEL) {
 			double newValue = double(event.getWheelValue()) / MidiEvent::wheelValueMax() * 2. - 1;
-			randomSlider->setValue(newValue);
+			//randomSlider->setValue(newValue);
 		}
 	});
 	

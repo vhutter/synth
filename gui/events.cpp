@@ -62,6 +62,17 @@ const double MidiEvent::getWheelValueNorm() const
 	return double(getWheelValue()) / wheelValueMax();
 }
 
+const double MidiEvent::getWheelKnobNorm() const
+{
+	auto type = getType();
+	if (type == Type::WHEEL)
+		return getWheelValueNorm();
+	else if (type == Type::KNOB)
+		return getVelocityNorm();
+	else
+		return 0.;
+}
+
 bool MidiContext::openPort(unsigned p)
 {
 	try {
