@@ -19,12 +19,12 @@ EmptyGuiElement::EmptyGuiElement(const midiCallback_t& midi)
 	setFocusable(false);
 }
 
-void EmptyGuiElement::setSfmlCallback(const sfmlCallback_t& sfml)
+void EmptyGuiElement::setCallback(const sfmlCallback_t& sfml)
 {
 	sfmlCallback = sfml;
 }
 
-void EmptyGuiElement::setMidiCallback(const midiCallback_t& midi)
+void EmptyGuiElement::setCallback(const midiCallback_t& midi)
 {
 	midiCallback = midi;
 }
@@ -60,7 +60,7 @@ bool GuiElement::forwardEvent(const SynthEvent& event, const sf::Transform& tran
 	return ret;
 }
 
-void GuiElement::addChild(std::shared_ptr<GuiElement> child, unsigned px, unsigned py)
+void GuiElement::addChild(std::shared_ptr<GuiElement> child, int px, int py)
 {
 	if (child->parent) {
 		child->parent->removeChild(child);

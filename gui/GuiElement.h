@@ -8,6 +8,7 @@
 class GuiElement : public sf::Drawable, public sf::Transformable, public std::enable_shared_from_this<GuiElement>
 {
 public:
+	virtual ~GuiElement() {}
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override final;
 	virtual SynthRect AABB() const;
 	virtual bool needsEvent(const SynthEvent& event) const { return true; }
@@ -15,7 +16,7 @@ public:
 	virtual sf::View childrenView(const sf::RenderTarget& target, const sf::RenderStates& states) const { return target.getView(); }
 	void moveAroundPoint(const SynthVec2& center);
 	bool forwardEvent(const SynthEvent& event, const sf::Transform& transform = {});
-	void addChild(std::shared_ptr<GuiElement> child, unsigned px=0, unsigned py=0);
+	void addChild(std::shared_ptr<GuiElement> child, int px=0, int py=0);
 	void removeChild(const std::shared_ptr<GuiElement>& child);
 	void onEvent(const SynthEvent& event);
 	void setVisibility(bool v);
@@ -43,18 +44,18 @@ private:
 
 class EmptyGuiElement : public GuiElement
 {
+public:
 	using midiCallback_t = std::function<void(const MidiEvent&)>;
 	using sfmlCallback_t = std::function<void(const sf::Event&)>;
 	using synthCallback_t = std::function<void(const SynthEvent&)>;
 
-public:
 	EmptyGuiElement() = default;
 	EmptyGuiElement(const sfmlCallback_t& sfml, const midiCallback_t& midi);
 	EmptyGuiElement(const sfmlCallback_t& sfml);
 	EmptyGuiElement(const midiCallback_t& midi);
 
-	void setSfmlCallback(const sfmlCallback_t& sfml);
-	void setMidiCallback(const midiCallback_t& midi);
+	void setCallback(const sfmlCallback_t& sfml);
+	void setCallback(const midiCallback_t& midi);
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override {}
