@@ -21,7 +21,7 @@ public:
 		frame->setSize(SynthVec2(300, 300));
 		frame->setFocusable(false);
 
-		configFrame->setBgColor(sf::Color::Black);
+		configFrame->setBgColor(sf::Color(0xaaaaaaaa));
 	}
 
 	const std::shared_ptr<Frame> getFrame() const { return frame; }

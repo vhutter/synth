@@ -10,6 +10,8 @@
 
 namespace
 {
+	using pos_t = MenuOption::OptionList::ChildPos_t;
+
 	std::vector<SampleGenerator<void*>::after_t> afterEffects;
 	std::unordered_map<std::string, std::optional<unsigned>> settings = {
 		{"sampleRate", 44100},
@@ -20,7 +22,7 @@ namespace
 	Instrument1 inst{
 		settings["sampleRate"].value(),
 		settings["bufferSize"].value(),
-		Sine13,
+		Sine13(),
 		generateNotes(2, 5),
 		settings["maxNoteCount"].value()
 	};
@@ -33,7 +35,6 @@ namespace
 
 		auto gui = mainWindow->getContentFrame();
 		auto menu = mainWindow->getMenuFrame();
-		using pos_t = MenuOption::OptionList::ChildPos_t;
 
 		auto volume = VolumeControl();
 		gui->addChildAutoPos(volume.getFrame());
@@ -62,7 +63,7 @@ namespace
 		gui->addChildAutoPos(configWindow);
 
 		menu->addChildAutoPos(MenuOption::createMenu(
-			100, 30, 15, {
+			30, 15, {
 				"View", pos_t::Down, {{
 					"Debug", debugWindow}, {
 					"Effects", {{
@@ -98,17 +99,6 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 				renderWindow.close();
 				break;
 			}
-			case sf::Event::KeyPressed: {
-				switch (event.key.code) {
-				case sf::Keyboard::Escape: {
-					renderWindow.close();
-					break;
-				}
-				default:
-					break;
-				}
-				break;
-			}
 			case sf::Event::Resized: {
 				sf::View view(sf::FloatRect(0, 0, event.size.width, event.size.height));
 				renderWindow.setView(view);
@@ -123,6 +113,17 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 
 	auto gui = mainWindow->getContentFrame();
 	auto menu = mainWindow->getMenuFrame();
+
+	menu->addChildAutoPos(MenuOption::createMenu(
+		30, 15, {
+			"Instruments", pos_t::Down, {
+				{"Classic synthesizer", inst.getGuiElement()},
+				{"Same as above", inst.getGuiElement()},
+				{"Still same, just testing", inst.getGuiElement()}
+			}
+		}
+	));
+
 	addAfterEffects(mainWindow);
 
 	attachAfterCallbacks(inst);

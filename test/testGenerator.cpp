@@ -1,20 +1,15 @@
 #include "test.h"
 
-namespace
+void testGenerator()
 {
-	Instrument1 inst(
+	static Instrument1 inst(
 		44100,
 		16,
-		Sine13,
+		Sine13(),
 		generateNotes(2, 5),
 		15
 	);
 	auto& gen = inst.getGenerator();
-};
-
-
-void testGenerator()
-{
 
 	gen[20].start(0.);
 	gen[21].start(0.);
@@ -32,4 +27,6 @@ void testGenerator()
 	gen[16].start(0.);
 	inst.play();
 
+
+	std::this_thread::sleep_for(std::chrono::seconds(30));
 }

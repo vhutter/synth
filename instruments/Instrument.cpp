@@ -48,7 +48,7 @@ void Instrument1::init()
 	window->setMenuBar(menuHeight);
 	window->setOnClose([this]() {keyboard.stopAll(); });
 	window->getMenuFrame()->addChildAutoPos(MenuOption::createMenu(
-		100, 30, 15, {
+		30, 15, {
 			"Settings", pos_t::Down, {
 			}
 		}

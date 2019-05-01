@@ -5,10 +5,8 @@
 
 int testMain(int argc, char** argv)
 {
-	//testGui();
-	testGenerator();
-
-	std::this_thread::sleep_for(std::chrono::seconds(30));
+	testGui();
+	//testGenerator();
 
 	return 0;
 }

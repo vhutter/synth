@@ -48,7 +48,7 @@ void testGui()
 	outer2->setMenuBar(30);
 	using pos_t = MenuOption::OptionList::ChildPos_t;
 	auto q = MenuOption::createMenu(
-		100, 30, 15, {
+		30, 15, {
 			"Menu1", pos_t::Down, {{
 				"inner1^", inner1}, {
 				"Menu12", {
@@ -63,17 +63,17 @@ void testGui()
 
 	auto notes = generateNotes(0, 2);
 
-	static auto generator = DynamicToneSum(Sine13, notes, 5);
+	static auto generator = DynamicToneSum(Sine13(), notes, 5);
 	
 	static auto pitch = PitchBender<DynamicToneSum>(generator);
 	auto pitchWindow = std::make_shared<Window>(pitch.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(pitchWindow);
 
-	auto glider = Glider(Sine13, notes, 5);
+	auto glider = Glider(Sine13(), notes, 5);
 	auto gliderWindow = std::make_shared<Window>(glider.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(gliderWindow);
 
-	auto input = std::make_shared<InputField>(100, 30);
+	auto input = std::make_shared<InputField>(InputField::Double, 100, 30);
 	outer2->getContentFrame()->addChildAutoPos(input);
 
 	auto randomSlider = std::shared_ptr(Slider::DefaultSlider("RandomSlider", -1, 1));
@@ -159,17 +159,6 @@ void testGui()
 			switch (event.type) {
 			case sf::Event::Closed: {
 				window.close();
-				break;
-			}
-			case sf::Event::KeyPressed: {
-				switch (event.key.code) {
-				case sf::Keyboard::Escape: {
-					window.close();
-					break;
-				}
-				default:
-					break;
-				}
 				break;
 			}
 			default:

@@ -82,9 +82,6 @@
     <ClCompile Include="instruments\Instrument.cpp">
       <Filter>Instruments</Filter>
     </ClCompile>
-    <ClCompile Include="gui\InputField.cpp">
-      <Filter>gui</Filter>
-    </ClCompile>
     <ClCompile Include="gui\Configurable.cpp">
       <Filter>gui</Filter>
     </ClCompile>
@@ -93,6 +90,9 @@
     </ClCompile>
     <ClCompile Include="test\testGui.cpp">
       <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\Input.cpp">
+      <Filter>gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -156,11 +156,11 @@
     <ClInclude Include="instruments\Instrument.h">
       <Filter>Instruments</Filter>
     </ClInclude>
-    <ClInclude Include="gui\InputField.h">
-      <Filter>gui</Filter>
-    </ClInclude>
     <ClInclude Include="test\test.h">
       <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\Input.h">
+      <Filter>gui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
