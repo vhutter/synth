@@ -2,8 +2,14 @@
 
 #include <optional>
 
-const SynthVec2 SynthKey::whiteSizeDefault(100, 200);
-const SynthVec2 SynthKey::blackSizeDefault(40, 150);
+SynthVec2 SynthKey::whiteSizeDefault()
+{
+	return { 100, 200 };
+}
+SynthVec2 SynthKey::blackSizeDefault()
+{
+	return { 40, 150 };
+}
 
 SynthKey::SynthKey(Type t, const SynthVec2& size)
 	:type(t)
@@ -11,11 +17,11 @@ SynthKey::SynthKey(Type t, const SynthVec2& size)
 	setSize(sf::Vector2f(size));
 
 	if (t == Type::Black) {
-		if (size.x == 0) setSize(sf::Vector2f(SynthKey::blackSizeDefault));
+		if (size.x == 0) setSize(sf::Vector2f(SynthKey::blackSizeDefault()));
 		setFillColor(sf::Color::Black);
 	}
 	else {
-		if (size.x == 0) setSize(sf::Vector2f(SynthKey::whiteSizeDefault));
+		if (size.x == 0) setSize(sf::Vector2f(SynthKey::whiteSizeDefault()));
 		setFillColor(sf::Color::White);
 	}
 
@@ -96,16 +102,6 @@ void SynthKeyboard::onMidiEvent(const MidiEvent & event)
 	uint8_t least = message[1] & 0b0111'1111;
 	uint8_t most = message[2] & 0b0111'1111;
 	uint16_t all = least + (most << 7);
-
-	/*
-	static int msgId = 0;
-	std::cout << msgId++ << ".\n" <<
-		"Max. wheel value: " << MidiEvent::wheelValueMax() << "\n" <<
-		"Current wheel value: " << event.getWheelValue() << "\n" <<
-		"Event type: " << std::bitset<8>(uint8_t(event.getType())) << "\n" <<
-		"Key code: " << unsigned(event.getKey()) << "\n" <<
-		"Velocity: " << unsigned(event.getVelocity()) << "\n\n";
-	*/
 
 	unsigned char middleC = 48;
 	unsigned char value = keyCode - middleC;
@@ -250,8 +246,8 @@ KeyboardOutput::KeyboardOutput(unsigned keyCount)
 		}
 	}))
 {
-	kb->setSize(SynthKey::Black, {SynthKey::blackSizeDefault/SynthFloat(4)});
-	kb->setSize(SynthKey::White, {SynthKey::whiteSizeDefault/SynthFloat(4)});
+	kb->setSize(SynthKey::Black, {SynthKey::blackSizeDefault()/SynthFloat(4)});
+	kb->setSize(SynthKey::White, {SynthKey::whiteSizeDefault()/SynthFloat(4)});
 }
 
 std::shared_ptr<SynthKeyboard> KeyboardOutput::getSynthKeyboard() const

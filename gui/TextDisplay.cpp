@@ -3,8 +3,6 @@
 
 #include "TextDisplay.h"
 
-sf::Font TextDisplay::font = loadCourierNew();
-
 const SynthVec2 TextDisplay::topLeftAlignment() const
 {
 	const auto& boundingBox = text.getGlobalBounds();
@@ -41,8 +39,14 @@ void TextDisplay::fitFrame(const SynthVec2& size)
 	});
 }
 
-TextDisplay::TextDisplay(const std::string& initialText, SynthFloat sx, SynthFloat sy, unsigned int size)
-	: text()
+TextDisplay::TextDisplay(
+	const std::string& initialText, 
+	SynthFloat sx, 
+	SynthFloat sy, 
+	unsigned int size, 
+	const sf::Font& fontArg
+)
+	: text(), font(fontArg)
 {
 	setFocusable(false);
 
@@ -73,7 +77,8 @@ std::unique_ptr<TextDisplay> TextDisplay::DefaultText(
 std::unique_ptr<TextDisplay> TextDisplay::Multiline(
 	const std::string initialText,
 	SynthFloat width,
-	unsigned int charSize
+	unsigned int charSize,
+	const sf::Font& font
 )
 {
 	sf::Text dummyText;

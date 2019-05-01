@@ -2,7 +2,7 @@
 
 void Instrument1::init()
 {
-	const unsigned wWidth{ 800 }, wHeight{ 400 }, menuHeight{ 30 };
+	const unsigned wWidth{ 1000 }, wHeight{ 400 }, menuHeight{ 30 };
 	using pos_t = MenuOption::OptionList::ChildPos_t;
 	window->setSize(SynthVec2(wWidth, wHeight));
 	auto gui = window->getContentFrame();

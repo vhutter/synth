@@ -5,7 +5,7 @@
 
 sf::Font loadCourierNew()
 {
-	sf::Font tmpFont;
+	static sf::Font tmpFont;
 	if (!tmpFont.loadFromFile("fonts/cour.ttf")) {
 		throw std::runtime_error("fonts/cour.ttf not found");
 	}

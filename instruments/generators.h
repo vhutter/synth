@@ -107,7 +107,7 @@ public:
 	{}
 	double getSample(double t) const
 	{
-		T input = *const_cast<T*>(static_cast<const T*>(this));
+		T& input = *const_cast<T*>(static_cast<const T*>(this));
  		if (beforeSample) {
 			beforeSample(t, input);
 		}

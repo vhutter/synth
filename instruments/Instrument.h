@@ -29,7 +29,7 @@ public:
 		left{ [this](double t) {return generator.getSample(t); } },
 		right{ [this](double t) {return generator.getSample(t); } },
 		stream{ sampleRate, bufferSize, left, right },
-		window{ std::make_shared<Window>(0,0,sf::Color::Black) }
+		window{ std::make_shared<Window>(0,0) }
 	{
 	}
 

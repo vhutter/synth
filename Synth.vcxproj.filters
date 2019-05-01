@@ -88,6 +88,12 @@
     <ClCompile Include="gui\Configurable.cpp">
       <Filter>gui</Filter>
     </ClCompile>
+    <ClCompile Include="test\testGenerator.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="test\testGui.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gui\Button.h">
@@ -147,14 +153,14 @@
     <ClInclude Include="instruments\SynthStream.h">
       <Filter>Instruments</Filter>
     </ClInclude>
-    <ClInclude Include="test\testMain.h">
-      <Filter>Tests</Filter>
-    </ClInclude>
     <ClInclude Include="instruments\Instrument.h">
       <Filter>Instruments</Filter>
     </ClInclude>
     <ClInclude Include="gui\InputField.h">
       <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="test\test.h">
+      <Filter>Tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

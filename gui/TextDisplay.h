@@ -6,7 +6,13 @@
 class TextDisplay : public Frame
 {
 public:
-	TextDisplay(const std::string& initialText, SynthFloat sx = 0, SynthFloat sy = 0, unsigned int charSize = 30);
+	TextDisplay(
+		const std::string& initialText, 
+		SynthFloat sx = 0, 
+		SynthFloat sy = 0, 
+		unsigned int charSize = 30, 
+		const sf::Font& font = loadCourierNew()
+	);
 	TextDisplay() : TextDisplay("") {}
 	static std::unique_ptr<TextDisplay> DefaultText(
 		const std::string& initialText,
@@ -15,7 +21,8 @@ public:
 	static std::unique_ptr<TextDisplay> Multiline(
 		const std::string text,
 		SynthFloat width,
-		unsigned int charSize = 24
+		unsigned int charSize = 24,
+		const sf::Font& font = loadCourierNew()
 	);
 
 	template<class string_t=sf::String>
@@ -42,7 +49,7 @@ protected:
 	sf::Text text;
 	bool fixedFrame{ false };
 
-	static sf::Font font;
+	sf::Font font;
 };
 
 #endif //TEXTDISPLAY_H_INCLUDED

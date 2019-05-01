@@ -3,7 +3,7 @@
 #include "synthMain.h"
 
 #ifdef __TEST__
-#include "test/testMain.h"
+#include "test/test.h"
 #else
 #include "synthMain.h"
 #endif

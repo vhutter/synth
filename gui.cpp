@@ -116,14 +116,14 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 	auto gui = mainWindow->getContentFrame();
 	auto menu = mainWindow->getMenuFrame();
 	addAfterEffects(mainWindow);
-	
-	static Instrument1 inst(
-		settings["sampleRate"].value(), 
-		settings["bufferSize"].value(), 
-		Sine13, 
-		generateNotes(2, 5), 
+
+	static Instrument1 inst{
+		settings["sampleRate"].value(),
+		settings["bufferSize"].value(),
+		Sine13,
+		generateNotes(2, 5),
 		settings["maxNoteCount"].value()
-	);
+	};
 
 	attachAfterCallbacks(inst);
 	gui->addChild(inst.getGuiElement(), 50, 50);

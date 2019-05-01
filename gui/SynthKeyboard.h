@@ -14,7 +14,8 @@ public:
 	SynthKey(const SynthKey& other) : sf::RectangleShape(other), type(other.type), pressed(other.pressed.load()) {}
 	void setPressed(bool p);
 
-	static const SynthVec2 whiteSizeDefault, blackSizeDefault;
+	static SynthVec2 whiteSizeDefault();
+	static SynthVec2 blackSizeDefault();
 
 	const Type type;
 
@@ -47,7 +48,7 @@ private:
 
 	std::vector<SynthKey> keys;
 	callback_t onKey;
-	SynthVec2 blackSize{ SynthKey::blackSizeDefault }, whiteSize{ SynthKey::whiteSizeDefault };
+	SynthVec2 blackSize{ SynthKey::blackSizeDefault() }, whiteSize{ SynthKey::whiteSizeDefault() };
 	unsigned octaveShift{ 0 };
 };
 
