@@ -404,7 +404,7 @@ class DynamicToneSum : public Composite<Dynamic<Composite<WaveGenerator>>>
 
 		const unsigned maxTones;
 		mutable std::atomic<double> lastTime{ 0 };
-		mutable std::recursive_mutex mtx;
+		mutable std::mutex mtx;
 		std::vector<give_id<after_t>> afterSampleCallbacks;
 		std::vector<give_id<before_t>> beforeSampleCallbacks;
 		TimbreModel timbreModel;
