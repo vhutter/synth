@@ -28,6 +28,7 @@ public:
 	template<class string_t=sf::String>
 	const string_t getText() const
 	{
+		std::lock_guard lock(mtx);
 		return text.getString();
 	}
 	const sf::Color& getTextColor() const;
@@ -49,7 +50,8 @@ protected:
 	sf::Text text;
 	bool fixedFrame{ false };
 
-	sf::Font font;
+	const sf::Font& font;
+	mutable std::mutex mtx;
 };
 
 #endif //TEXTDISPLAY_H_INCLUDED

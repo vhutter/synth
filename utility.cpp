@@ -3,7 +3,7 @@
 
 #include <unordered_set>
 
-sf::Font loadCourierNew()
+const sf::Font& loadCourierNew()
 {
 	static sf::Font tmpFont;
 	if (!tmpFont.loadFromFile("fonts/cour.ttf")) {

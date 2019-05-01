@@ -111,38 +111,45 @@ std::unique_ptr<TextDisplay> TextDisplay::Multiline(
 
 void TextDisplay::setTextSize(unsigned newSize)
 {
+	std::lock_guard lock(mtx);
 	text.setCharacterSize(newSize);
 }
 
 const sf::Color & TextDisplay::getTextColor() const
 {
+	std::lock_guard lock(mtx);
 	return text.getFillColor();
 }
 
 const unsigned TextDisplay::getTextSize() const
 {
+	std::lock_guard lock(mtx);
 	return text.getCharacterSize();
 }
 
 void TextDisplay::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	Frame::drawImpl(target, states);
+	std::lock_guard lock(mtx);
 	target.draw(text, states);
 }
 
 void TextDisplay::setText(const std::string& content)
 {
+	std::lock_guard lock(mtx);
 	text.setString(content);
 	fitFrame();
 }
 
 void TextDisplay::setText(const sf::String& content)
 {
+	std::lock_guard lock(mtx);
 	text.setString(content);
 	fitFrame();
 }
 
 void TextDisplay::setTextColor(const sf::Color & color)
 {
+	std::lock_guard lock(mtx);
 	text.setFillColor(color);
 }
