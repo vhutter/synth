@@ -19,8 +19,9 @@ private:
 	sf::RectangleShape window;
 	mutable std::vector<sf::Vertex> vArray;
 	const unsigned resolution;
-	double speed;
 	double currTime = 0;
+
+	mutable std::mutex mtx;
 };
 
 #endif //OSCILLOSCOPE_H_INCLUDED

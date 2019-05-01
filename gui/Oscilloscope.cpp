@@ -27,11 +27,13 @@ SynthRect Oscilloscope::AABB() const
 void Oscilloscope::drawImpl(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(window, states);
+	std::lock_guard lock(mtx);
 	target.draw(vArray.data(), resolution, sf::LineStrip, states);
 }
 
 void Oscilloscope::newSamples(const std::vector<double>& samples) const
 {
+	std::lock_guard lock(mtx);
 	const double halfY = window.getSize().y / 2;
 	const unsigned dif = samples.size();
 	if (dif < vArray.size()) {
