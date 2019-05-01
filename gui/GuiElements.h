@@ -12,7 +12,7 @@
 #include "Oscilloscope.h"
 #include "Window.h"
 #include "MenuOption.h"
-#include "InputField.h"
+#include "Input.h"
 
 
 #endif // GUI_ELEMENTS_H_INCLUDED

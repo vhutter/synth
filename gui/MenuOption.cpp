@@ -77,25 +77,41 @@ bool MenuOption::isActive() const
 	return active;
 }
 
+
+
+void MenuOption::correctWidth(TextDisplay& tile, unsigned h, unsigned alignment)
+{
+	tile.setFixedSize(false);
+	tile.fitFrame(tile.getSize());
+	tile.setSize(SynthVec2(tile.getSize().x + SynthFloat(alignment) * 2, h));
+	tile.centralize();
+	tile.setFixedSize(true);
+}
+
 std::shared_ptr<MenuOption> MenuOption::createMenu(
-	unsigned w, unsigned h,
+	unsigned h,
 	unsigned fontSize,
-	const OptionList& option
+	const OptionList& option,
+	unsigned alignment,
+	unsigned width
 )
 {
 	std::shared_ptr<MenuOption> ret;
-	if (std::holds_alternative< std::shared_ptr<Window>>(option.children)) {
+
+	if (std::holds_alternative< std::shared_ptr<Window>>(option.children))
 		ret = std::make_shared<MenuOption>(option.title, fontSize, std::get<std::shared_ptr<Window>>(option.children));
-	}
-	else {
+	else
 		ret = std::make_shared<MenuOption>(option.title, fontSize);
-	}
-	ret->setSize(SynthVec2(w,h));
-	ret->centralize();
+
+	if (width)
+		ret->setSize(SynthVec2(width, h));
+	else
+		correctWidth(*ret, h, alignment);
+
 	using pos_t = OptionList::ChildPos_t;
 	SynthVec2 startPos{ 0,0 }, difPos{ 0, SynthFloat(h) };
 	if (option.childPos == pos_t::Right) {
-		startPos.x += w;
+		startPos.x += ret->getSize().x;
 	}
 	else if (option.childPos == pos_t::Down) {
 		startPos.y += h;
@@ -103,9 +119,22 @@ std::shared_ptr<MenuOption> MenuOption::createMenu(
 
 	if (std::holds_alternative< std::vector<OptionList>>(option.children)) {
 		auto children = std::get<std::vector<OptionList>>(option.children);
+
+		// Precalculate max width of the direct descendants with plain TextDisplay
+		unsigned maxWidth = 0;
 		for (auto child : children) {
-			auto newItem = createMenu(w, h, fontSize, child);
-			ret->addChild( newItem, startPos.x, startPos.y );
+			auto newItem = TextDisplay(child.title, 0, h, fontSize);
+			correctWidth(newItem, h, alignment);
+			unsigned newWidth = unsigned(newItem.getSize().x);
+			maxWidth = newWidth > maxWidth ? newWidth : maxWidth;
+		}
+
+		// Recursively create the submenu (with the previously calculated width for the direct descendants)
+		auto newSize = SynthVec2(maxWidth, h);
+		for (auto child : children) {
+			auto newItem = createMenu(h, fontSize, child, alignment, maxWidth);
+			newItem->centralize();
+			ret->addChild(newItem, startPos.x, startPos.y);
 			startPos += difPos;
 		}
 	}

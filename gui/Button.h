@@ -49,11 +49,11 @@ public:
 	virtual bool needsEvent(const SynthEvent& event) const override;
 
 protected:
-	bool isPressedOrReleased(const sf::Event& event) const;
 	sf::Event lastEvent;
 	bool passesAllClicks{ false };
 
 private:
+	bool isPressedOrReleased(const sf::Event& event) const;
 	using TextDisplay::setBgColor;
 	void refreshCol();
 

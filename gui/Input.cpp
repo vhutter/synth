@@ -1,4 +1,4 @@
-#include "InputField.h"
+#include "Input.h"
 
 void InputField::activate()
 {
@@ -13,7 +13,7 @@ void InputField::deactivate()
 	if (onEndCallback) onEndCallback();
 }
 
-InputField::InputField(SynthFloat sx, SynthFloat sy, unsigned int charSize)
+InputField::InputField(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize)
 	:Button("", sx, sy, charSize, [this]() {
 		if (isPressed()) {
 			activate();
@@ -22,19 +22,28 @@ InputField::InputField(SynthFloat sx, SynthFloat sy, unsigned int charSize)
 			deactivate();
 		}
 	}),
-	eventHandler(std::make_unique<EmptyGuiElement>([this](const sf::Event& event) {
+	eventHandler(std::make_unique<EmptyGuiElement>([this, type](const sf::Event& event) {
 		if (event.type == sf::Event::TextEntered) {
 			if (active) {
 				auto code = event.text.unicode;
 				auto oldText = getText();
-				if (code == 8) { //backspace
+				if (code == '\b') { //backspace
 					setTextCentered(oldText.substring(0, oldText.getSize() - 1));
 				}
-				if (code == 10 || code == 13) { //enter
+				else if (code == '\t') { // tab
+					// ignore
+				}
+				else if (code == '\r' || code == '\n' || code == 27) { //enter || escape
 					deactivate();
 				}
-				else if (code < 128) { // ASCII
-					setTextCentered(oldText + sf::String(event.text.unicode));
+				else if (code < 128 && ( // ASCII
+					(type & Int  ) && '0' <= code && code <= '9' ||
+					(type & Point) && '.' == code                ||
+					(type & Alpha) && 'a' <= code && code <= 'z' ||
+					(type & Alpha) && 'A' <= code && code <= 'Z'
+				)) {
+					std::string newText = oldText + sf::String(event.text.unicode);
+					setTextCentered(newText);
 					const auto & aabb = text.getLocalBounds();
 					if (aabb.width >= getSize().x) {
 						setTextCentered(oldText);
@@ -67,15 +76,17 @@ bool InputField::needsEvent(const SynthEvent& event) const
 {
 	if (std::holds_alternative<MidiEvent>(event)) return false;
 	const auto& sfEvent = std::get<sf::Event>(event);
-	if (sfEvent.type == sf::Event::MouseButtonPressed ||
+	return (
+		sfEvent.type == sf::Event::MouseButtonPressed ||
 		sfEvent.type == sf::Event::MouseButtonReleased ||
-		sfEvent.type == sf::Event::TextEntered)
-		return true;
+		sfEvent.type == sf::Event::TextEntered ||
+		sfEvent.type == sf::Event::KeyPressed
+	);
 	return false;
 }
 
 InputRecord::InputRecord(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize)
-	:InputField(sx, sy, charSize),
+	:InputField(InputField::None, sx, sy, charSize),
 	type(type)
 {
 	eventHandler->setCallback(EmptyGuiElement::sfmlCallback_t{});
@@ -165,10 +176,10 @@ bool InputRecord::needsEvent(const SynthEvent& event) const
 	else {
 		const auto& e = std::get<sf::Event>(event);
 		return (
-			((type & KeyboardButton) && e.type == sf::Event::MouseButtonPressed)  ||
-			((type & MouseWheel    ) && e.type == sf::Event::MouseButtonReleased) ||
-			((type & MouseButton   ) && e.type == sf::Event::MouseWheelScrolled)  ||
-			((type & Mouse         ) && e.type == sf::Event::KeyPressed)
+			e.type == sf::Event::MouseButtonReleased || // Deactivation click
+			e.type == sf::Event::MouseButtonPressed  || //
+			((type & MouseWheel    ) && e.type == sf::Event::MouseWheelScrolled)  ||
+			((type & KeyboardButton) && e.type == sf::Event::KeyPressed)
 		);
 	}
 	return false;

@@ -6,7 +6,18 @@
 class InputField : public Button
 {
 public:
-	InputField(SynthFloat sx, SynthFloat sy, unsigned int charSize=16);
+	using Type = uint8_t;
+	enum : Type {
+		None      = 0x00,
+		Alpha     = 0b0001,
+		Int       = 0b0010,
+		Point     = 0b0100,
+		Double    = Int | Point,
+		AlphaNum  = Int | Alpha,
+		Any       = 0xff,
+	};
+
+	InputField(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize=16);
 	void setTextCentered(const std::string& str);
 	void setOnEnd(std::function<void()> callback);
 
@@ -50,7 +61,6 @@ public:
 private:
 	SynthEvent lastEvent;
 	const Type type;
-
 };
 
 #endif //INPUTFIELD_H_INCLUDED

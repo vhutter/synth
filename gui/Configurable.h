@@ -1,7 +1,7 @@
 #ifndef CONFIGURABLE_H_INCLUDED
 #define CONFIGURABLE_H_INCLUDED
 
-#include "InputField.h"
+#include "Input.h"
 
 class Configurable
 {

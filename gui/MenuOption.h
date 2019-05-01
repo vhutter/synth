@@ -34,12 +34,16 @@ public:
 	};
 
 	static std::shared_ptr<MenuOption> createMenu(
-		unsigned w, unsigned h,
+		unsigned height,
 		unsigned fontSize,
-		const OptionList& option
+		const OptionList& option,
+		unsigned alignment = 10u,
+		unsigned width = 0u
 	);
 
 private:
+	static void correctWidth(TextDisplay& tile, unsigned h, unsigned alignment);
+
 	void init();
 	MenuOption* pressedChild();
 
