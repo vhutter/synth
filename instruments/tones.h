@@ -6,15 +6,7 @@
 
 #include "generators.h"
 
-static TimbreModel Sine13{
-	{
-		TimbreModel::ToneSkeleton{ 1., 1.,  waves::sine },
-		TimbreModel::ToneSkeleton{ 3., 0.3, waves::sine },
-		TimbreModel::ToneSkeleton{ 5., 0.3, waves::sine },
-		TimbreModel::ToneSkeleton{ 7., 0.3, waves::sine },
-		TimbreModel::ToneSkeleton{ 9., 0.3, waves::sine },
-	}
-};
+const TimbreModel& Sine13();
 
 template<typename WaveGenerator>
 std::vector<typename Dynamic<Composite<WaveGenerator>>> generateTones(
