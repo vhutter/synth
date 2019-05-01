@@ -6,15 +6,7 @@
 int testMain(int argc, char** argv)
 {
 	//testGui();
-
-	Instrument1 inst(
-		44100,
-		16,
-		Sine13,
-		generateNotes(2, 5),
-		5
-	);
-	testGenerator(inst);
+	testGenerator();
 
 	std::this_thread::sleep_for(std::chrono::seconds(30));
 

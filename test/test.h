@@ -5,6 +5,6 @@
 
 int testMain(int argc, char** argv);
 void testGui();
-void testGenerator(Instrument<DynamicToneSum>& instrument);
+void testGenerator();
 
 #endif
