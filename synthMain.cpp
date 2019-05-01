@@ -15,9 +15,9 @@ int synthMain(int argc, char** argv)
 	setupGui(mainWindow, window);
 
 	MidiContext midiContext;
+	sf::Event event;
+	MidiEvent midiEvent;
 	while (window.isOpen()) {
-		static sf::Event event;
-		static MidiEvent midiEvent;
 
 		while (midiContext.pollEvent(midiEvent)) {
 			mainWindow->forwardEvent(midiEvent);

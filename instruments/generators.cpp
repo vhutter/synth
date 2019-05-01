@@ -116,33 +116,23 @@ Note::Note(double f)
     :freq(f), initialFreq(freq)
 {}
 
-//const Note Note::C  (523.25);
-//const Note Note::Cis(554.37);
-//const Note Note::D  (587.33);
-//const Note Note::Dis(622.25);
-//const Note Note::E  (659.25);
-//const Note Note::F  (698.46);
-//const Note Note::Fis(739.99);
-//const Note Note::G  (783.99);
-//const Note Note::Gis(830.61);
-//const Note Note::A  (880.00);
-//const Note Note::Ais(932.33);
-//const Note Note::B  (987.77);
+const Note& Note::A()   { static const Note n(16.35); return n; }
+const Note& Note::Ais() { static const Note n(17.32); return n; }
+const Note& Note::B()   { static const Note n(18.35); return n; }
+const Note& Note::C()   { static const Note n(19.45); return n; }
+const Note& Note::Cis() { static const Note n(20.60); return n; }
+const Note& Note::D()   { static const Note n(21.83); return n; }
+const Note& Note::Dis() { static const Note n(23.12); return n; }
+const Note& Note::E()   { static const Note n(24.50); return n; }
+const Note& Note::F()   { static const Note n(25.96); return n; }
+const Note& Note::Fis() { static const Note n(27.50); return n; }
+const Note& Note::G()   { static const Note n(29.14); return n; }
+const Note& Note::Gis() { static const Note n(30.87); return n; }
 
-const Note Note::C  (16.35);
-const Note Note::Cis(17.32);
-const Note Note::D  (18.35);
-const Note Note::Dis(19.45);
-const Note Note::E  (20.60);
-const Note Note::F  (21.83);
-const Note Note::Fis(23.12);
-const Note Note::G  (24.50);
-const Note Note::Gis(25.96);
-const Note Note::A  (27.50);
-const Note Note::Ais(29.14);
-const Note Note::B  (30.87);
-
-const std::array<Note, 12> Note::baseNotes{ C, Cis, D, Dis, E, F, Fis, G, Gis, A, Ais, B };
+const std::array<Note, 12> Note::baseNotes()
+{
+	return { A(), Ais(), B(), C(), Cis(), D(), Dis(), E(), F(), Fis(), G(), Gis() };
+}
 
 WaveGenerator::WaveGenerator(
 	const Note& note,

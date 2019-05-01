@@ -75,6 +75,7 @@ private:
 		std::shared_ptr<TextDisplay> maxSampText, eventText;
 		std::vector<double> lastSamples = std::vector<double>( resolution, 0. );
 		double maxSamp;
+		unsigned sampleId{ 0 };
 	};
 
 	std::shared_ptr<Impl> impl;

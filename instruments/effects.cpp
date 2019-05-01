@@ -28,17 +28,17 @@ DebugEffect::DebugEffect()
 
 void DebugEffect::effectImpl(double t, double & sample) const
 {
-	static auto sampleId = 0u;
-	auto& lastSamples = impl->lastSamples;
-	lastSamples[sampleId++] = sample;
-	if (sampleId == 500) {
-		impl->oscilloscope->newSamples(lastSamples);
-		sampleId = 0;
-		impl->maxSampText->setText(std::to_string(impl->maxSamp));
-		impl->maxSamp = 0;
+	auto& _impl = *impl;
+	auto& lastSamples = _impl.lastSamples;
+	lastSamples[_impl.sampleId++] = sample;
+	if (_impl.sampleId == 500) {
+		_impl.oscilloscope->newSamples(lastSamples);
+		_impl.sampleId = 0;
+		_impl.maxSampText->setText(std::to_string(impl->maxSamp));
+		_impl.maxSamp = 0;
 	}
-	if (sample > impl->maxSamp) {
-		impl->maxSamp = sample;
+	if (sample > _impl.maxSamp) {
+		_impl.maxSamp = sample;
 	}
 }
 
@@ -57,6 +57,7 @@ std::string DebugEffect::getMidiEventInfo(const MidiEvent& event)
 VolumeControl::VolumeControl()
 	:impl{ std::make_shared<Impl>() }
 {
+	impl->sliderVolume->setValue(1);
 	auto aabb = impl->sliderVolume->AABB();
 	frame->addChildAutoPos( impl->sliderVolume );
 	frame->fitToChildren();

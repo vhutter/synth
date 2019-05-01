@@ -68,21 +68,20 @@ class Note
         operator double() const {return freq;}
 		Note& operator= (const Note& other) { freq = other.freq; return *this; }
 
+		static const Note& A()  ;
+		static const Note& Ais();
+		static const Note& B()  ;
+		static const Note& C()  ;
+		static const Note& Cis();
+		static const Note& D()  ;
+		static const Note& Dis();
+		static const Note& E()  ;
+		static const Note& F()  ;
+		static const Note& Fis();
+		static const Note& G()  ;
+		static const Note& Gis();
 
-		static const Note A;
-		static const Note Ais;
-		static const Note B;
-		static const Note C;
-		static const Note Cis;
-		static const Note D;
-		static const Note Dis;
-		static const Note E;
-		static const Note F;
-		static const Note Fis;
-		static const Note G;
-		static const Note Gis;
-
-		static const std::array<Note, 12> baseNotes;
+		static const std::array<Note, 12> baseNotes();
 		
     private:
         double freq;
