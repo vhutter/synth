@@ -1,7 +1,5 @@
 #define _USE_MATH_DEFINES
 
-#include "synthMain.h"
-
 #ifdef __TEST__
 #include "test/test.h"
 #else
