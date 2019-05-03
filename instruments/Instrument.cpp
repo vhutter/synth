@@ -2,9 +2,7 @@
 
 void Instrument1::init()
 {
-	const unsigned wWidth{ 1000 }, wHeight{ 400 }, menuHeight{ 30 };
 	using pos_t = MenuOption::OptionList::ChildPos_t;
-	window->setSize(SynthVec2(wWidth, wHeight));
 	auto gui = window->getContentFrame();
 	gui->setChildAlignment(10);
 	gui->setCursor(10, 10);
@@ -44,7 +42,7 @@ void Instrument1::init()
 	}));
 
 	gui->fitToChildren();
-	window->setHeader(menuHeight, "Instrument1");
+	window->setSize(gui->getSize());
 	window->setMenuBar(menuHeight);
 	window->setOnClose([this]() {keyboard.stopAll(); });
 	window->getMenuFrame()->addChildAutoPos(MenuOption::createMenu(

@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <optional>
 #include <vector>
+#include <numeric>
+
 
 namespace
 {
@@ -19,12 +21,82 @@ namespace
 		{"maxNoteCount", 5},
 	};
 
-	Instrument1 inst{
-		settings["sampleRate"].value(),
-		settings["bufferSize"].value(),
-		Sine13(),
+	Instrument1 inst1{
+		"Classic1",
+		Sines1(),
+		ADSREnvelope(),
 		generateNotes(2, 5),
 		settings["maxNoteCount"].value()
+	};
+	
+	Instrument1 inst2{
+		"Soft bass",
+		Sines2(),
+		ADSREnvelope(),
+		generateNotes(1, 3),
+		settings["maxNoteCount"].value()
+	};
+	
+	Instrument1 inst3{
+		"Synth 2",
+		SinesTriangles(),
+		ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
+		generateNotes(2, 5),
+		settings["maxNoteCount"].value()
+	};
+	
+	Instrument1 inst4{
+		"Sine",
+		Sine(),
+		ADSREnvelope(),
+		generateNotes(2, 5),
+		settings["maxNoteCount"].value()
+	};
+	
+	Instrument1 inst5{
+		"Square",
+		Square(),
+		ADSREnvelope(),
+		generateNotes(2, 5),
+		settings["maxNoteCount"].value()
+	};
+	
+	Instrument1 inst6{
+		"Sawtooth",
+		Saw(),
+		ADSREnvelope(),
+		generateNotes(2, 5),
+		settings["maxNoteCount"].value()
+	};
+	
+	Instrument1 inst7{
+		"Triangle",
+		Triangle(),
+		ADSREnvelope(),
+		generateNotes(2, 5),
+		settings["maxNoteCount"].value()
+	};
+
+	auto instruments = std::forward_as_tuple(inst1, inst2, inst3, inst4, inst5, inst6, inst7);
+
+	SumGenerator generator(
+		{},
+		[](double t, double& sample) {
+			for (auto f : afterEffects)
+				f(t, sample);
+		},
+		instruments
+	);
+
+	SynthStream synthStream{
+		settings["sampleRate"].value(),
+		settings["bufferSize"].value(),
+		[](double t) -> double { 
+			return generator.getSample(t);
+		},
+		[](double t) -> double {
+			return generator.getSample(t);
+		},
 	};
 
 	void addAfterEffects(std::shared_ptr<Window> mainWindow)
@@ -83,7 +155,7 @@ namespace
 	void attachAfterCallbacks(T& inst)
 	{
 		for (auto callback : afterEffects) {
-			inst.getGenerator().addAfterCallback(callback);
+			inst.addAfterCallback(callback);
 		}
 	}
 
@@ -114,20 +186,33 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 	auto gui = mainWindow->getContentFrame();
 	auto menu = mainWindow->getMenuFrame();
 
+	auto toVector = [](auto & tuple) {
+		auto toList = [](auto & instrument) -> MenuOption::OptionList {
+			return { instrument.getTitle(), instrument.getGuiElement() };
+		};
+
+		return std::apply([toList](auto & ... args) -> std::vector<MenuOption::OptionList> {
+			return { toList(args)... };
+		}, tuple);
+	};
+
 	menu->addChildAutoPos(MenuOption::createMenu(
 		30, 15, {
-			"Instruments", pos_t::Down, {
-				{"Classic synthesizer", inst.getGuiElement()},
-				{"Same as above", inst.getGuiElement()},
-				{"Still same, just testing", inst.getGuiElement()}
-			}
+			"Instruments", pos_t::Down, toVector(instruments)
 		}
 	));
 
-	addAfterEffects(mainWindow);
 
-	attachAfterCallbacks(inst);
-	gui->addChild(inst.getGuiElement(), 50, 50);
-	inst.getGuiElement()->focus();
-	inst.play();
+	std::apply([gui](auto && ... args) {
+		(
+			(
+				gui->addChild(args.getGuiElement(), 50, 50),
+				args.getGuiElement()->setVisibility(false)
+			),
+			...
+		);
+	}, instruments);
+
+	addAfterEffects(mainWindow);
+	synthStream.play();
 }

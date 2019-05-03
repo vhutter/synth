@@ -19,35 +19,25 @@ public:
 
 	template<class ...GeneratorParams>
 	Instrument(
-		const unsigned sampleRate,
-		const unsigned bufferSize,
+		const std::string title,
 		GeneratorParams&& ...params
 	)
-		:sampleRate{ sampleRate },
-		bufferSize{ bufferSize },
+		:title(title),
 		generator{ std::forward<GeneratorParams>(params)... },
-		left{ [this](double t) {return generator.getSample(t); } },
-		right{ [this](double t) {return generator.getSample(t); } },
-		stream{ sampleRate, bufferSize, left, right },
-		window{ std::make_shared<Window>(0,0) }
+		window{ std::make_shared<Window>(wWidth, wHeight) }
 	{
+		window->setHeader(30, title);
 	}
 
 	Generator& getGenerator() { return generator; }
-	unsigned getSampleRate() const { return sampleRate; }
-	unsigned getBufferSize() const { return bufferSize; }
-	void play() { stream.play(); }
-	void stop() { stream.stop(); }
-
+	const std::string& getTitle() const { return title; }
 	std::shared_ptr<Window> getGuiElement() const { return window; }
 
 protected:
 
-	const unsigned sampleRate{ 44100 }, bufferSize{ 64 };
 	Generator generator;
-	std::function<double(double)> left, right;
-	SynthStream stream;
-	
+	std::string title;
+	const unsigned wWidth{ 1000 }, wHeight{ 400 }, menuHeight{ 30 };
 	std::shared_ptr<Window> window;
 };
 
