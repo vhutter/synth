@@ -140,8 +140,11 @@ void Window::addMenuOptions(const std::vector<std::shared_ptr<MenuOption>>& opti
 
 void Window::fixLayout()
 {
+	header->centralize();
 	header->setPosition(0, 0);
-	menuBar->setPosition(0, header->getSize().y);
+	const auto& headerSize = header->getSize();
+	exitButton->setPosition(headerSize.x - headerSize.y, 0);
+	menuBar->setPosition(0, headerSize.y);
 	headerPart->fitToChildren();
 	content->setPosition(0, headerPart->getSize().y);
 }
@@ -170,12 +173,10 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 	if (!textSize)
 		textSize = defaultTextSize(size);
 	header->setTextSize(textSize);
-	header->centralize();
 
 	exitButton->setTextSize(textSize);
 	exitButton->setSize(SynthVec2( size, size ));
 	exitButton->centralize();
-	exitButton->setPosition(header->getSize().x - size, 0);
 
 	fixLayout();
 }
