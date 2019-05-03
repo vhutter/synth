@@ -6,18 +6,25 @@
 
 #include "generators.h"
 
-const TimbreModel& Sine13();
+const TimbreModel& Sine();
+const TimbreModel& Saw();
+const TimbreModel& Square();
+const TimbreModel& Triangle();
+const TimbreModel& Sines1();
+const TimbreModel& Sines2();
+const TimbreModel& SinesTriangles();
 
 template<typename WaveGenerator>
 std::vector<typename Dynamic<Composite<WaveGenerator>>> generateTones(
 	TimbreModel model,
-	const std::vector<Note>& notes
+	const std::vector<Note>& notes,
+	const ADSREnvelope& env = {}
 )
 {
 	std::vector<Dynamic<Composite<WaveGenerator>>> tones;
 	tones.reserve(notes.size());
 	for (auto& note : notes) {
-		tones.emplace_back(model(note));
+		tones.emplace_back(model(note, env));
 	}
 	return tones;
 }
