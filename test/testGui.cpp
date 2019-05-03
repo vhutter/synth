@@ -63,13 +63,13 @@ void testGui()
 
 	auto notes = generateNotes(0, 2);
 
-	static auto generator = DynamicToneSum(Sine13(), notes, 5);
+	static auto generator = DynamicToneSum(Sines1(), ADSREnvelope(), notes, 5);
 	
 	static auto pitch = PitchBender<DynamicToneSum>(generator);
 	auto pitchWindow = std::make_shared<Window>(pitch.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(pitchWindow);
 
-	auto glider = Glider(Sine13(), notes, 5);
+	auto glider = Glider(Sines1(), notes, 5);
 	auto gliderWindow = std::make_shared<Window>(glider.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(gliderWindow);
 
