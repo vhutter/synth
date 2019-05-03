@@ -37,7 +37,7 @@ protected:
 
 	Generator generator;
 	std::string title;
-	const unsigned wWidth{ 1000 }, wHeight{ 400 }, menuHeight{ 30 };
+	const unsigned wWidth{ 1000 }, wHeight{ 600 }, menuHeight{ 30 };
 	std::shared_ptr<Window> window;
 };
 

@@ -14,6 +14,14 @@ void Instrument1::init()
 
 	gui->addChildAutoPos(pitchBender.getFrame());
 	gui->addChildAutoPos(glider.getFrame());
+	gui->newLine();
+
+	gui->addChildAutoPos(Slider::DefaultSlider("qwe", -1, 1));
+	gui->addChildAutoPos(Slider::DefaultSlider("qwe", -1, 1));
+	gui->addChildAutoPos(Slider::DefaultSlider("qwe", -1, 1));
+	gui->addChildAutoPos(Slider::DefaultSlider("qwe", -1, 1));
+	gui->addChildAutoPos(Slider::DefaultSlider("qwe", -1, 1));
+
 
 	generator.addAfterCallback(glider);
 
