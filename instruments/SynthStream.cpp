@@ -25,7 +25,7 @@ int SynthStream::PaStreamCallbackData::callbackFunction(
     auto* out = static_cast<float*>( outputBuffer );
 
     for (unsigned i=0; i<framesPerBuffer; i++) {
-        float sample1 = std::clamp(data->generator1(data->sampleTime), -1., 1.);
+        float sample1 = data->generator1(data->sampleTime);
         float sample2 = sample1;
         *out++ = sample1;
 		*out++ = sample2;
@@ -53,7 +53,7 @@ SynthStream::SynthStream(unsigned sampleRate, unsigned bufferSize, CallbackFunct
                          &outputParameters, /* As above. */
                          sampleRate,
                          bufferSize,               /* Frames per buffer. */
-                         paClipOff,         /* No out of range samples expected. */
+                         paNoFlag,         /* No out of range samples expected. */
                          PaStreamCallbackData::callbackFunction,
                          &callbackData );
     ErrorCheck(Pa_Initialize());
