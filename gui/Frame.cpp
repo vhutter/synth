@@ -39,6 +39,13 @@ void Frame::setChildAlignment(unsigned a)
 	childAlignment = a;
 }
 
+void Frame::newLine()
+{
+	cursorX = childAlignment;
+	cursorY += rowHeight + childAlignment;
+	rowHeight = 0;
+}
+
 void Frame::setCursor(unsigned x, unsigned y)
 {
 	cursorX = x;
@@ -51,9 +58,7 @@ void Frame::addChildAutoPos(std::shared_ptr<GuiElement> child)
 	const auto& aabb = child->AABB();
 	cursorX += aabb.width + childAlignment;
 	if (cursorX > getSize().x) {
-		cursorX = 0;
-		cursorY += rowHeight + childAlignment;
-		rowHeight = 0;
+		newLine();
 		child->setPosition(cursorX, cursorY);
 		cursorX += aabb.width + childAlignment;
 	}

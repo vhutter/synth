@@ -18,6 +18,7 @@ public:
 	void setEventCallback(const std::variant<sfCallback_t, midiCallback_t>& cb);
 	void fitToChildren();
 	void setChildAlignment(unsigned a);
+	void newLine();
 	void setCursor(unsigned x, unsigned y);
 	void addChildAutoPos(std::shared_ptr<GuiElement> child);
 	void setCropping(bool crop);
