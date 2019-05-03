@@ -7,7 +7,9 @@
 #include <functional>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <atomic>
+#include <limits>
 #include <mutex>
 #include <array>
 #include <optional>
@@ -27,21 +29,26 @@ namespace waves
 
 class ADSREnvelope
 {
+	static constexpr double inf = std::numeric_limits<double>::infinity();
     public:
-        ADSREnvelope(double a=.005, double d=0.01, double s=1., double r=.01);
+
+        ADSREnvelope(double a=.01, double d=0.01, double s=1., double r=.01, double st = inf);
 		ADSREnvelope(const ADSREnvelope& rhs) = default;
         ~ADSREnvelope() = default;
 
-        void start(double t) const;
-        void stop(double t) const;
+        void start(double t);
+        void stop(double t);
         double getAmplitude(double t) const;
         bool isNonZero() const {return nonzero;}
 
     private:
-        const double attack, decay, sustain, release;
+		void calculateTimePoints();
+
+		mutable double attackTime, decayDur, sustainDur, releaseDur, sustainLevel;
+		mutable double decayTime, sustainTime, releaseTime;
 
         mutable bool nonzero = false, isHeld = false;
-        mutable double currentAmp = 0, beginTime = 0, startAmp = 0;
+        mutable double currentAmp = 0, beginTime = 0, startAmp = 0, lastStopTime=0;
 };
 
 class ContinuousFunction
@@ -53,20 +60,39 @@ class ContinuousFunction
 
     private:
         double value;
-        double startTime, endTime, startValue, endValue;
+		double startTime{ 0. }, endTime{ 0. }, startValue{ 0. }, endValue{ 0. };
         double m;
-
-        sf::Vector2<double> reach;
 };
 
-class Note
+template<class T>
+class SaveInitialValue
+{
+public:
+	SaveInitialValue(const T& val) : value(val), initial(val) {}
+	const T& getInitial() const { return initial; }
+
+	operator const T&() const { return value; }
+	SaveInitialValue<T>& operator=(const SaveInitialValue<T>& other)
+	{
+		value = other.value;
+		return *this;
+	}
+	SaveInitialValue<T>& operator=(const T& other)
+	{
+		value = other;
+		return *this;
+	}
+
+	T value;
+private:
+	const T initial;
+};
+
+class Note : public SaveInitialValue<double>
 {
     public:
-        Note(double freq);
-        double getInitialFreq() const {return initialFreq;}
-        double getFifth() const {return freq*3/2;}
-        operator double() const {return freq;}
-		Note& operator= (const Note& other) { freq = other.freq; return *this; }
+		using SaveInitialValue<double>::SaveInitialValue;
+		using SaveInitialValue<double>::operator=;
 
 		static const Note& A()  ;
 		static const Note& Ais();
@@ -82,10 +108,6 @@ class Note
 		static const Note& Gis();
 
 		static const std::array<Note, 12> baseNotes();
-		
-    private:
-        double freq;
-		const double initialFreq;
 };
 
 
@@ -139,6 +161,39 @@ protected:
 	after_t afterSample;
 };
 
+class SumGenerator : public SampleGenerator<SumGenerator>
+{
+	friend class SampleGenerator<WaveGenerator>;
+	using callback_t = std::function<double(double)>;
+
+public:
+	using before_t = std::function<void(double, SumGenerator&)>;
+
+	template<class T>
+	SumGenerator(
+		before_t before,
+		after_t after,
+		T&& instruments
+	)
+		:SampleGenerator(before, after),
+		callback{ [instruments = std::move(instruments)] (double t) mutable {
+			return std::apply([t](auto& ... args) {
+				return (args.getGenerator().getSample(t) + ...);
+				}, instruments);
+			} 
+		}
+	{
+	}
+
+	double getSampleImpl(double t) const { return callback(t); }
+	void modifyMainPitchImpl(double t, double f2) { return; }
+	double getMainFreq() const { return 1; }
+
+
+private:
+	callback_t callback;
+};
+
 class WaveGenerator : public SampleGenerator<WaveGenerator>
 {
 		friend class SampleGenerator<WaveGenerator>;
@@ -147,12 +202,12 @@ class WaveGenerator : public SampleGenerator<WaveGenerator>
 		using before_t = std::function<void(double, WaveGenerator&)>;
 
         Note freq;
-        double intensity;
+        SaveInitialValue<double> intensity;
         double phase = 0;
         waves::wave_t waveform;
 
         WaveGenerator(
-            const Note& note,
+            const double& note,
             double intensity,
             waves::wave_t waveform,
 			before_t before = {},
@@ -167,20 +222,18 @@ class WaveGenerator : public SampleGenerator<WaveGenerator>
 };
 
 template<class T>
-class Composite: public SampleGenerator<Composite<T>>
+class Composite : public SampleGenerator<Composite<T>>
 {
 	friend class SampleGenerator<Composite<T>>;
     public:
 		using before_t = std::function<void(double, Composite<T>&)>;
 
-		Composite();
-        Composite(
+		Composite(
 			const std::vector<T>&,
 			before_t before = {},
 			typename SampleGenerator<Composite<T>>::after_t after = {}
 		);
 
-        void addComponent(const T& desc);
 		const T& operator[](std::size_t idx) const;
 
     protected:
@@ -190,11 +243,8 @@ class Composite: public SampleGenerator<Composite<T>>
 
         const std::vector<T> initialComponents;
         std::vector<T> components;
+		double intensitySum;
 };
-
-template<class T>
-Composite<T>::Composite()
-{}
 
 template<class T>
 Composite<T>::Composite(
@@ -203,13 +253,16 @@ Composite<T>::Composite(
 	typename SampleGenerator<Composite<T>>::after_t after)
 	: SampleGenerator<Composite>(before, after),
 	initialComponents(comps.begin(), comps.end()),
-	components(initialComponents)
-{}
-
-template<class T>
-void Composite<T>::addComponent(const T& td)
+	components(initialComponents),
+	intensitySum(std::accumulate(
+		components.begin(),
+		components.end(),
+		0.,
+		[](double acc, const auto& component) {
+			return component.getIntensity() + acc;
+		}
+	))
 {
-	components.push_back(td);
 }
 
 template<class T>
@@ -228,15 +281,13 @@ template<class T>
 double Composite<T>::getSampleImpl(double t) const
 {
 	double result = 0.;
-	double intensitySum = 0.;
 	for (auto& c : components) {
 		const double& sample = c.getSample(t);
 		if (sample != 0) {
 			result += sample;
-			intensitySum += c.getIntensity();
 		}
 	}
-	return result / intensitySum;
+	return result/intensitySum;
 }
 
 template<class T>
@@ -259,8 +310,8 @@ class Dynamic: public BaseGenerator
 			const BaseGenerator& baseGen,
 			ADSREnvelope env = {}
 		);
-		void start(double t) const;
-		void stop(double t) const;
+		void start(double t);
+		void stop(double t);
 		std::optional<double> getSample(double t) const;
 
 	private:
@@ -277,13 +328,13 @@ Dynamic<T>::Dynamic(
 {}
 
 template<class T>
-void Dynamic<T>::start(double t) const
+void Dynamic<T>::start(double t)
 {
 	envelope.start(t);
 }
 
 template<class T>
-void Dynamic<T>::stop(double t) const
+void Dynamic<T>::stop(double t)
 {
 	envelope.stop(t);
 }
@@ -315,6 +366,7 @@ struct TimbreModel
 		Composite<WaveGenerator>::after_t  after = {}
 	);
 	Composite<WaveGenerator> operator()(const double& baseFreq) const;
+	Dynamic<Composite<WaveGenerator>> operator()(const double& baseFreq, const ADSREnvelope& env) const;
 
 	std::vector<ToneSkeleton> components;
 	WaveGenerator::before_t         beforeTone;
@@ -332,7 +384,8 @@ class DynamicToneSum : public Composite<Dynamic<Composite<WaveGenerator>>>
 		using before_t = std::function<void(double, DynamicToneSum&)>;
 
 		DynamicToneSum(
-			const TimbreModel& timbreModel, 
+			const TimbreModel& timbreModel,
+			const ADSREnvelope& env,
 			const std::vector<Note>& notes, 
 			unsigned maxTones
 		);
@@ -407,6 +460,7 @@ class DynamicToneSum : public Composite<Dynamic<Composite<WaveGenerator>>>
 		std::vector<give_id<after_t>> afterSampleCallbacks;
 		std::vector<give_id<before_t>> beforeSampleCallbacks;
 		TimbreModel timbreModel;
+		ADSREnvelope env;
 		before_t beforeSample; // shadowing base class' beforeSample, because of its type
 };
 

@@ -41,52 +41,76 @@ namespace waves
     }
 }
 
-ADSREnvelope::ADSREnvelope(double a, double d, double s, double r)
-    :attack(a), decay(d), sustain(s), release(r) {}
-
-void ADSREnvelope::start(double t) const
+void ADSREnvelope::calculateTimePoints()
 {
-    startAmp = getAmplitude(t);
-    beginTime = t;
-    isHeld = true;
-    nonzero = true;
+	decayTime = attackTime + decayDur;
+	sustainTime = decayTime + sustainDur;
+	releaseTime = sustainTime + releaseDur;
 }
 
-void ADSREnvelope::stop(double t) const
+ADSREnvelope::ADSREnvelope(double a, double d, double s, double r, double h)
+	:attackTime(a), decayDur(d), sustainDur(h), releaseDur(r), sustainLevel(s)
 {
-    beginTime = t;
-    isHeld = false;
+}
+
+void ADSREnvelope::start(double t)
+{
+	calculateTimePoints();
+	startAmp = getAmplitude(t);
+	beginTime = t;
+	lastStopTime = 0;
+	nonzero = true;
+	isHeld = true;
+}
+
+void ADSREnvelope::stop(double t)
+{
+	// return if it is being called redundantly
+	if (!isHeld)
+		return;
+
+	// if sustain duration is indefinite, we tweak it a little bit
+	// for getAmplitude to be working
+	if (sustainDur == inf) {
+		sustainTime = t;
+		releaseTime = sustainTime + releaseDur;
+	}
+
+	double timeUntilSustain = sustainTime - t + beginTime;
+	if (timeUntilSustain > 0)
+		lastStopTime = sustainTime - t + beginTime;
+	else
+		lastStopTime = 0;
+	isHeld = false;
 }
 
 double ADSREnvelope::getAmplitude(double t) const
 {
-    t = t - beginTime;
-    if (isHeld) {
-        if (t <= attack)
-            currentAmp = t*(1-startAmp)/attack + startAmp;
-        else if (t < attack+decay)
-            currentAmp = 1 - (t-attack) * (1 - sustain) / decay;
-        else
-            currentAmp = sustain;
-    }
-    else {
-        if (t < release)
-            // we saved currentAmp for this case:
-            // the key may have been released before reaching the sustain level,
-            // in which case we have to calculate the appropiate decay level by
-            // considering the last available amplitude
-            return currentAmp - t * currentAmp/release;
-        else {
-            nonzero = false;
-            currentAmp = 0;
-        }
-    }
-    return currentAmp;
+	t = t - beginTime + lastStopTime;
+	if (nonzero) {
+		if (t <= attackTime)
+			currentAmp = t * (1 - startAmp) / attackTime + startAmp;
+		else if (t < decayTime)
+			currentAmp = 1 - (t - attackTime) * (1 - sustainLevel) / decayDur;
+		else if (t < sustainTime)
+			currentAmp = sustainLevel;
+		else  if (t < releaseTime)
+			// we saved currentAmp for this case:
+			// the key may have been released before reaching the sustain level,
+			// in which case we have to calculate the appropiate decay level by
+			// considering the last available amplitude
+			return currentAmp * (1 - (t-sustainTime) / releaseDur);
+		else {
+			nonzero = false;
+			currentAmp = 0;
+		}
+	}
+	return currentAmp;
 }
 
 
 ContinuousFunction::ContinuousFunction(double initConst)
-    : value(initConst), m(0), reach(0,0) {}
+    : value(initConst), m(0) {}
 
 double ContinuousFunction::getValue(double t)
 {
@@ -109,12 +133,7 @@ void ContinuousFunction::setValueLinear(double newVal, double btime, double dura
     startTime = btime;
     endTime = btime + duration;
     m = (endValue - startValue) / (endTime - startTime);
-    reach = sf::Vector2<double>(endTime, endValue);
 }
-
-Note::Note(double f)
-    :freq(f), initialFreq(freq)
-{}
 
 const Note& Note::A()   { static const Note n(16.35); return n; }
 const Note& Note::Ais() { static const Note n(17.32); return n; }
@@ -135,7 +154,7 @@ const std::array<Note, 12> Note::baseNotes()
 }
 
 WaveGenerator::WaveGenerator(
-	const Note& note,
+	const double& note,
 	double intensity,
 	waves::wave_t waveform,
 	before_t before,
@@ -165,31 +184,27 @@ double WaveGenerator::getSampleImpl(double t) const
 
 const double WaveGenerator::getMainFreqImpl() const
 {
-	return freq.getInitialFreq();
+	return freq.getInitial();
 }
 
 DynamicToneSum::DynamicToneSum(
 	const TimbreModel& timbreModel,
+	const ADSREnvelope& env,
 	const std::vector<Note>& notes,
 	unsigned maxTones
 )
-	:base_t(generateTones<WaveGenerator>(timbreModel, notes)),
+	:base_t(generateTones<WaveGenerator>(timbreModel, notes, env)),
+	env(env),
 	maxTones(maxTones),
 	timbreModel(timbreModel)
 {}
 DynamicToneSum::DynamicToneSum(const DynamicToneSum& that)
-	:DynamicToneSum(that.timbreModel, that.getNotes(), that.maxTones)
+	:DynamicToneSum(that.timbreModel, that.env, that.getNotes(), that.maxTones)
 {}
 
 void DynamicToneSum::lock() const { mtx.lock(); }
 void DynamicToneSum::unlock() const { mtx.unlock(); }
 double DynamicToneSum::time() const { return lastTime.load(); }
-
-//double DynamicToneSum::getSample(double t) const
-//{
-//	lastTime.store(t);
-//	return Base_t::getSample(t);
-//}
 
 double DynamicToneSum::getSample(double t) const
 {
@@ -294,4 +309,9 @@ Composite<WaveGenerator> TimbreModel::operator()(const double& baseFreq) const
 	}
 	);
 	return Composite(tones, before, after);
+}
+
+Dynamic<Composite<WaveGenerator>> TimbreModel::operator()(const double& baseFreq, const ADSREnvelope& env) const
+{
+	return Dynamic{ operator()(baseFreq), env };
 }
