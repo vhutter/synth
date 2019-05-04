@@ -3,6 +3,7 @@
 void InputField::activate()
 {
 	active = true;
+	firstInput = true;
 	setOutlineThickness(-1);
 }
 
@@ -42,7 +43,12 @@ InputField::InputField(Type type, SynthFloat sx, SynthFloat sy, unsigned int cha
 					(type & Alpha) && 'a' <= code && code <= 'z' ||
 					(type & Alpha) && 'A' <= code && code <= 'Z'
 				)) {
+					if (firstInput) {
+						oldText = "";
+						firstInput = false;
+					}
 					std::string newText = oldText + sf::String(event.text.unicode);
+
 					setTextCentered(newText);
 					const auto & aabb = text.getLocalBounds();
 					if (aabb.width >= getSize().x) {

@@ -1,13 +1,20 @@
 #include "Frame.h"
 
+Frame::Frame()
+	:Frame(0,0)
+{
+
+}
+
 Frame::Frame(const SynthFloat sx, const SynthFloat sy)
-	:frame(sf::Vector2f(sx, sy))
+	:Frame(SynthVec2(sx, sy))
 {
 }
 
 Frame::Frame(const SynthVec2 & size)
 	:frame(sf::Vector2f(size))
 {
+	setBgColor(sf::Color::Transparent);
 }
 
 void Frame::setEventCallback(const std::variant<sfCallback_t, midiCallback_t>& cb)
@@ -20,9 +27,11 @@ void Frame::setEventCallback(const std::variant<sfCallback_t, midiCallback_t>& c
 
 void Frame::fitToChildren()
 {
+	bool changed = false;
 	float x2 = std::numeric_limits<float>::lowest();//x1 + getSize().x;
 	float y2 = std::numeric_limits<float>::lowest();//x1 + getSize().y;
 	for (auto child : children) {
+		changed = true;
 		const auto& aabb = child->AABB();
 		float cx1 = aabb.left;
 		float cy1 = aabb.top;
@@ -31,7 +40,7 @@ void Frame::fitToChildren()
 		x2 = std::max(x2, cx2);
 		y2 = std::max(y2, cy2);
 	}
-	setSize({ x2, y2 });
+	if(changed) setSize({ x2, y2 });
 }
 
 void Frame::setChildAlignment(unsigned a)
@@ -39,10 +48,10 @@ void Frame::setChildAlignment(unsigned a)
 	childAlignment = a;
 }
 
-void Frame::newLine()
+void Frame::newLine(unsigned dist)
 {
 	cursorX = childAlignment;
-	cursorY += rowHeight + childAlignment;
+	cursorY += rowHeight + childAlignment + dist;
 	rowHeight = 0;
 }
 

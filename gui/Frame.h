@@ -11,14 +11,14 @@ public:
 	using sfCallback_t = std::function<void(const sf::Event&)>;
 	using midiCallback_t = std::function<void(const MidiEvent&)>;
 
-	Frame() = default;
+	Frame();
 	Frame(const SynthFloat sx, const SynthFloat sy);
 	Frame(const SynthVec2& size);
 
 	void setEventCallback(const std::variant<sfCallback_t, midiCallback_t>& cb);
 	void fitToChildren();
 	void setChildAlignment(unsigned a);
-	void newLine();
+	void newLine(unsigned dist=0);
 	void setCursor(unsigned x, unsigned y);
 	void addChildAutoPos(std::shared_ptr<GuiElement> child);
 	void setCropping(bool crop);

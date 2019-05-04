@@ -28,7 +28,7 @@ protected:
 	void deactivate();
 
 	std::shared_ptr<EmptyGuiElement> eventHandler;
-	bool active{ false };
+	bool active{ false }, firstInput{ false };
 
 private:
 	std::function<void()> onEndCallback;

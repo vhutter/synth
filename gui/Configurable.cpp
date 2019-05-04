@@ -29,9 +29,11 @@ void Configurable::setupConfig(
 			});
 		input->setText(std::string("<Empty>"));
 		input->centralize();
-		auto title = std::make_shared<TextDisplay>(name, 0, 30, 13);
-		title->centralize();
-		frame->addChildAutoPos(title);
+		if (!name.empty()) {
+			auto title = std::make_shared<TextDisplay>(name, 0, 30, 13);
+			title->centralize();
+			frame->addChildAutoPos(title);
+		}
 		frame->addChildAutoPos(input);
 		frame->setBgColor(sf::Color::Black);
 		frame->fitToChildren();

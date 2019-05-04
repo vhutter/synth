@@ -14,6 +14,7 @@ void Window::initHeaderPart()
 
 	headerPart->addChild(header);
 	headerPart->addChild(menuBar);
+	headerPart->setBgColor(sf::Color::White);
 }
 
 Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
@@ -164,7 +165,6 @@ void Window::setHeader(unsigned size, const std::string & title, unsigned textSi
 
 	header->setVisibility(true);
 	header->setTextColor(sf::Color::Black);
-	header->setBgColor(sf::Color::White);
 
 	header->setFixedSize(false);
 	header->setSize(SynthVec2( content->getSize().x, size ));
