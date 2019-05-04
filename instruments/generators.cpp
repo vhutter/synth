@@ -156,12 +156,9 @@ const std::array<Note, 12> Note::baseNotes()
 WaveGenerator::WaveGenerator(
 	const double& note,
 	double intensity,
-	waves::wave_t waveform,
-	before_t before,
-	after_t  after
+	waves::wave_t waveform
 )
-	:SampleGenerator<WaveGenerator>(before, after),
-	freq(note),
+	:freq(note),
 	intensity(intensity),
 	waveform(waveform)
 {}
@@ -276,17 +273,9 @@ void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 }
 
 TimbreModel::TimbreModel(
-	std::vector<TimbreModel::ToneSkeleton> components,
-	WaveGenerator::before_t         beforeTone,
-	WaveGenerator::after_t          afterTone,
-	Composite<WaveGenerator>::before_t before,
-	Composite<WaveGenerator>::after_t  after
+	std::vector<TimbreModel::ToneSkeleton> components
 )
-	:components(components),
-	beforeTone(beforeTone),
-	afterTone(afterTone),
-	before(before),
-	after(after)
+	:components(components)
 {}
 
 Composite<WaveGenerator> TimbreModel::operator()(const double& baseFreq) const
@@ -301,13 +290,11 @@ Composite<WaveGenerator> TimbreModel::operator()(const double& baseFreq) const
 		return WaveGenerator(
 			baseFreq * component.relativeFreq,
 			component.intensity,
-			component.waveform,
-			beforeTone,
-			afterTone
+			component.waveform
 		);
 	}
 	);
-	return Composite(tones, before, after);
+	return Composite(tones);
 }
 
 Dynamic<Composite<WaveGenerator>> TimbreModel::operator()(const double& baseFreq, const ADSREnvelope& env) const

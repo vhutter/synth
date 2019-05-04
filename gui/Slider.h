@@ -124,7 +124,7 @@ public:
 
 private:
 
-	ContinuousFunction<double> value;
+	ContinuousFunction value;
 };
 
 #endif //SLIDER_H_INCLUDED

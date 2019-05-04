@@ -91,7 +91,7 @@ private:
 	struct Impl
 	{
 		std::atomic<double> lastTime{ 0. };
-		ContinuousFunction<double> amp;
+		ContinuousFunction amp;
 		std::shared_ptr<Slider> sliderVolume = Slider::DefaultSlider("Volume", 0, 1, [this](const Slider& sliderVolume) {
 			amp.setValueLinear(sliderVolume.getValue(), lastTime, 0.005);
 		});
@@ -139,7 +139,7 @@ private:
 	struct Impl
 	{
 		Dynamic<Composite<WaveGenerator>> glidingTone;
-		ContinuousFunction<double> glidePitch{ 100 };
+		ContinuousFunction glidePitch{ 100 };
 		std::atomic<double> glideSpeed{ .5 }, lastTime{ 0. };
 		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, glideSpeed) };
 

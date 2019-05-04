@@ -14,7 +14,7 @@ namespace
 {
 	using pos_t = MenuOption::OptionList::ChildPos_t;
 
-	std::vector<SampleGenerator<void*>::after_t> afterEffects;
+	std::vector<std::function<void(double, double&)>> afterEffects;
 	std::unordered_map<std::string, std::optional<unsigned>> settings = {
 		{"sampleRate", 44100},
 		{"bufferSize", 64},
@@ -80,7 +80,6 @@ namespace
 	auto instruments = std::forward_as_tuple(inst1, inst2);// , inst3, inst4, inst5, inst6, inst7);
 
 	SumGenerator generator(
-		{},
 		[](double t, double& sample) {
 			for (auto f : afterEffects)
 				f(t, sample);
