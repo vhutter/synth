@@ -220,13 +220,13 @@ class Composite : public SampleGenerator<Composite<T>>
 
         const std::vector<T> initialComponents;
         std::vector<T> components;
-		double intensitySum;
+		//double intensitySum;
 };
 
 template<class T>
 Composite<T>::Composite(const std::vector<T> comps)
 	: initialComponents(std::move(comps)),
-	components(initialComponents),
+	components(initialComponents)/*,
 	intensitySum(std::accumulate(
 		components.begin(),
 		components.end(),
@@ -234,7 +234,7 @@ Composite<T>::Composite(const std::vector<T> comps)
 		[](double acc, const auto& component) {
 			return component.getIntensity() + acc;
 		}
-	))
+	))*/
 {
 }
 
@@ -254,8 +254,10 @@ template<class T>
 double Composite<T>::getSampleImpl(double t) const
 {
 	double result = 0.;
+	double intensitySum = 0.;
 	for (auto& c : components) {
 		const double& sample = c.getSample(t);
+		intensitySum += c.getIntensity();
 		if (sample != 0) {
 			result += sample;
 		}
