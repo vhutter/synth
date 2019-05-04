@@ -110,29 +110,29 @@ double ADSREnvelope::getAmplitude(double t) const
 
 
 ContinuousFunction::ContinuousFunction(double initConst)
-    : value(initConst), m(0) {}
+	: value(initConst), m(0) {}
 
-double ContinuousFunction::getValue(double t)
+double ContinuousFunction::getValue(double t) const
 {
-    if (m != 0 && t >= startTime) {
-        value = startValue + m * (t-startTime);
+	if (m != 0 && t >= startTime) {
+		value = startValue + m * (t - startTime);
 
-        if (t >= endTime)
-        {
-            value = endValue;
-            m = 0;
-        }
-    }
-    return value;
+		if (t >= endTime)
+		{
+			value = endValue;
+			m = 0;
+		}
+	}
+	return value;
 }
 
 void ContinuousFunction::setValueLinear(double newVal, double btime, double duration)
 {
-    startValue = value;
-    endValue = newVal;
-    startTime = btime;
-    endTime = btime + duration;
-    m = (endValue - startValue) / (endTime - startTime);
+	startValue = value;
+	endValue = newVal;
+	startTime = btime;
+	endTime = btime + duration;
+	m = (endValue - startValue) / (endTime - startTime);
 }
 
 const Note& Note::A()   { static const Note n(16.35); return n; }
@@ -168,12 +168,11 @@ WaveGenerator::WaveGenerator(
 
 void WaveGenerator::modifyMainPitchImpl(double t, double f2)
 {
-	auto& component = *this;
-	double f1 = component.freq;
-	double p = (t + component.phase) * f1 / f2 - t;
-	p = fmod(p, 2 * M_PI*f2);
-	component.phase = p;
-	component.freq = f2;
+	double f1 = this->freq;
+	double p = (t + this->phase) * f1 / f2 - t;
+	p = std::fmod(p, 2 * M_PI*f2);
+	this->phase = p;
+	this->freq = f2;
 }
 
 double WaveGenerator::getSampleImpl(double t) const

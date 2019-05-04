@@ -54,14 +54,14 @@ class ADSREnvelope
 class ContinuousFunction
 {
     public:
-        ContinuousFunction(double initConst=0);
+        ContinuousFunction(double initConst=0.);
         void setValueLinear(double newVal, double begin, double duration);
-        double getValue(double t);
+        double getValue(double t) const;
 
     private:
-        double value;
+		mutable double value;
 		double startTime{ 0. }, endTime{ 0. }, startValue{ 0. }, endValue{ 0. };
-        double m;
+		mutable double m;
 };
 
 template<class T>
@@ -173,10 +173,10 @@ public:
 	SumGenerator(
 		before_t before,
 		after_t after,
-		T&& instruments
+		const T& instruments
 	)
 		:SampleGenerator(before, after),
-		callback{ [instruments = std::move(instruments)] (double t) mutable {
+		callback{ [instruments = std::forward<decltype(instruments)>(instruments)] (double t) mutable {
 			return std::apply([t](auto& ... args) {
 				return (args.getGenerator().getSample(t) + ...);
 				}, instruments);
@@ -202,7 +202,7 @@ class WaveGenerator : public SampleGenerator<WaveGenerator>
 		using before_t = std::function<void(double, WaveGenerator&)>;
 
         Note freq;
-        SaveInitialValue<double> intensity;
+        double intensity;
         double phase = 0;
         waves::wave_t waveform;
 
@@ -213,7 +213,6 @@ class WaveGenerator : public SampleGenerator<WaveGenerator>
 			before_t before = {},
 			after_t  after = {}
 		);
-
 
     private:
 		void modifyMainPitchImpl(double t, double dest);
@@ -229,12 +228,14 @@ class Composite : public SampleGenerator<Composite<T>>
 		using before_t = std::function<void(double, Composite<T>&)>;
 
 		Composite(
-			const std::vector<T>&,
+			const std::vector<T>,
 			before_t before = {},
 			typename SampleGenerator<Composite<T>>::after_t after = {}
 		);
 
 		const T& operator[](std::size_t idx) const;
+		T& operator[](std::size_t idx);
+		std::size_t size() const;
 
     protected:
         void modifyMainPitchImpl(double t, double dest);
@@ -248,11 +249,11 @@ class Composite : public SampleGenerator<Composite<T>>
 
 template<class T>
 Composite<T>::Composite(
-	const std::vector<T>& comps,
+	const std::vector<T> comps,
 	before_t before,
 	typename SampleGenerator<Composite<T>>::after_t after)
 	: SampleGenerator<Composite>(before, after),
-	initialComponents(comps.begin(), comps.end()),
+	initialComponents(std::move(comps)),
 	components(initialComponents),
 	intensitySum(std::accumulate(
 		components.begin(),
@@ -294,6 +295,18 @@ template<class T>
 const T& Composite<T>::operator[](std::size_t idx) const
 {
 	return components[idx];
+}
+
+template<class T>
+T& Composite<T>::operator[](std::size_t idx)
+{
+	return const_cast<T&>(components[idx]);
+}
+
+template<class T>
+inline std::size_t Composite<T>::size() const
+{
+	return components.size();
 }
 
 template<class T>
