@@ -37,47 +37,47 @@ namespace
 		settings["maxNoteCount"].value()
 	};
 	
-	Instrument1 inst3{
-		"Synth 2",
-		SinesTriangles(),
-		ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
-		generateNotes(2, 5),
-		settings["maxNoteCount"].value()
-	};
-	
-	Instrument1 inst4{
-		"Sine",
-		Sine(),
-		ADSREnvelope(),
-		generateNotes(2, 5),
-		settings["maxNoteCount"].value()
-	};
-	
-	Instrument1 inst5{
-		"Square",
-		Square(),
-		ADSREnvelope(),
-		generateNotes(2, 5),
-		settings["maxNoteCount"].value()
-	};
-	
-	Instrument1 inst6{
-		"Sawtooth",
-		Saw(),
-		ADSREnvelope(),
-		generateNotes(2, 5),
-		settings["maxNoteCount"].value()
-	};
-	
-	Instrument1 inst7{
-		"Triangle",
-		Triangle(),
-		ADSREnvelope(),
-		generateNotes(2, 5),
-		settings["maxNoteCount"].value()
-	};
-
-	auto instruments = std::forward_as_tuple(inst1, inst2, inst3, inst4, inst5, inst6, inst7);
+	//Instrument1 inst3{
+	//	"Synth 2",
+	//	SinesTriangles(),
+	//	ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
+	//	generateNotes(2, 5),
+	//	settings["maxNoteCount"].value()
+	//};
+	//
+	//Instrument1 inst4{
+	//	"Sine",
+	//	Sine(),
+	//	ADSREnvelope(),
+	//	generateNotes(2, 5),
+	//	settings["maxNoteCount"].value()
+	//};
+	//
+	//Instrument1 inst5{
+	//	"Square",
+	//	Square(),
+	//	ADSREnvelope(),
+	//	generateNotes(2, 5),
+	//	settings["maxNoteCount"].value()
+	//};
+	//
+	//Instrument1 inst6{
+	//	"Sawtooth",
+	//	Saw(),
+	//	ADSREnvelope(),
+	//	generateNotes(2, 5),
+	//	settings["maxNoteCount"].value()
+	//};
+	//
+	//Instrument1 inst7{
+	//	"Triangle",
+	//	Triangle(),
+	//	ADSREnvelope(),
+	//	generateNotes(2, 5),
+	//	settings["maxNoteCount"].value()
+	//};
+	//
+	auto instruments = std::forward_as_tuple(inst1, inst2);// , inst3, inst4, inst5, inst6, inst7);
 
 	SumGenerator generator(
 		{},
@@ -141,7 +141,7 @@ namespace
 					"Effects", {{
 						"Delay", delayWindow},
 					}},
-					{"Settings", configWindow}
+					{"Input settings", configWindow}
 				}
 			}
 		));

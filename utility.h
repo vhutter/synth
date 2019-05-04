@@ -20,4 +20,6 @@ bool isAlpha(const sf::Keyboard::Key& key);
 bool isNumeric(const sf::Keyboard::Key& key);
 bool isAlnum(const sf::Keyboard::Key& key);
 
+static double eps = 0.001;
+
 #endif

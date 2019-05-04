@@ -21,7 +21,7 @@ public:
 		frame->setSize(SynthVec2(300, 300));
 		frame->setFocusable(false);
 
-		configFrame->setBgColor(sf::Color(0xaaaaaaaa));
+		configFrame->setBgColor(sf::Color::Black);
 	}
 
 	const std::shared_ptr<Frame> getFrame() const { return frame; }
@@ -91,7 +91,7 @@ private:
 	struct Impl
 	{
 		std::atomic<double> lastTime{ 0. };
-		ContinuousFunction amp{0.5};
+		ContinuousFunction<double> amp;
 		std::shared_ptr<Slider> sliderVolume = Slider::DefaultSlider("Volume", 0, 1, [this](const Slider& sliderVolume) {
 			amp.setValueLinear(sliderVolume.getValue(), lastTime, 0.005);
 		});
@@ -139,7 +139,7 @@ private:
 	struct Impl
 	{
 		Dynamic<Composite<WaveGenerator>> glidingTone;
-		ContinuousFunction glidePitch{ 100 };
+		ContinuousFunction<double> glidePitch{ 100 };
 		std::atomic<double> glideSpeed{ .5 }, lastTime{ 0. };
 		std::shared_ptr<Slider> glideSpeedSlider{ Slider::DefaultSlider("Glide", 0, .5, glideSpeed) };
 
@@ -180,7 +180,7 @@ public:
 
 private:
 	SampleGenerator_T& generator;
-	std::shared_ptr<Slider> sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, [this](Slider & sliderPitch) {
+	std::shared_ptr<Slider> sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, [this](const Slider & sliderPitch) {
 		if (isActive()) {
 			std::lock_guard lock(generator);
 			generator.modifyMainPitch(
