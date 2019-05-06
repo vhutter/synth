@@ -5,8 +5,8 @@
 
 int testMain(int argc, char** argv)
 {
-	testGui();
-	//testGenerator();
+	//testGui();
+	testGenerator();
 
 	return 0;
 }
