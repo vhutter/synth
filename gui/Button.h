@@ -17,7 +17,7 @@ public:
 	static std::unique_ptr<Button> DefaultButton(const std::string& s, std::atomic<bool>& val) {
 		return DefaultButton(s, [&]() {val = !val; });
 	}
-	static std::unique_ptr<Button> OnOffButton(std::atomic<bool>& val) {
+	static std::unique_ptr<Button> OnOffButton(std::atomic<bool>& val, std::function<void(bool)> cb = {}) {
 		auto ret = std::make_unique<Button>("", 40, 40, 16, [&]() {});
 
 		using namespace std::string_literals;
@@ -34,9 +34,10 @@ public:
 		};
 
 		setState(val);
-		ret->clickCallback = [button = ret.get(), &val, setState ]() {
+		ret->clickCallback = [button = ret.get(), &val, setState, cb]() {
 			val = !val;
 			setState(val);
+			if (cb) cb(val);
 		};
 
 		return ret;

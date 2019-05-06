@@ -117,6 +117,7 @@ void Window::setSize(const SynthVec2 & size)
 	if (menuBar) {
 		menuBar->setSize(SynthVec2(size.x, menuBar->getSize().y));
 	}
+	fixLayout();
 }
 
 SynthVec2 Window::getSize() const
