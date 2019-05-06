@@ -1,6 +1,35 @@
 #include "Instrument.h"
 
-void Instrument1::init()
+Instrument::Instrument(const std::string& title)
+	:title(title),
+	window{ std::make_shared<Window>(wWidth, wHeight) }
+{
+	window->setHeader(30, title);
+}
+
+
+const std::string& Instrument::getTitle() const 
+{ 
+	return title; 
+}
+
+std::shared_ptr<Window> Instrument::getGuiElement() const 
+{ 
+	return window; 
+}
+
+KeyboardInstrument::KeyboardInstrument(
+	const std::string& title,
+	const TimbreModel& timbreModel,
+	const ADSREnvelope& env,
+	const std::vector<Note>& notes,
+	unsigned maxTones
+)
+	:Instrument(title),
+	generator{ timbreModel, env, notes, maxTones },
+	keyboard{ generator.getNotesCount() },
+	pitchBender{ generator },
+	glider{ generator.getTimbreModel(), generator.getNotes(), generator.getMaxTones() }
 {
 	using pos_t = MenuOption::OptionList::ChildPos_t;
 	auto gui = window->getContentFrame();
@@ -108,4 +137,32 @@ void Instrument1::init()
 			}
 		}
 	));
+}
+
+InputInstrument::InputInstrument(const std::string& title)
+	:Instrument(title)
+{
+	auto gui = window->getContentFrame();
+	gui->addChildAutoPos(button);
+	window->setSize(SynthVec2(300, 50));
+}
+
+InputInstrument::GeneratorProxy& InputInstrument::getGenerator()
+{
+	return generator;
+}
+
+void InputInstrument::GeneratorProxy::feedSample(const double& sample)
+{
+	this->sample = sample;
+}
+
+double InputInstrument::GeneratorProxy::getSampleImpl(double t) const
+{
+	return sample;
+}
+
+void InputInstrument::operator()(const double& sample)
+{
+	generator.feedSample(sample * isOn);
 }

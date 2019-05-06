@@ -10,57 +10,63 @@
 #include "effects.h"
 #include "SynthStream.h"
 
-template<class Generator>
 class Instrument
 {
 public:
+	Instrument(const std::string& title);
 
-	using Generator_t = Generator;
-
-	template<class ...GeneratorParams>
-	Instrument(
-		const std::string title,
-		GeneratorParams&& ...params
-	)
-		:title(title),
-		generator{ std::forward<GeneratorParams>(params)... },
-		window{ std::make_shared<Window>(wWidth, wHeight) }
-	{
-		window->setHeader(30, title);
-	}
-
-	Generator& getGenerator() { return generator; }
-	const std::string& getTitle() const { return title; }
-	std::shared_ptr<Window> getGuiElement() const { return window; }
+	const std::string& getTitle() const;
+	std::shared_ptr<Window> getGuiElement() const;
 
 protected:
-
-	Generator generator;
 	std::string title;
 	const unsigned wWidth{ 1000 }, wHeight{ 600 }, menuHeight{ 30 };
 	std::shared_ptr<Window> window;
 };
 
-class Instrument1 : public Instrument<DynamicToneSum>
+class KeyboardInstrument : public Instrument
 {
 public:
-	template<class ...BaseParams>
-	Instrument1(BaseParams&& ...params) 
-		:Instrument(std::forward<BaseParams>(params)...),
-		keyboard{ generator.getNotesCount() },
-		pitchBender{ generator },
-		glider{ generator.getTimbreModel(), generator.getNotes(), generator.getMaxTones() }
-	{
-		init();
-	}
+	KeyboardInstrument(
+		const std::string& title,
+		const TimbreModel& timbreModel,
+		const ADSREnvelope& env,
+		const std::vector<Note>& notes,
+		unsigned maxTones
+	);
+
+	DynamicToneSum& getGenerator() { return generator; }
 
 private:
-	void init();
-
+	DynamicToneSum generator;
 	KeyboardOutput keyboard;
 	PitchBender<DynamicToneSum> pitchBender;
 	Glider glider;
 
+};
+
+class InputInstrument : public Instrument
+{
+public:
+	class GeneratorProxy : public SampleGenerator<GeneratorProxy>
+	{
+	public:
+		void feedSample(const double& sample);
+		double getSampleImpl(double t) const;
+
+	protected:
+		double sample;
+	};
+
+	InputInstrument(const std::string& title);
+
+	GeneratorProxy& getGenerator();
+	void operator() (const double& sample);
+
+private:
+	GeneratorProxy generator;
+	std::atomic<bool> isOn{ false };
+	std::shared_ptr<Button> button{ Button::OnOffButton(isOn) };
 };
 
 #endif //INSTRUMENT_H
