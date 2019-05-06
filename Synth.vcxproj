@@ -129,6 +129,7 @@
     <ClCompile Include="gui\SynthKeyboard.cpp" />
     <ClCompile Include="gui\TextDisplay.cpp" />
     <ClCompile Include="gui\Window.cpp" />
+    <ClCompile Include="instruments\AudioFile\AudioFile.cpp" />
     <ClCompile Include="instruments\effects.cpp" />
     <ClCompile Include="instruments\generators.cpp" />
     <ClCompile Include="instruments\Instrument.cpp" />
@@ -173,6 +174,7 @@
     <ClInclude Include="gui\SynthKeyboard.h" />
     <ClInclude Include="gui\TextDisplay.h" />
     <ClInclude Include="gui\Window.h" />
+    <ClInclude Include="instruments\AudioFile\AudioFile.h" />
     <ClInclude Include="instruments\effects.h" />
     <ClInclude Include="instruments\generators.h" />
     <ClInclude Include="instruments\Instrument.h" />

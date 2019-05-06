@@ -6,7 +6,7 @@
 
 int synthMain(int argc, char** argv)
 {
-	const unsigned wWidth{ 1600 }, wHeight{ 1000 }, menuHeight{ 30 };
+	const unsigned wWidth{ 1280 }, wHeight{ 720 }, menuHeight{ 30 };
 	sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "Basic synth");
 	std::shared_ptr mainWindow = std::make_shared<Window>(0, 30, sf::Color::Black);
 	mainWindow->setSize({ SynthFloat(wWidth), SynthFloat(wHeight - menuHeight) });

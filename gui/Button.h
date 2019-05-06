@@ -35,9 +35,9 @@ public:
 
 		setState(val);
 		ret->clickCallback = [button = ret.get(), &val, setState, cb]() {
+			setState(!val);
+			if (cb) cb(!val);
 			val = !val;
-			setState(val);
-			if (cb) cb(val);
 		};
 
 		return ret;

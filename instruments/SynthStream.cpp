@@ -23,10 +23,13 @@ int SynthStream::PaStreamCallbackData::callbackFunction(
 {
     auto* data = static_cast<PaStreamCallbackData*>( userData );
     auto* out = static_cast<float*>( outputBuffer );
+	auto* in = static_cast< const float* >(inputBuffer);
 
     for (unsigned i=0; i<framesPerBuffer; i++) {
+		float input = *in++;
+		data->inputGenerator(input);
         float sample1 = data->generator1(data->sampleTime);
-        float sample2 = sample1;
+		float sample2 = data->generator2(data->sampleTime);
         *out++ = sample1;
 		*out++ = sample2;
         data->sampleTime += data->sampleTimeDif;
@@ -35,25 +38,39 @@ int SynthStream::PaStreamCallbackData::callbackFunction(
     return 0;
 }
 
-SynthStream::SynthStream(unsigned sampleRate, unsigned bufferSize, CallbackFunction g1, CallbackFunction g2)
-    :callbackData(g1, g2, double(1)/sampleRate)
+SynthStream::SynthStream(
+	unsigned sampleRate, 
+	unsigned bufferSize, 
+	CallbackFunction g1, 
+	CallbackFunction g2,
+	InputCallback g3)
+    :callbackData(g1, g2, g3, double(1)/sampleRate)
 {
     ErrorCheck(Pa_Initialize());
+	inputParameters.device = Pa_GetDefaultInputDevice();
+	if (inputParameters.device == paNoDevice) {
+		throw std::runtime_error("PortAudio error: No default input device.\n");
+	}
     outputParameters.device = Pa_GetDefaultOutputDevice();
     if (outputParameters.device == paNoDevice) {
         throw std::runtime_error("PortAudio error: No default output device.\n");
     }
     outputParameters.channelCount = 2;                     /* stereo output */
-    outputParameters.sampleFormat = paFloat32;             /* 32 bit floating point output */
-    outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
+    outputParameters.sampleFormat = paFloat32;
+	outputParameters.suggestedLatency = Pa_GetDeviceInfo(outputParameters.device)->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
 
+	inputParameters.channelCount = 1;                     /* Mono input */
+	inputParameters.sampleFormat = paFloat32;
+	inputParameters.suggestedLatency = 0.01; Pa_GetDeviceInfo(inputParameters.device)->defaultLowInputLatency;
+	inputParameters.hostApiSpecificStreamInfo = NULL;
+
     err = Pa_OpenStream( &stream,
-                         NULL,              /* No input. */
-                         &outputParameters, /* As above. */
+                         &inputParameters,
+                         &outputParameters,
                          sampleRate,
                          bufferSize,               /* Frames per buffer. */
-                         paNoFlag,         /* No out of range samples expected. */
+                         paNoFlag,         /* Automatically clip samples out of [-1, 1] */
                          PaStreamCallbackData::callbackFunction,
                          &callbackData );
     ErrorCheck(Pa_Initialize());

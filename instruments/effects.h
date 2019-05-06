@@ -156,9 +156,11 @@ private:
 class SaveToFile : public PostSampleEffect<SaveToFile>
 {
 public:
+
 	SaveToFile(
 		const std::string& fname,
-		unsigned sampleRate
+		unsigned sampleRate,
+		unsigned channels
 	);
 
 	void effectImpl(double t, double& sample) const;
@@ -173,8 +175,7 @@ private:
 		const std::string dirName{"Records"};
 		std::string fname;
 		AudioFile<double>::AudioBuffer buffer;
-		unsigned sampleId = 0;
-		unsigned sampleRate;
+		unsigned channelId = 0, sampleRate, channels;
 		std::atomic<bool> isOn{ false };
 		std::mutex mtx; // fname, sampleId, sampleRate may change from other threads
 		std::shared_ptr<TextDisplay> displayResult;
@@ -183,6 +184,7 @@ private:
 		void stop();
 
 		std::shared_ptr<Button> onOff{ Button::OnOffButton(isOn, [this](bool on) {
+			std::lock_guard lock(mtx);
 			if (on) {
 				start();
 			}

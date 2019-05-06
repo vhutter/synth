@@ -17,6 +17,9 @@
     <Filter Include="gui\RtMidi">
       <UniqueIdentifier>{effe7dda-01d4-4123-9624-dedbd2f522f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Instruments\AudioFile">
+      <UniqueIdentifier>{aa171bf5-235b-4d06-a1c0-9dc3728ec4a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -94,6 +97,9 @@
     <ClCompile Include="gui\Input.cpp">
       <Filter>gui</Filter>
     </ClCompile>
+    <ClCompile Include="instruments\AudioFile\AudioFile.cpp">
+      <Filter>Instruments\AudioFile</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gui\Button.h">
@@ -161,6 +167,9 @@
     </ClInclude>
     <ClInclude Include="gui\Input.h">
       <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="instruments\AudioFile\AudioFile.h">
+      <Filter>Instruments\AudioFile</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

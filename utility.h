@@ -3,6 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 
+using namespace std::string_literals;
+
 using SynthFloat = double;
 using SynthVec2 = sf::Vector2<SynthFloat>;
 using SynthRect = sf::Rect<SynthFloat>;

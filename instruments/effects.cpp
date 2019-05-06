@@ -152,11 +152,13 @@ void Glider::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 
 SaveToFile::SaveToFile(
 	const std::string& fname,
-	unsigned sampleRate)
+	unsigned sampleRate,
+	unsigned channels)
 	:impl( std::make_shared<Impl>() )
 {
-	impl->sampleRate = sampleRate;
 	impl->fname = fname;
+	impl->sampleRate = sampleRate;
+	impl->channels = channels;
 	
 	auto inputField = std::make_shared<InputField>(InputField::Alpha, 150, 30);
 	inputField->setOnEnd([impl = this->impl, inputField]() {
@@ -202,26 +204,31 @@ void SaveToFile::effectImpl(double t, double& sample) const
 {
 	auto& _impl = *impl;
 	if (_impl.isOn) {
-		++_impl.sampleId;
-		_impl.buffer[0].push_back(sample);
+		std::lock_guard lock(_impl.mtx);
+		_impl.buffer[_impl.channelId].push_back(sample);
+		_impl.channelId = (_impl.channelId + 1) % _impl.channels;
 	}
 }
 
 void SaveToFile::Impl::start()
 {
-	buffer.resize(1);
-	buffer[0].clear();
-	sampleId = 0;
+	buffer.resize(channels);
+	for(auto& channel: buffer) channel.clear();
+	channelId = 0;
 	displayResult->setText("Recording"s);
 }
 
 void SaveToFile::Impl::stop()
 {
-	if (!isOn && buffer.size() && buffer[0].size()) {
+	std::size_t n = std::numeric_limits<std::size_t>::max();
+	for (const auto& channel : buffer) n = std::min(n, channel.size());
+	for (auto& channel : buffer) 
+		channel.resize(n); // keep the same amount of samples on each channel
+	if (buffer.size() && n) {
 		AudioFile<double> file;
 		file.setAudioBuffer(buffer);
-		file.setNumChannels(1);
-		file.setNumSamplesPerChannel(buffer[0].size());
+		file.setNumChannels(channels);
+		file.setNumSamplesPerChannel(n);
 		file.setBitDepth(24);
 		file.setSampleRate(sampleRate);
 		if (file.save(dirName + '/' + fname + ".wav", AudioFileFormat::Wave)) {
