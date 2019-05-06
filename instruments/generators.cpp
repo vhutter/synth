@@ -178,9 +178,14 @@ double WaveGenerator::getSampleImpl(double t) const
     return result;
 }
 
-const double WaveGenerator::getMainFreqImpl() const
+double WaveGenerator::getMainFreqImpl() const
 {
 	return freq.getInitial();
+}
+
+constexpr double WaveGenerator::getIntensityImpl() const
+{
+	return intensity;
 }
 
 DynamicToneSum::DynamicToneSum(

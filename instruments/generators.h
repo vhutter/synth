@@ -123,22 +123,22 @@ public:
 	}
 	constexpr double getIntensity() const
 	{
-		if constexpr (std::is_same_v<T, WaveGenerator>) {
-			return static_cast<const T*>(this)->intensity;
-		}
-		else {
-			return 1;
-		}
+		return static_cast<const T*>(this)->getIntensityImpl();
 	}
 	void modifyMainPitch(double t, double f2)
 	{
 		static_cast<T*>(this)->modifyMainPitchImpl(t, f2);
 	}
-	
-	const double getMainFreq() const
+	double getMainFreq() const
 	{
 		return static_cast<const T*>(this)->getMainFreqImpl();
 	}
+
+protected:
+	void modifyMainPitchImpl(double t, double f2) {}
+	double getMainFreqImpl() const { return 1.; }
+	double getSampleImpl(double t) { return 0.; }
+	constexpr double getIntensityImpl(double t) { return 0.; }
 };
 
 class SumGenerator : public SampleGenerator<SumGenerator>
@@ -170,8 +170,6 @@ public:
 		if(afterSample) afterSample(t, ret);
 		return ret;
 	}
-	void modifyMainPitchImpl(double t, double f2) { return; }
-	double getMainFreq() const { return 1; }
 
 private:
 	callback_t callback;
@@ -197,7 +195,8 @@ class WaveGenerator : public SampleGenerator<WaveGenerator>
     private:
 		void modifyMainPitchImpl(double t, double dest);
         double getSampleImpl(double t) const;
-		const double getMainFreqImpl() const;
+		double getMainFreqImpl() const;
+		constexpr double getIntensityImpl() const;
 };
 
 template<class T>
@@ -220,21 +219,12 @@ class Composite : public SampleGenerator<Composite<T>>
 
         const std::vector<T> initialComponents;
         std::vector<T> components;
-		//double intensitySum;
 };
 
 template<class T>
 Composite<T>::Composite(const std::vector<T> comps)
 	: initialComponents(std::move(comps)),
-	components(initialComponents)/*,
-	intensitySum(std::accumulate(
-		components.begin(),
-		components.end(),
-		0.,
-		[](double acc, const auto& component) {
-			return component.getIntensity() + acc;
-		}
-	))*/
+	components(initialComponents)
 {
 }
 
@@ -256,7 +246,7 @@ double Composite<T>::getSampleImpl(double t) const
 	double result = 0.;
 	double intensitySum = 0.;
 	for (auto& c : components) {
-		const double& sample = c.getSample(t);
+		double sample = c.getSample(t);
 		intensitySum += c.getIntensity();
 		if (sample != 0) {
 			result += sample;
@@ -371,8 +361,8 @@ class DynamicToneSum : public Composite<Dynamic<Composite<WaveGenerator>>>
 		);
 		DynamicToneSum(const DynamicToneSum& that);
 
-		double time() const;
 		double getSample(double t) const;
+		double time() const;
 		unsigned getMaxTones() const;
 		std::vector<Note> getNotes() const;
 		unsigned getNotesCount() const;
