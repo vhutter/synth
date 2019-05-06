@@ -1,9 +1,11 @@
 #ifndef EFFECTS_H_DEFINED
 #define EFFECTS_H_DEFINED
 
+#include <string>
 #include <memory>
 #include <tuple>
 #include "generators.h"
+#include "AudioFile/AudioFile.h"
 #include "../gui/Slider.h"
 #include "../gui/Button.h"
 #include "../gui/Oscilloscope.h"
@@ -18,7 +20,7 @@ public:
 		configFrame{ std::make_shared<Frame>() }
 	{
 		frame->setBgColor(sf::Color(0x555555aa));
-		frame->setSize(SynthVec2(300, 300));
+		frame->setSize(SynthVec2(3000, 3000));
 		frame->setFocusable(false);
 
 		configFrame->setBgColor(sf::Color::Black);
@@ -151,6 +153,48 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
+class SaveToFile : public PostSampleEffect<SaveToFile>
+{
+public:
+	SaveToFile(
+		const std::string& fname,
+		unsigned sampleRate
+	);
+
+	void effectImpl(double t, double& sample) const;
+
+	void start(){impl->isOn = true;impl->start();}
+	void stop() {impl->isOn = false;impl->stop();}
+
+
+private:
+	struct Impl
+	{
+		const std::string dirName{"Records"};
+		std::string fname;
+		AudioFile<double>::AudioBuffer buffer;
+		unsigned sampleId = 0;
+		unsigned sampleRate;
+		std::atomic<bool> isOn{ false };
+		std::mutex mtx; // fname, sampleId, sampleRate may change from other threads
+		std::shared_ptr<TextDisplay> displayResult;
+
+		void start();
+		void stop();
+
+		std::shared_ptr<Button> onOff{ Button::OnOffButton(isOn, [this](bool on) {
+			if (on) {
+				start();
+			}
+			else {
+				stop();
+			}
+		}) };
+	};
+
+	std::shared_ptr<Impl> impl;
+};
+
 template<class SampleGenerator_T>
 class PitchBender : public EffectBase
 {
@@ -183,13 +227,13 @@ private:
 	std::shared_ptr<Slider> sliderPitch{ Slider::DefaultSlider("Pitch", -1, 1, [this](const Slider & sliderPitch) {
 		if (isActive()) {
 			std::lock_guard lock(generator);
+			//generator.q = std::pow(2., sliderPitch.getValue());
 			generator.modifyMainPitch(
 				generator.time(),
 				generator.getMainFreq() + sliderPitch.getValue() * 1 / 9 * generator.getMainFreq()
 			);
 		}
 	}) };
-
 };
 
 

@@ -5,6 +5,7 @@
 
 #include <bitset>
 #include <sstream>
+#include <filesystem>
 
 DebugEffect::DebugEffect()
 	:impl{ std::make_shared<Impl>() }
@@ -146,5 +147,88 @@ void Glider::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 	}
 	else if (keyIdx == lastPressed) {
 		impl->glidingTone.stop(impl->lastTime);
+	}
+}
+
+SaveToFile::SaveToFile(
+	const std::string& fname,
+	unsigned sampleRate)
+	:impl( std::make_shared<Impl>() )
+{
+	impl->sampleRate = sampleRate;
+	impl->fname = fname;
+	
+	auto inputField = std::make_shared<InputField>(InputField::Alpha, 150, 30);
+	inputField->setOnEnd([impl = this->impl, inputField]() {
+		impl->fname = inputField->getText();
+	});
+
+	impl->displayResult = TextDisplay::DefaultText(" ", 14);
+
+	// Creating the directory to put records in
+	namespace fs = std::filesystem;
+
+	bool created = false;
+	if (fs::exists(impl->dirName))
+		created = true;
+	else {
+		try {
+			created = fs::create_directory(impl->dirName);
+		}
+		catch (...) {}
+	}
+
+	if (created) {
+		impl->displayResult->setText(impl->dirName+" directory created.");
+	}
+	else {
+		impl->displayResult->setText("Unable to access "s+impl->dirName+" directory."s);
+	}
+
+	// Default file name
+
+
+	frame->setChildAlignment(15);
+	frame->addChildAutoPos(impl->onOff);
+	frame->newLine();
+	frame->addChildAutoPos(TextDisplay::DefaultText("File name: ", 14));
+	frame->addChildAutoPos(inputField);
+	frame->newLine();
+	frame->addChildAutoPos(impl->displayResult);
+	frame->setSize({450, 200});
+}
+
+void SaveToFile::effectImpl(double t, double& sample) const
+{
+	auto& _impl = *impl;
+	if (_impl.isOn) {
+		++_impl.sampleId;
+		_impl.buffer[0].push_back(sample);
+	}
+}
+
+void SaveToFile::Impl::start()
+{
+	buffer.resize(1);
+	buffer[0].clear();
+	sampleId = 0;
+	displayResult->setText("Recording"s);
+}
+
+void SaveToFile::Impl::stop()
+{
+	if (!isOn && buffer.size() && buffer[0].size()) {
+		AudioFile<double> file;
+		file.setAudioBuffer(buffer);
+		file.setNumChannels(1);
+		file.setNumSamplesPerChannel(buffer[0].size());
+		file.setBitDepth(24);
+		file.setSampleRate(sampleRate);
+		if (file.save(dirName + '/' + fname + ".wav", AudioFileFormat::Wave)) {
+			displayResult->setText("Saved"s);
+		}
+		else {
+			displayResult->setText("Failed to save"s);
+		}
 	}
 }
