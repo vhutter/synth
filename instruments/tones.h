@@ -14,14 +14,14 @@ const TimbreModel& Sines1();
 const TimbreModel& Sines2();
 const TimbreModel& SinesTriangles();
 
-template<typename WaveGenerator>
-std::vector<typename Dynamic<Composite<WaveGenerator>>> generateTones(
+template<typename T>
+std::vector<typename Dynamic<Composite<T>>> generateTones(
 	TimbreModel model,
 	const std::vector<Note>& notes,
 	const ADSREnvelope& env = {}
 )
 {
-	std::vector<Dynamic<Composite<WaveGenerator>>> tones;
+	std::vector<Dynamic<Composite<T>>> tones;
 	tones.reserve(notes.size());
 	for (auto& note : notes) {
 		tones.emplace_back(model(note, env));

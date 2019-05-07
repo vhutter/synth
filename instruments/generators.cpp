@@ -158,7 +158,8 @@ WaveGenerator::WaveGenerator(
 	double intensity,
 	waves::wave_t waveform
 )
-	:freq(note),
+	:DynamicAmp(intensity),
+	freq(note),
 	intensity(intensity),
 	waveform(waveform)
 {}
@@ -172,8 +173,14 @@ void WaveGenerator::modifyMainPitchImpl(double t, double f2)
 	this->freq = f2;
 }
 
-double WaveGenerator::getSampleImpl(double t) const
+void DynamicToneSum::releaseKeys()
 {
+	pressedKeys = 0;
+}
+
+double WaveGenerator::getSampleImpl(double t)
+{
+	intensity = intensityFunction.getValue(t);
     double result = waveform(t, this->intensity, this->freq, this->phase);
     return result;
 }
@@ -207,7 +214,7 @@ void DynamicToneSum::lock() const { mtx.lock(); }
 void DynamicToneSum::unlock() const { mtx.unlock(); }
 double DynamicToneSum::time() const { return lastTime.load(); }
 
-double DynamicToneSum::getSample(double t) const
+double DynamicToneSum::getSample(double t)
 {
 	std::lock_guard lock(*this);
 	lastTime.store(t);
@@ -270,9 +277,12 @@ void DynamicToneSum::removeBeforeCallback(unsigned id)
 void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 {
 	if (keyState == SynthKey::State::Pressed) {
-		components.at(keyIdx).start(this->time());
+		if (++pressedKeys <= maxTones) {
+			components.at(keyIdx).start(this->time());
+		}
 	}
 	else {
+		--pressedKeys;
 		components.at(keyIdx).stop(this->time());
 	}
 }

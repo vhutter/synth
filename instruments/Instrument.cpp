@@ -58,7 +58,7 @@ KeyboardInstrument::KeyboardInstrument(
 			std::lock_guard lock(generator);
 			for (std::size_t j = 0; j < generator.size(); ++j) {
 				auto& g = generator[j];
-				g[i].intensity = slider.getValue();
+				g[i].modifyIntensity(generator.time(), slider.getValue());
 			}
 		}));
 		cSlider->setValue(timbre.components[i].intensity);
@@ -129,7 +129,7 @@ KeyboardInstrument::KeyboardInstrument(
 	gui->fitToChildren();
 	window->setSize(SynthVec2(gui->getSize()));
 	window->setMenuBar(menuHeight);
-	window->setOnClose([this]() {keyboard.stopAll(); });
+	window->setOnClose([this]() {keyboard.stopAll(); generator.releaseKeys(); });
 	window->getMenuFrame()->addChildAutoPos(MenuOption::createMenu(
 		30, 15, {
 			"View", pos_t::Down, {
