@@ -40,7 +40,7 @@ void Frame::fitToChildren()
 		x2 = std::max(x2, cx2);
 		y2 = std::max(y2, cy2);
 	}
-	if(changed) setSize({ x2, y2 });
+	if(changed) setSize({ x2+childAlignment, y2+childAlignment });
 }
 
 void Frame::setChildAlignment(unsigned a)

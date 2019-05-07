@@ -17,10 +17,10 @@ void InputField::deactivate()
 InputField::InputField(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize)
 	:Button("", sx, sy, charSize, [this]() {
 		if (isPressed()) {
-			activate();
+			if(!active) activate();
 		}
 		else {
-			deactivate();
+			if(active) deactivate();
 		}
 	}),
 	eventHandler(std::make_unique<EmptyGuiElement>([this, type](const sf::Event& event) {
