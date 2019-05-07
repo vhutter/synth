@@ -15,6 +15,8 @@ void Window::initHeaderPart()
 	headerPart->addChild(header);
 	headerPart->addChild(menuBar);
 	headerPart->setBgColor(sf::Color::White);
+	headerPart->setOutlineColor(sf::Color(0xccccccff));
+	headerPart->setOutlineThickness(-1);
 }
 
 Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
