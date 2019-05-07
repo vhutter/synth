@@ -41,10 +41,10 @@ void Oscilloscope::newSamples(const std::vector<double>& samples) const
 			i->position.y = (i + dif)->position.y;
 		const std::size_t shift = vArray.size() + dif;
 		for (auto i = vArray.end() - dif; i < vArray.end(); ++i)
-			i->position.y = window.getPosition().y + halfY + samples[i - vArray.begin() - shift] * halfY;
+			i->position.y = window.getPosition().y + halfY + std::clamp(samples[i - vArray.begin() - shift], -1., 1.) * halfY;
 	}
 	else {
 		for (unsigned i = 0; i < vArray.size(); ++i)
-			vArray[i].position.y = window.getPosition().y + halfY + samples[i] * halfY;
+			vArray[i].position.y = window.getPosition().y + halfY + std::clamp(samples[i], -1., 1.) * halfY;
 	}
 }
