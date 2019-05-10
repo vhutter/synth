@@ -12,7 +12,7 @@ public:
 	using midiCallback_t = std::function<void(const MidiEvent&)>;
 
 	Frame();
-	Frame(const SynthFloat sx, const SynthFloat sy);
+	Frame(SynthFloat sx, SynthFloat sy);
 	Frame(const SynthVec2& size);
 
 	void setEventCallback(const std::variant<sfCallback_t, midiCallback_t>& cb);
@@ -25,8 +25,8 @@ public:
 
 	const sf::Color& getBgColor() const;
 	const sf::Color& getOutlineColor() const;
-	const SynthFloat getOutlineThickness() const;
-	const SynthVec2 getSize() const;
+	SynthFloat getOutlineThickness() const;
+	SynthVec2 getSize() const;
 
 	void setBgColor(const sf::Color& color);
 	void setOutlineColor(const sf::Color& color);
@@ -35,7 +35,7 @@ public:
 
 	virtual SynthRect AABB() const override;
 	virtual sf::View childrenView(const sf::RenderTarget& target, const sf::RenderStates& states) const override;
-	virtual bool needsEvent(const SynthEvent& event) const;
+	virtual bool needsEvent(const SynthEvent& event) const override;
 	virtual bool forwardsEvent(const SynthEvent& event) const override;
 
 protected:
@@ -46,7 +46,7 @@ protected:
 	sf::RectangleShape frame;
 
 private:
-	const sf::FloatRect globalFrame() const;
+	sf::FloatRect globalFrame() const;
 
 	unsigned childAlignment{ 0 }, cursorX{ 0 }, cursorY{ 0 }, rowHeight{ 0 }; // variables for automatic positioning of children
 	bool cropping{ false };

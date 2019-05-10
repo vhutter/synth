@@ -30,7 +30,7 @@ MenuOption::MenuOption(const std::string & text, unsigned int charSize)
 		else {
 			auto* pChild = pressedChild();
 			if (!pChild) active = false;
-			else if (pChild->children.size() == 0) {
+			else if (pChild->children.empty()) {
 				pChild->forwardEvent(lastEvent, globalTransform);
 				active = false;
 			}

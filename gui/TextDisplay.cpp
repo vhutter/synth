@@ -75,7 +75,7 @@ std::unique_ptr<TextDisplay> TextDisplay::DefaultText(
 }
 
 std::unique_ptr<TextDisplay> TextDisplay::Multiline(
-	const std::string initialText,
+	const std::string& initialText,
 	SynthFloat width,
 	unsigned int charSize,
 	const sf::Font& font

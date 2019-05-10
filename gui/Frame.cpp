@@ -6,7 +6,7 @@ Frame::Frame()
 
 }
 
-Frame::Frame(const SynthFloat sx, const SynthFloat sy)
+Frame::Frame(SynthFloat sx, SynthFloat sy)
 	:Frame(SynthVec2(sx, sy))
 {
 }
@@ -89,12 +89,12 @@ const sf::Color & Frame::getOutlineColor() const
 	return frame.getOutlineColor();
 }
 
-const SynthFloat Frame::getOutlineThickness() const
+SynthFloat Frame::getOutlineThickness() const
 {
 	return SynthFloat(frame.getOutlineThickness());
 }
 
-const SynthVec2 Frame::getSize() const
+SynthVec2 Frame::getSize() const
 {
 	return SynthVec2(frame.getSize());
 }
@@ -140,7 +140,7 @@ sf::View Frame::childrenView(const sf::RenderTarget& target, const sf::RenderSta
 		return GuiElement::childrenView(target, states);
 }
 
-const sf::FloatRect Frame::globalFrame() const
+sf::FloatRect Frame::globalFrame() const
 {
 	return globalTransform.transformRect(sf::FloatRect(
 		frame.getPosition(),

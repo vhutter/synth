@@ -22,14 +22,14 @@ public:
 		const ChildPos_t childPos;
 		const std::variant< std::vector<OptionList>, std::shared_ptr<Window> > children;
 
-		OptionList(const std::string& title, ChildPos_t childPos, const std::vector<OptionList>& children)
-			:title(title), childPos(childPos), children(children)
+		OptionList(std::string title, ChildPos_t childPos, std::vector<OptionList> children)
+			:title(std::move(title)), childPos(childPos), children(std::move(children))
 		{}
-		OptionList(const std::string& title, const std::vector<OptionList>& children = {})
-			:title(title), childPos(ChildPos_t::Right), children(children)
+		OptionList(std::string title, std::vector<OptionList> children = {})
+			:title(std::move(title)), childPos(ChildPos_t::Right), children(std::move(children))
 		{}
-		OptionList(const std::string& title, std::shared_ptr<Window> window)
-			:title(title), childPos{}, children(window)
+		OptionList(std::string title, std::shared_ptr<Window> window)
+			:title(std::move(title)), childPos{}, children(window)
 		{}
 	};
 

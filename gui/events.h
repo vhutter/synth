@@ -64,6 +64,6 @@ private:
 	void* userData[2] = { &msgQueue, &midiMutex };
 };
 
-typedef std::variant<MidiEvent, sf::Event> SynthEvent;
+using SynthEvent = std::variant<MidiEvent, sf::Event>;
 
 #endif //SYNTHEVENT_H_DEFINED

@@ -19,14 +19,14 @@ public:
 		unsigned int charSize = 30
 	);
 	static std::unique_ptr<TextDisplay> Multiline(
-		const std::string text,
+		const std::string& text,
 		SynthFloat width,
 		unsigned int charSize = 24,
 		const sf::Font& font = loadCourierNew()
 	);
 
 	template<class string_t=sf::String>
-	const string_t getText() const
+	const string_t& getText() const
 	{
 		std::lock_guard lock(mtx);
 		return text.getString();

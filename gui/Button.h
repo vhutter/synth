@@ -9,7 +9,7 @@
 class Button : public TextDisplay
 {
 public:
-	Button(const std::string& initialText, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
+	Button(std::string initialText, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
 
 	static std::unique_ptr<Button> DefaultButton(const std::string& s, std::function<void()> onClick) {
 		return std::make_unique<Button>(s, 100, 30, 16, onClick);

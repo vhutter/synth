@@ -222,7 +222,7 @@ class Composite : public SampleGenerator<Composite<T>>
 	friend class SampleGenerator<Composite<T>>;
 public:
 	Composite(
-		const std::vector<T>
+		std::vector<T> comps
 	);
 
 	const T& operator[](std::size_t idx) const;
@@ -232,14 +232,14 @@ public:
 protected:
     void modifyMainPitchImpl(double t, double dest);
     double getSampleImpl(double t);
-	const double getMainFreqImpl() const;
+	double getMainFreqImpl() const;
 
     const std::vector<T> initialComponents;
     std::vector<T> components;
 };
 
 template<class T>
-Composite<T>::Composite(const std::vector<T> comps)
+Composite<T>::Composite(std::vector<T> comps)
 	: initialComponents(std::move(comps)),
 	components(initialComponents)
 {
@@ -291,7 +291,7 @@ inline std::size_t Composite<T>::size() const
 }
 
 template<class T>
-const double Composite<T>::getMainFreqImpl() const
+double Composite<T>::getMainFreqImpl() const
 {
 	return initialComponents.front().getMainFreq();
 }

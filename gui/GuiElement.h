@@ -8,7 +8,7 @@
 class GuiElement : public sf::Drawable, public sf::Transformable, public std::enable_shared_from_this<GuiElement>
 {
 public:
-	virtual ~GuiElement() {}
+	virtual ~GuiElement() = default;
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override final;
 	virtual SynthRect AABB() const;
 	virtual bool needsEvent(const SynthEvent& event) const { return true; }
@@ -59,8 +59,8 @@ public:
 
 protected:
 	virtual void drawImpl(sf::RenderTarget& target, sf::RenderStates states) const override {}
-	virtual void onSfmlEvent(const sf::Event& event) { if (sfmlCallback) sfmlCallback(event); }
-	virtual void onMidiEvent(const MidiEvent& event) { if (midiCallback) midiCallback(event); }
+	virtual void onSfmlEvent(const sf::Event& event) override { if (sfmlCallback) sfmlCallback(event); }
+	virtual void onMidiEvent(const MidiEvent& event) override { if (midiCallback) midiCallback(event); }
 
 	sfmlCallback_t sfmlCallback;
 	midiCallback_t midiCallback;
