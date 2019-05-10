@@ -445,7 +445,7 @@ private:
 	}
 
 	const unsigned maxTones;
-	unsigned pressedKeys{ 0 };
+	int pressedKeys{ 0 };
 	mutable std::atomic<double> lastTime{ 0 };
 	mutable std::mutex mtx;
 	std::vector<give_id<after_t>> afterSampleCallbacks;

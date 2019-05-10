@@ -285,6 +285,7 @@ void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 		--pressedKeys;
 		components.at(keyIdx).stop(this->time());
 	}
+	if (pressedKeys < 0) pressedKeys = 0;
 }
 
 TimbreModel::TimbreModel(
