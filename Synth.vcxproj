@@ -56,7 +56,7 @@
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-network-d.lib;portaudio_static_x64.lib;winmm.lib
+      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;portaudio_static_x64.lib;winmm.lib
 ;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>D:/SDKs/portaudio-msvc/Debug;D:\SDKs\SFML-2.5.1-msvc\lib\Debug</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>

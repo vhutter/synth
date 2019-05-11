@@ -15,7 +15,6 @@ DebugEffect::DebugEffect()
 	impl->maxSampText = TextDisplay::DefaultText("0                  \n", 20);
 	impl->eventText = TextDisplay::DefaultText(getMidiEventInfo(MidiEvent()), 20);
 	addToggleButton();
-	frame->setBgColor(sf::Color(0x222222cc));
 
 	frame->addChildAutoPos( impl->oscilloscope );
 	frame->addChildAutoPos( TextDisplay::DefaultText("Max sample:", 20) );
@@ -93,7 +92,6 @@ DelayEffect::DelayEffect(unsigned sampleRate, double echoLength, double coeffArg
 	frame->addChildAutoPos(_impl.sliderTime);
 	addToggleButton();
 	frame->fitToChildren();
-	frame->setBgColor(sf::Color::Black);
 
 	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Delay settings", 0, 30, 16));
 	configFrame->addChildAutoPos(_impl.sliderCoeff->getConfigFrame());

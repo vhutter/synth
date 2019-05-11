@@ -25,7 +25,7 @@ namespace
 		"Classic synth",
 		Sines1(),
 		ADSREnvelope(),
-		generateNotes(2, 5),
+		generateNotes(2, 6),
 		settings["maxNoteCount"].value()
 	};
 	
