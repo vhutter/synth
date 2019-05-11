@@ -64,7 +64,7 @@
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.1-src\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\SDKs\portaudio-src\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>__WINDOWS_MM__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -83,7 +83,7 @@
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;D:\SDKs\frozen\frozen-master\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\SDKs\portaudio-src\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>__WINDOWS_MM__;__TEST__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -93,7 +93,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>D:\SDKs\portaudio\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;D:\SDKs\frozen\frozen-master\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\SDKs\portaudio-src\include;D:\SDKs\SFML-2.5.0\include;D:\SDKs\SFML-2.5.1-src\include;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
