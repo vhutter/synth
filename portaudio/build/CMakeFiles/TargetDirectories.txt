@@ -1,0 +1,4 @@
+D:/Programozas/synth/portaudio/build/CMakeFiles/portaudio.dir
+D:/Programozas/synth/portaudio/build/CMakeFiles/portaudio_static.dir
+D:/Programozas/synth/portaudio/build/CMakeFiles/ALL_BUILD.dir
+D:/Programozas/synth/portaudio/build/CMakeFiles/ZERO_CHECK.dir

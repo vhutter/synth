@@ -1,7 +1,9 @@
 *.dll
-*.diagsession
-*.cd
 *.wav
+*.lib
+*.exe
+*.a
+*.so
 
 # Created by https://www.gitignore.io/api/codeblocks
 

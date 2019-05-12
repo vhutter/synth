@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_allocation.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_converters.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_cpuload.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_debugprint.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_dither.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_front.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_process.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_ringbuffer.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_stream.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\common\pa_trace.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\hostapi\skeleton\pa_hostapi_skeleton.c">
+      <Filter>hostapi\skeleton</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\os\win\pa_win_hostapis.c">
+      <Filter>os\win</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\os\win\pa_win_util.c">
+      <Filter>os\win</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\os\win\pa_win_waveformat.c">
+      <Filter>os\win</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\os\win\pa_win_wdmks_utils.c">
+      <Filter>os\win</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\os\win\pa_win_coinitialize.c">
+      <Filter>os\win</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\os\win\pa_x86_plain_converters.c">
+      <Filter>os\win</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\hostapi\wmme\pa_win_wmme.c">
+      <Filter>hostapi\wmme</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Programozas\synth\portaudio\src\hostapi\wdmks\pa_win_wdmks.c">
+      <Filter>hostapi\wdmks</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\os\win\pa_win_coinitialize.h">
+      <Filter>os\win</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\os\win\pa_win_wdmks_utils.h">
+      <Filter>os\win</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\os\win\pa_x86_plain_converters.h">
+      <Filter>os\win</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\build\options_cmake.h">
+      <Filter>cmake_generated</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\include\portaudio.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\include\pa_win_wmme.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\include\pa_win_wdmks.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_allocation.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_converters.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_cpuload.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_debugprint.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_dither.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_endianness.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_hostapi.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_memorybarrier.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_process.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_ringbuffer.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_stream.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_trace.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_types.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Programozas\synth\portaudio\src\common\pa_util.h">
+      <Filter>common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Programozas\synth\portaudio\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\Programozas\synth\portaudio\build\portaudio_cmake.def">
+      <Filter>cmake_generated</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="cmake_generated">
+      <UniqueIdentifier>{9D7F035C-5A3D-3F50-B50C-4D4AEF741C2D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{F8B86A5A-FC53-3E76-BAC0-FC1A4C736156}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hostapi">
+      <UniqueIdentifier>{D9C99C39-B1C8-3E7F-A299-D14C75AD29D5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hostapi\skeleton">
+      <UniqueIdentifier>{518F8722-2B42-34FA-9929-E17F68685A01}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hostapi\wdmks">
+      <UniqueIdentifier>{1800C591-71FA-3B4E-AD50-106A1C69BF80}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hostapi\wmme">
+      <UniqueIdentifier>{F78D3C0E-65F5-35DC-B397-5E5797421949}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{5DE0FB90-A609-3674-B0BD-18DD3DE91BF5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="os">
+      <UniqueIdentifier>{F8A4C3FF-E548-3FD0-9781-F8BC6C7F3DA4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="os\win">
+      <UniqueIdentifier>{A0371DB3-03D1-370B-B14F-B59377FF282F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
