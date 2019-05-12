@@ -21,89 +21,71 @@ namespace
 		{"maxNoteCount", 5},
 	};
 
-	KeyboardInstrument inst1{
-		"Classic synth",
-		Sines1(),
-		ADSREnvelope(),
-		generateNotes(2, 6),
-		settings["maxNoteCount"].value()
-	};
-	
-	KeyboardInstrument inst2{
-		"Soft bass",
-		Sines2(),
-		ADSREnvelope(),
-		generateNotes(1, 3),
-		settings["maxNoteCount"].value()
-	};
+	auto& getInputInstrument()
+	{
+		static InputInstrument inst3{
+			"Microphone input"
+		};
+		return inst3;
+	}
 
-	InputInstrument inst3{
-		"Microphone input"
-	};
-	
-	//KeyboardInstrument inst3{
-	//	"Synth 2",
-	//	SinesTriangles(),
-	//	ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
-	//	generateNotes(2, 5),
-	//	settings["maxNoteCount"].value()
-	//};
-	//
-	//KeyboardInstrument inst4{
-	//	"Sine",
-	//	Sine(),
-	//	ADSREnvelope(),
-	//	generateNotes(2, 5),
-	//	settings["maxNoteCount"].value()
-	//};
-	//
-	//KeyboardInstrument inst5{
-	//	"Square",
-	//	Square(),
-	//	ADSREnvelope(),
-	//	generateNotes(2, 5),
-	//	settings["maxNoteCount"].value()
-	//};
-	//
-	//KeyboardInstrument inst6{
-	//	"Sawtooth",
-	//	Saw(),
-	//	ADSREnvelope(),
-	//	generateNotes(2, 5),
-	//	settings["maxNoteCount"].value()
-	//};
-	//
-	//KeyboardInstrument inst7{
-	//	"Triangle",
-	//	Triangle(),
-	//	ADSREnvelope(),
-	//	generateNotes(2, 5),
-	//	settings["maxNoteCount"].value()
-	//};
-	//
-	auto instruments = std::forward_as_tuple(inst1, inst2, inst3);// , inst3, inst4, inst5, inst6, inst7);
+	auto& getInstruments()
+	{
+		static KeyboardInstrument inst1{
+			"Synth 1",
+			Sines1(),
+			ADSREnvelope(),
+			generateNotes(2, 6),
+			settings["maxNoteCount"].value()
+		};
 
-	SumGenerator generator(
-		[](double t, double& sample) {
-			for (auto f : afterEffects)
-				f(t, sample);
-		},
-		instruments
-	);
+		static KeyboardInstrument inst2{
+			"Soft bass",
+			Sines2(),
+			ADSREnvelope(),
+			generateNotes(1, 3),
+			settings["maxNoteCount"].value()
+		};
+		static auto& inst3 = getInputInstrument();
 
-	SynthStream synthStream{
-		settings["sampleRate"].value(),
-		settings["bufferSize"].value(),
-		[](double t) -> double { 
-			return generator.getSample(t);
-		},
-		[](double t) -> double {
-			return generator.getSample(t);
-		},
-		[](double t) {
-			inst3(t);
-		}
-	};
+		static KeyboardInstrument inst4{
+			"Synth 2",
+			SinesTriangles(),
+			ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
+			generateNotes(2, 5),
+			settings["maxNoteCount"].value()
+		};
+
+		static auto instruments = std::forward_as_tuple(inst1, inst2, inst3);
+		return instruments;
+	}
+
+
+	auto& getSynth()
+	{
+
+		static SumGenerator generator(
+			[](double t, double& sample) {
+				for (auto f : afterEffects)
+					f(t, sample);
+			},
+			getInstruments()
+		);
+		static SynthStream synthStream{
+			settings["sampleRate"].value(),
+			settings["bufferSize"].value(),
+			[](double t) -> double {
+				return generator.getSample(t);
+			},
+			[](double t) -> double {
+				return generator.getSample(t);
+			},
+			[](double t) {
+				getInputInstrument()(t);
+			}
+		};
+		return synthStream;
+	}
 
 	void addAfterEffects(std::shared_ptr<Window> mainWindow)
 	{
@@ -206,7 +188,7 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 
 	menu->addChildAutoPos(MenuOption::createMenu(
 		30, 15, {
-			"Instruments", pos_t::Down, toVector(instruments)
+			"Instruments", pos_t::Down, toVector(getInstruments())
 		}
 	));
 
@@ -219,8 +201,8 @@ void setupGui(std::shared_ptr<Window> mainWindow, sf::RenderWindow& renderWindow
 			),
 			...
 		);
-	}, instruments);
+	}, getInstruments());
 
 	addAfterEffects(mainWindow);
-	synthStream.play();
+	getSynth().play();
 }
