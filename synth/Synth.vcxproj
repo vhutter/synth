@@ -110,7 +110,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\libs</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;winmm.lib;gdi32.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
     </Link>
