@@ -1,0 +1,5 @@
+# CMake generation dependency list for this directory.
+D:/Programozas/synth/SFML-2.5.1/src/SFML/Window/CMakeLists.txt
+D:/Programs/CMake/share/cmake-3.14/Modules/FindOpenGL.cmake
+D:/Programs/CMake/share/cmake-3.14/Modules/FindPackageHandleStandardArgs.cmake
+D:/Programs/CMake/share/cmake-3.14/Modules/FindPackageMessage.cmake

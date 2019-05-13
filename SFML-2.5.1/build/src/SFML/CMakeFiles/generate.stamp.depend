@@ -1,0 +1,4 @@
+# CMake generation dependency list for this directory.
+D:/Programozas/synth/SFML-2.5.1/cmake/Macros.cmake
+D:/Programozas/synth/SFML-2.5.1/src/SFML/CMakeLists.txt
+D:/Programs/CMake/share/cmake-3.14/Modules/CMakeParseArguments.cmake
