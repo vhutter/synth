@@ -14,7 +14,7 @@ class TextDisplay;
 class Window : public GuiElement
 {
 public:
-	Window(SynthFloat sx, SynthFloat sy, const sf::Color& fillColor=sf::Color(0x333333cc));
+	Window(SynthFloat sx, SynthFloat sy, const sf::Color& fillColor = sf::Color(getConfig("defaultWindowColor")));
 	Window(std::shared_ptr<Frame> frame);
 
 	void setSize(const SynthVec2& size);

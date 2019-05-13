@@ -20,7 +20,7 @@ public:
 
 protected:
 	std::string title;
-	const unsigned wWidth{ 1000 }, wHeight{ 600 }, menuHeight{ 30 };
+	const unsigned wWidth{ 1000 }, wHeight{ 600 }, menuHeight{ getConfig("defaultHeaderSize") };
 	std::shared_ptr<Window> window;
 };
 

@@ -23,14 +23,14 @@ void Configurable::setupConfig(
 		listener = std::make_shared<EmptyGuiElement>();
 		frame->addChild(listener);
 		frame->setSize(SynthVec2(1000, 100));
-		auto input = std::make_shared<InputRecord>(type, 200, 30);
+		auto input = std::make_shared<InputRecord>(type, 200, getConfig("defaultTextHeight"));
 		input->setOnEnd([input, onEnd]() {
 			onEnd(input->getLastEvent());
 			});
 		input->setText(std::string("<Empty>"));
 		input->centralize();
 		if (!name.empty()) {
-			auto title = std::make_shared<TextDisplay>(name, 0, 30, 13);
+			auto title = std::make_shared<TextDisplay>(name, 0, getConfig("defaultTextHeight"));
 			title->centralize();
 			frame->addChildAutoPos(title);
 		}

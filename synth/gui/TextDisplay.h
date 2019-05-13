@@ -2,6 +2,7 @@
 #define TEXTDISPLAY_H_INCLUDED
 
 #include "Frame.h"
+#include "../utility.h"
 
 class TextDisplay : public Frame
 {
@@ -10,18 +11,18 @@ public:
 		const std::string& initialText, 
 		SynthFloat sx = 0, 
 		SynthFloat sy = 0, 
-		unsigned int charSize = 30, 
+		unsigned int charSize = getConfig("defaultCharSize"), 
 		const sf::Font& font = loadCourierNew()
 	);
 	TextDisplay() : TextDisplay("") {}
 	static std::unique_ptr<TextDisplay> DefaultText(
 		const std::string& initialText,
-		unsigned int charSize = 30
+		unsigned int charSize = getConfig("defaultCharSize")
 	);
 	static std::unique_ptr<TextDisplay> Multiline(
 		const std::string& text,
 		SynthFloat width,
-		unsigned int charSize = 24,
+		unsigned int charSize = getConfig("defaultCharSize"),
 		const sf::Font& font = loadCourierNew()
 	);
 

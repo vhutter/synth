@@ -3,6 +3,7 @@
 
 #include <variant>
 #include "Button.h"
+#include "../utility.h"
 
 class Window;
 
@@ -37,7 +38,7 @@ public:
 		unsigned height,
 		unsigned fontSize,
 		const OptionList& option,
-		unsigned alignment = 10u,
+		unsigned alignment = getConfig("defaultMenuAlignment"),
 		unsigned width = 0u
 	);
 

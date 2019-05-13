@@ -36,9 +36,9 @@ public:
 	template<class T = std::function<void()>>
 	static std::unique_ptr<Slider> DefaultSlider(const std::string& name, double from, double to, T&& onMoveVal = {})
 	{
-		constexpr SynthFloat width = 30;
-		constexpr SynthFloat height = 100;
-		constexpr unsigned titleSize = 16;
+		const SynthFloat width = getConfig("defaultSliderWidth");
+		const SynthFloat height = getConfig("defaultSliderHeight");
+		const unsigned titleSize = getConfig("defaultCharSize");
 
 		if constexpr (std::is_constructible_v<std::function<void(const Slider&)>, T>)
 		{

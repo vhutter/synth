@@ -17,38 +17,38 @@ void testGui()
 	std::shared_ptr inner1 = std::make_unique<Window>(200, 200, sf::Color::Black);
 	std::shared_ptr inner2 = std::make_unique<Window>(600, 200, sf::Color::Black);
 
-	outer1->setHeader(30, "Outer1");
+	outer1->setHeader(getConfig("defaultHeaderSize"), "Outer1");
 	outer1->getContentFrame()->addChildAutoPos(windowText);
 
 
-	outer2->setHeader(30, "Outer2");
+	outer2->setHeader(getConfig("defaultHeaderSize"), "Outer2");
 
 	inner1->getContentFrame()->addChildAutoPos(
 		TextDisplay::Multiline("cat... cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat cat", 100, 24)
 	);
 
 	std::shared_ptr menu1 = std::make_unique<MenuOption>(" Option1 ", 15);
-	auto button1 = std::make_shared<MenuOption>("This works! :)", 30);
+	auto button1 = std::make_shared<MenuOption>("This works! :)", getConfig("defaultHeaderSize"));
 	button1->setNormalColor(sf::Color::Magenta);
 	button1->setTextColor(sf::Color::Black);
-	menu1->addChild( button1, 0, 30);
+	menu1->addChild( button1, 0, getConfig("defaultHeaderSize"));
 
 	std::shared_ptr menu2 = std::make_unique<MenuOption>(" Option2 ", 15);
-	menu2->addChild( std::make_shared<MenuOption>("This works! :)", 30) );
+	menu2->addChild( std::make_shared<MenuOption>("This works! :)", getConfig("defaultHeaderSize")) );
 
-	outer1->setMenuBar(30);
+	outer1->setMenuBar(getConfig("defaultHeaderSize"));
 	outer1->addMenuOption(menu1);
 	outer1->addMenuOption(menu2);
 
 	outer1->getContentFrame()->addChildAutoPos(inner1);
 	outer1->getContentFrame()->addChildAutoPos(inner2);
-	inner1->setHeader(30, "Inner1");
-	inner2->setHeader(30, "Inner2");
+	inner1->setHeader(getConfig("defaultHeaderSize"), "Inner1");
+	inner2->setHeader(getConfig("defaultHeaderSize"), "Inner2");
 
-	outer2->setMenuBar(30);
+	outer2->setMenuBar(getConfig("defaultHeaderSize"));
 	using pos_t = MenuOption::OptionList::ChildPos_t;
 	auto q = MenuOption::createMenu(
-		30, 15, {
+		getConfig("defaultHeaderSize"), 15, {
 			"Menu1", pos_t::Down, {{
 				"inner1^", inner1}, {
 				"Menu12", {
@@ -73,7 +73,7 @@ void testGui()
 	auto gliderWindow = std::make_shared<Window>(glider.getFrame());
 	outer2->getContentFrame()->addChildAutoPos(gliderWindow);
 
-	auto input = std::make_shared<InputField>(InputField::Double, 100, 30);
+	auto input = std::make_shared<InputField>(InputField::Double, 100, getConfig("defaultTextHeight"));
 	outer2->getContentFrame()->addChildAutoPos(input);
 
 	auto randomSlider = std::shared_ptr(Slider::DefaultSlider("RandomSlider", -1, 1));
@@ -81,7 +81,7 @@ void testGui()
 	outer2->getContentFrame()->addChild(randomSlider->getConfigFrame(), 300, 140);
 
 
-	auto inputRec = std::make_shared<InputRecord>(InputRecord::Any, 60, 30, 15);
+	auto inputRec = std::make_shared<InputRecord>(InputRecord::Any, 60, getConfig("defaultTextHeight"), 15);
 	outer2->getContentFrame()->addChild(inputRec, 100, 100);
 
 	

@@ -3,7 +3,9 @@
 
 #include <unordered_set>
 #include <fstream>
+#include <sstream>
 #include <ctime>
+#include <utility>
 
 const sf::Font& loadCourierNew()
 {
@@ -133,5 +135,40 @@ void log(const std::string& str)
 	std::time_t now = std::time(nullptr);
 	if (std::strftime(buf, sizeof(buf), "%F/%T", std::localtime(&now))) {
 		log << buf << "   " << str << "\n";
+	}
+}
+
+//https://stackoverflow.com/questions/28054528/overloading-ifstream-iterator-for-pairs
+struct P : std::pair<std::string, unsigned>
+{
+	using std::pair<std::string, unsigned>::pair;
+};
+
+std::istream& operator>> (std::istream& in, P& p)
+{
+	std::string tmp;
+	in >> p.first >> tmp;
+	std::istringstream iss(tmp);
+	if (tmp.rfind("0x", 0) == 0) {
+		iss >> std::hex >> p.second;
+	}
+	else {
+		iss >> std::dec >> p.second;
+	}
+	return in;
+}
+
+unsigned getConfig(const std::string& str)
+{
+	static std::ifstream cfgFile("Config.txt");
+	static std::unordered_map<std::string, unsigned> cfg{
+		std::istream_iterator<P>(cfgFile),
+		std::istream_iterator<P>()
+	};
+	try {
+		return cfg.at(str);
+	}
+	catch (...) {
+		throw std::out_of_range(str + " does not exist in Config.txt");
 	}
 }

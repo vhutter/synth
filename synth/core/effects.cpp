@@ -62,7 +62,7 @@ VolumeControl::VolumeControl()
 	frame->addChildAutoPos( impl->sliderVolume );
 	frame->fitToChildren();
 
-	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Volume settings", 0, 30, 16));
+	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Volume settings", 0, getConfig("defaultTextHeight"), 16));
 	configFrame->addChildAutoPos(impl->sliderVolume->getConfigFrame());
 	configFrame->fitToChildren();
 }
@@ -93,7 +93,7 @@ DelayEffect::DelayEffect(unsigned sampleRate, double echoLength, double coeffArg
 	addToggleButton();
 	frame->fitToChildren();
 
-	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Delay settings", 0, 30, 16));
+	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Delay settings", 0, getConfig("defaultTextHeight"), 16));
 	configFrame->addChildAutoPos(_impl.sliderCoeff->getConfigFrame());
 	configFrame->addChildAutoPos(_impl.sliderTime->getConfigFrame());
 	configFrame->fitToChildren();
@@ -125,7 +125,7 @@ Glider::Glider(const TimbreModel& model, const std::vector<Note>& notes, unsigne
 	frame->addChildAutoPos(impl->glideSpeedSlider);
 	frame->fitToChildren();
 
-	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Glider settings", 0, 30, 16));
+	configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Glider settings", 0, getConfig("defaultTextHeight"), 16));
 	configFrame->addChildAutoPos(impl->glideSpeedSlider->getConfigFrame());
 	configFrame->fitToChildren();
 }
@@ -158,7 +158,7 @@ SaveToFile::SaveToFile(
 	impl->sampleRate = sampleRate;
 	impl->channels = channels;
 	
-	auto inputField = std::make_shared<InputField>(InputField::Alpha, 150, 30);
+	auto inputField = std::make_shared<InputField>(InputField::Alpha, 150, getConfig("defaultTextHeight"));
 	inputField->setOnEnd([impl = this->impl, inputField]() {
 		impl->fname = inputField->getText();
 	});

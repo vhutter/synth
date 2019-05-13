@@ -2,6 +2,7 @@
 #define INPUTFIELD_H_INCLUDED
 
 #include "Button.h"
+#include "../utility.h"
 
 class InputField : public Button
 {
@@ -17,7 +18,7 @@ public:
 		Any       = 0xff,
 	};
 
-	InputField(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize=16);
+	InputField(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize = getConfig("defaultCharSize"));
 	void setTextCentered(const std::string& str);
 	void setOnEnd(std::function<void()> callback);
 
@@ -53,7 +54,7 @@ public:
 		Any            = Sfml | Midi,
 	};
 
-	InputRecord(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize = 16);
+	InputRecord(Type type, SynthFloat sx, SynthFloat sy, unsigned int charSize = getConfig("defaultCharSize"));
 	const SynthEvent& getLastEvent() const;
 
 	virtual bool needsEvent(const SynthEvent& event) const override;

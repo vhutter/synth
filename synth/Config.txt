@@ -1,0 +1,32 @@
+sampleRate 44100
+bufferSize 64
+maxNoteCount 3
+
+defaultWindowColor 0x333333cc
+defaultHeaderSize 30
+defaultWindowHeaderOutlineColor 0xccccccff
+defaultCharSize 14
+defaultTextHeight 30
+whiteKeyWidth 100
+whiteKeyHeight 200
+blackKeyWidth 40
+blackKeyHeight 150
+keyOutlineColor 0x4C0099FF
+whitePressedColor 0xC0C0C0FF
+blackPressedColor 0x404040FF
+sliderMainOutlineColor 0x757575FF
+sliderMainFillColor 0x660000FF
+sliderSmallOutlineColor 0x757575FF
+sliderSmallFillColor 0x003366FF
+defaultMenuAlignment 10
+inputFieldNormalColor 0x330017ff
+inputFieldPressedColor 0x330017ff
+defaultButtonWidth 100
+defaultButtonHeight 30
+defaultOnOffButtonSize 40
+defaultButtonNormalColor 0x000000ff
+defaultButtonPressedColor 0x555555ff
+defaultSliderWidth 30
+defaultSliderHeight 100
+
+effectBgColor 0x555555aa

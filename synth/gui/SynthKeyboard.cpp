@@ -1,14 +1,15 @@
 #include "SynthKeyboard.h"
 
 #include <optional>
+#include "../utility.h"
 
 SynthVec2 SynthKey::whiteSizeDefault()
 {
-	return { 100, 200 };
+	return { SynthFloat(getConfig("whiteKeyWidth")), SynthFloat(getConfig("whiteKeyHeight")) };
 }
 SynthVec2 SynthKey::blackSizeDefault()
 {
-	return { 40, 150 };
+	return { SynthFloat(getConfig("blackKeyWidth")), SynthFloat(getConfig("blackKeyHeight")) };
 }
 
 SynthKey::SynthKey(Type t, const SynthVec2& size)
@@ -25,7 +26,7 @@ SynthKey::SynthKey(Type t, const SynthVec2& size)
 		setFillColor(sf::Color::White);
 	}
 
-	setOutlineColor(sf::Color(0x4C0099FF));
+	setOutlineColor(sf::Color(getConfig("keyOutlineColor")));
 	setOutlineThickness(1);
 }
 
@@ -33,11 +34,11 @@ void SynthKey::setPressed(bool p)
 {
 	pressed = p;
 	if (type == Type::White) {
-		if (pressed) setFillColor(sf::Color(0xC0C0C0FF));
+		if (pressed) setFillColor(sf::Color(getConfig("whitePressedColor")));
 		else setFillColor(sf::Color::White);
 	}
 	else {
-		if (pressed) setFillColor(sf::Color(0x404040FF));
+		if (pressed) setFillColor(sf::Color(getConfig("blackPressedColor")));
 		else setFillColor(sf::Color::Black);
 	}
 }

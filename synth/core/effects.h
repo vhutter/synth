@@ -11,6 +11,7 @@
 #include "../gui/Oscilloscope.h"
 #include "../gui/Window.h"
 #include "../gui/events.h"
+#include "../utility.h"
 
 class EffectBase
 {
@@ -19,7 +20,7 @@ public:
 		:frame{ std::make_shared<Frame>() },
 		configFrame{ std::make_shared<Frame>() }
 	{
-		frame->setBgColor(sf::Color(0x555555aa));
+		frame->setBgColor(sf::Color(getConfig("effectBgColor")));
 		frame->setSize(SynthVec2(3000, 3000));
 		frame->setFocusable(false);
 
@@ -219,7 +220,7 @@ public:
 			}
 		}));
 
-		configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Pitch bend settings", 0, 30, 16));
+		configFrame->addChildAutoPos(std::make_unique<TextDisplay>("Pitch bend settings", 0, getConfig("defaultTextHeight"), 16));
 		configFrame->addChildAutoPos(sliderPitch->getConfigFrame());
 		configFrame->fitToChildren();
 	}

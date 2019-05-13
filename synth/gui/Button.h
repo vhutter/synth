@@ -12,13 +12,23 @@ public:
 	Button(std::string initialText, SynthFloat sx, SynthFloat sy, unsigned int charSize, std::function<void()> onClick);
 
 	static std::unique_ptr<Button> DefaultButton(const std::string& s, std::function<void()> onClick) {
-		return std::make_unique<Button>(s, 100, 30, 16, onClick);
+		return std::make_unique<Button>(
+			s, 
+			getConfig("defaultButtonWidth"), 
+			getConfig("defaultButtonHeight"),
+			getConfig("defaultCharSize"), 
+			onClick
+		);
 	}
 	static std::unique_ptr<Button> DefaultButton(const std::string& s, std::atomic<bool>& val) {
 		return DefaultButton(s, [&]() {val = !val; });
 	}
 	static std::unique_ptr<Button> OnOffButton(std::atomic<bool>& val, std::function<void(bool)> cb = {}) {
-		auto ret = std::make_unique<Button>("", 40, 40, 16, [&]() {});
+		auto ret = std::make_unique<Button>("",
+			getConfig("defaultOnOffButtonSize"),
+			getConfig("defaultOnOffButtonSize"),
+			getConfig("defaultCharSize"), [&]() {}
+		);
 
 		using namespace std::string_literals;
 		auto setState = [button = ret.get()](bool val) {
@@ -60,7 +70,8 @@ private:
 
 	std::function<void()> clickCallback;
 	bool pressed{ false };
-	sf::Color normalCol{ sf::Color::Black }, pressedCol{ 0x555555ff };
+	sf::Color normalCol{ getConfig("defaultButtonNormalColor") }, 
+		pressedCol{ getConfig("defaultButtonPressedColor") };
 };
 
 #endif //BUTTON_H_INCLUDED

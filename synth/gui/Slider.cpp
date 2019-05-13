@@ -1,5 +1,6 @@
 #include "Slider.h"
 #include "TextDisplay.h"
+#include "../utility.h"
 
 #include <string>
 #include <sstream>
@@ -41,14 +42,14 @@ Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, Sy
 	}
 
 	mainRect.setPosition({ 0,0 });
-	mainRect.setOutlineColor(sf::Color(0x757575FF));
-	mainRect.setFillColor(sf::Color(0x660000FF));
+	mainRect.setOutlineColor(sf::Color(getConfig("sliderMainOutlineColor")));
+	mainRect.setFillColor(sf::Color(getConfig("sliderMainFillColor")));
 	mainRect.setOutlineThickness(-1.);
 
 	sliderRect.setSize(sf::Vector2f(sliderRectSize));
 	sliderRect.setPosition(mainRect.getSize().x / 2 - sliderRectSize.x / 2, mainRect.getSize().y / 2 - sliderRectSize.y / 2);
-	sliderRect.setOutlineColor(sf::Color(0x757575FF));
-	sliderRect.setFillColor(sf::Color(0x003366FF));
+	sliderRect.setOutlineColor(sf::Color(getConfig("sliderSmallOutlineColor")));
+	sliderRect.setFillColor(sf::Color(getConfig("sliderSmallFillColor")));
 	sliderRect.setOutlineThickness(-2.);
 
 	refreshText();

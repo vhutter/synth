@@ -62,8 +62,8 @@ InputField::InputField(Type type, SynthFloat sx, SynthFloat sy, unsigned int cha
 	addChild(eventHandler);
 	passesAllClicks = true;
 	setOutlineColor(sf::Color::White);
-	setNormalColor(sf::Color(0x330017ff));
-	setPressedColor(sf::Color(0x330017ff));
+	setNormalColor(sf::Color(getConfig("inputFieldNormalColor")));
+	setPressedColor(sf::Color(getConfig("inputFieldPressedColor")));
 	setOutlineThickness(0);
 }
 

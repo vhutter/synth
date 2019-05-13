@@ -15,11 +15,11 @@ void Window::initHeaderPart()
 	headerPart->addChild(header);
 	headerPart->addChild(menuBar);
 	headerPart->setBgColor(sf::Color::White);
-	headerPart->setOutlineColor(sf::Color(0xccccccff));
+	headerPart->setOutlineColor(sf::Color(getConfig("defaultWindowHeaderOutlineColor")));
 	headerPart->setOutlineThickness(-1);
 }
 
-Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color & fillColor)
+Window::Window(SynthFloat sx, SynthFloat sy, const sf::Color& fillColor)
 	:content(std::make_shared<Frame>(sx, sy)),
 	headerPart(std::make_shared<Frame>()),
 	header(std::make_shared<TextDisplay>()),

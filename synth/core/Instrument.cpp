@@ -1,10 +1,11 @@
 #include "Instrument.h"
+#include "../utility.h"
 
 Instrument::Instrument(const std::string& title)
 	:title(title),
 	window{ std::make_shared<Window>(wWidth, wHeight) }
 {
-	window->setHeader(30, title);
+	window->setHeader(getConfig("defaultHeaderSize"), title);
 }
 
 
@@ -63,7 +64,7 @@ KeyboardInstrument::KeyboardInstrument(
 		}));
 		cSlider->setValue(timbre.components[i].intensity);
 		
-		auto cValueInput = std::make_shared<InputField>(InputField::Double, 100, 30, 16);
+		auto cValueInput = std::make_shared<InputField>(InputField::Double, 100, getConfig("defaultTextHeight"));
 		cValueInput->setTextCentered(std::to_string(timbre.components[i].relativeFreq));
 		cValueInput->setOnEnd([this, cValueInput, i]() {
 			std::string valStr = cValueInput->getText();
@@ -122,7 +123,7 @@ KeyboardInstrument::KeyboardInstrument(
 
 	inputConfigFrame->fitToChildren();
 	auto inputConfigWindow = std::make_shared<Window>(inputConfigFrame);
-	inputConfigWindow->setHeader(30, "Input config");
+	inputConfigWindow->setHeader(getConfig("defaultHeaderSize"), "Input config");
 	inputConfigWindow->setVisibility(false);
 	gui->addChild(inputConfigWindow, 100, 100);
 
@@ -131,7 +132,7 @@ KeyboardInstrument::KeyboardInstrument(
 	window->setMenuBar(menuHeight);
 	window->setOnClose([this]() {keyboard.stopAll(); generator.releaseKeys(); });
 	window->getMenuFrame()->addChildAutoPos(MenuOption::createMenu(
-		30, 15, {
+		getConfig("defaultHeaderSize"), 15, {
 			"View", pos_t::Down, {
 				{"Input settings", inputConfigWindow}
 			}
