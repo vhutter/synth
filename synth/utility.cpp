@@ -2,6 +2,8 @@
 #include "core/generators.h"
 
 #include <unordered_set>
+#include <fstream>
+#include <ctime>
 
 const sf::Font& loadCourierNew()
 {
@@ -122,4 +124,14 @@ bool isNumeric(const sf::Keyboard::Key& key)
 bool isAlnum(const sf::Keyboard::Key& key)
 {
 	return isNumeric(key) || isAlpha(key);
+}
+
+void log(const std::string& str)
+{
+	static std::ofstream log("Logs.txt", std::ios_base::app);
+	static char buf[500];
+	std::time_t now = std::time(nullptr);
+	if (std::strftime(buf, sizeof(buf), "%F/%T", std::localtime(&now))) {
+		log << buf << "   " << str << "\n";
+	}
 }

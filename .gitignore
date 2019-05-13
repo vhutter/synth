@@ -5,6 +5,8 @@
 *.a
 *.so
 
+synth/Logs.txt
+
 # Created by https://www.gitignore.io/api/codeblocks
 
 ### CodeBlocks ###

@@ -24,4 +24,6 @@ bool isAlnum(const sf::Keyboard::Key& key);
 
 static double eps = 0.001;
 
+void log(const std::string& str);
+
 #endif
