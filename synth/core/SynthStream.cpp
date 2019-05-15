@@ -44,7 +44,7 @@ SynthStream::SynthStream(
 	CallbackFunction g1, 
 	CallbackFunction g2,
 	InputCallback g3)
-    :callbackData(g1, g2, g3, double(1)/sampleRate)
+    :callbackData(g1, g2, g3, 1./sampleRate)
 {
     ErrorCheck(Pa_Initialize());
 	inputParameters.device = Pa_GetDefaultInputDevice();

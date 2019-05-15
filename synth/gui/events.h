@@ -2,8 +2,8 @@
 #define SYNTHEVENT_H_DEFINED
 
 #include <SFML/Window.hpp>
+#include <RtMidi.h>
 
-#include "RtMidi/RtMidi.h"
 #include <queue>
 #include <mutex>
 #include <variant>

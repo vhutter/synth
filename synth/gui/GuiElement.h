@@ -1,6 +1,7 @@
 #ifndef GUIELEMENT_H_INCLUDED
 #define GUIELEMENT_H_INCLUDED
 
+#include <functional>
 #include <sfml/Graphics.hpp>
 #include "../core/utility.h"
 #include "events.h"

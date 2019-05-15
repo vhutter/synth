@@ -2,6 +2,7 @@
 #define SYNTH_UTILITY_H_DEFINED
 
 #include <SFML/Graphics.hpp>
+#include <functional>
 
 using namespace std::string_literals;
 

@@ -1,11 +1,12 @@
 #ifndef EFFECTS_H_DEFINED
 #define EFFECTS_H_DEFINED
 
+#include <AudioFile.h>
+
 #include <string>
 #include <memory>
 #include <tuple>
 #include "generators.h"
-#include "AudioFile/AudioFile.h"
 #include "../gui/Slider.h"
 #include "../gui/Button.h"
 #include "../gui/Oscilloscope.h"

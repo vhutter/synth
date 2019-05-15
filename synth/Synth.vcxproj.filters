@@ -4,14 +4,8 @@
     <Filter Include="Core">
       <UniqueIdentifier>{b8115da6-46bc-4414-9896-be0172be9820}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\AudioFile">
-      <UniqueIdentifier>{aa171bf5-235b-4d06-a1c0-9dc3728ec4a7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Gui">
       <UniqueIdentifier>{0c409f2c-ea1c-49e0-8af0-43dbda359ce3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Gui\RtMidi">
-      <UniqueIdentifier>{effe7dda-01d4-4123-9624-dedbd2f522f3}</UniqueIdentifier>
     </Filter>
     <Filter Include="SynthMain">
       <UniqueIdentifier>{f4bb2d05-df10-4485-b466-225b93475cf7}</UniqueIdentifier>
@@ -51,9 +45,6 @@
     <ClCompile Include="gui\Frame.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
-    <ClCompile Include="gui\RtMidi\RtMidi.cpp">
-      <Filter>Gui\RtMidi</Filter>
-    </ClCompile>
     <ClCompile Include="gui\Configurable.cpp">
       <Filter>Gui</Filter>
     </ClCompile>
@@ -74,9 +65,6 @@
     </ClCompile>
     <ClCompile Include="core\tones.cpp">
       <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="core\AudioFile\AudioFile.cpp">
-      <Filter>Core\AudioFile</Filter>
     </ClCompile>
     <ClCompile Include="core\utility.cpp">
       <Filter>Core</Filter>
@@ -132,9 +120,6 @@
     <ClInclude Include="gui\GuiElements.h">
       <Filter>Gui</Filter>
     </ClInclude>
-    <ClInclude Include="gui\RtMidi\RtMidi.h">
-      <Filter>Gui\RtMidi</Filter>
-    </ClInclude>
     <ClInclude Include="gui\Input.h">
       <Filter>Gui</Filter>
     </ClInclude>
@@ -152,9 +137,6 @@
     </ClInclude>
     <ClInclude Include="core\tones.h">
       <Filter>Core</Filter>
-    </ClInclude>
-    <ClInclude Include="core\AudioFile\AudioFile.h">
-      <Filter>Core\AudioFile</Filter>
     </ClInclude>
     <ClInclude Include="core\utility.h">
       <Filter>Core</Filter>

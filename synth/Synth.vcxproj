@@ -18,26 +18,27 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D54C7D50-3940-4ED8-A128-7FA5B5C63E7C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>false</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>Spectre</SpectreMitigation>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <SpectreMitigation>false</SpectreMitigation>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -65,7 +66,7 @@
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>..\SFML-2.5.1\include;..\portaudio\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SFML-2.5.1\include;..\portaudio\include;..\AudioFile;..\RtMidi</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>SFML_STATIC;__WINDOWS_MM__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -85,7 +86,7 @@
     </Link>
     <ClCompile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>..\SFML-2.5.1\include;..\portaudio\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SFML-2.5.1\include;..\portaudio\include;..\AudioFile;..\RtMidi</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PreprocessorDefinitions>SFML_STATIC;__WINDOWS_MM__;__TEST__</PreprocessorDefinitions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -95,28 +96,30 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\SFML-2.5.1\include;..\portaudio\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\SFML-2.5.1\include;..\portaudio\include;..\AudioFile;..\RtMidi</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ConformanceMode>true</ConformanceMode>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
       <DisableSpecificWarnings>4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <Optimization>Disabled</Optimization>
-      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-      <OmitFramePointers>false</OmitFramePointers>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <OmitFramePointers>true</OmitFramePointers>
       <PreprocessorDefinitions>SFML_STATIC;__WINDOWS_MM__</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\libs</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;winmm.lib;gdi32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="core\AudioFile\AudioFile.cpp" />
     <ClCompile Include="core\effects.cpp" />
     <ClCompile Include="core\generators.cpp" />
     <ClCompile Include="core\Instrument.cpp" />
@@ -131,7 +134,6 @@
     <ClCompile Include="gui\Input.cpp" />
     <ClCompile Include="gui\MenuOption.cpp" />
     <ClCompile Include="gui\Oscilloscope.cpp" />
-    <ClCompile Include="gui\RtMidi\RtMidi.cpp" />
     <ClCompile Include="gui\Slider.cpp" />
     <ClCompile Include="gui\SynthKeyboard.cpp" />
     <ClCompile Include="gui\TextDisplay.cpp" />
@@ -155,7 +157,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="core\AudioFile\AudioFile.h" />
     <ClInclude Include="core\effects.h" />
     <ClInclude Include="core\generators.h" />
     <ClInclude Include="core\Instrument.h" />
@@ -170,7 +171,6 @@
     <ClInclude Include="gui\Input.h" />
     <ClInclude Include="gui\MenuOption.h" />
     <ClInclude Include="gui\Oscilloscope.h" />
-    <ClInclude Include="gui\RtMidi\RtMidi.h" />
     <ClInclude Include="gui\Slider.h" />
     <ClInclude Include="gui\SynthKeyboard.h" />
     <ClInclude Include="gui\TextDisplay.h" />
@@ -187,8 +187,14 @@
     <None Include="gui\Configurable.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AudioFile\AudioFile.vcxproj">
+      <Project>{31e654ac-05c2-4d4e-a540-21f06b8bb2c2}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\portaudio\build\portaudio_static.vcxproj">
       <Project>{2a9ec4d2-8cb2-3d7a-aacf-e011cf970459}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\RtMidi\RtMidi.vcxproj">
+      <Project>{ccc15d48-b393-41e4-b815-81a7ce0fb9f1}</Project>
     </ProjectReference>
     <ProjectReference Include="..\SFML-2.5.1\build\src\SFML\Graphics\sfml-graphics.vcxproj">
       <Project>{3cfa12d1-e93e-3b9c-9db9-e936029b9599}</Project>

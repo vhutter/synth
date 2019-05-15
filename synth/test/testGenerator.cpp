@@ -1,5 +1,6 @@
+#include <AudioFile.h>
+
 #include "test.h"
-#include "../core/AudioFile/AudioFile.h"
 
 void testGenerator()
 {
