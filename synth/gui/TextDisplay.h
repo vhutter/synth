@@ -2,7 +2,7 @@
 #define TEXTDISPLAY_H_INCLUDED
 
 #include "Frame.h"
-#include "../utility.h"
+#include "../core/utility.h"
 
 class TextDisplay : public Frame
 {

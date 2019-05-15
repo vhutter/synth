@@ -2,7 +2,7 @@
 #define INPUTFIELD_H_INCLUDED
 
 #include "Button.h"
-#include "../utility.h"
+#include "../core/utility.h"
 
 class InputField : public Button
 {

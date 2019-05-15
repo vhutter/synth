@@ -1,1 +1,0 @@
-arr = ['EmptyGuiElement', 'SynthKeyboard', 'TextDisplay', 'Button', 'Slider', 'Oscilloscope', 'Window'];

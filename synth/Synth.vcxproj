@@ -122,9 +122,7 @@
     <ClCompile Include="core\Instrument.cpp" />
     <ClCompile Include="core\SynthStream.cpp" />
     <ClCompile Include="core\tones.cpp" />
-    <ClCompile Include="gui.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="core\utility.cpp" />
     <ClCompile Include="gui\Button.cpp" />
     <ClCompile Include="gui\Configurable.cpp" />
     <ClCompile Include="gui\events.cpp" />
@@ -138,12 +136,9 @@
     <ClCompile Include="gui\SynthKeyboard.cpp" />
     <ClCompile Include="gui\TextDisplay.cpp" />
     <ClCompile Include="gui\Window.cpp" />
-    <ClCompile Include="main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="synthMain.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="synthMain\gui.cpp" />
+    <ClCompile Include="synthMain\synthMain.cpp" />
     <ClCompile Include="test\testGenerator.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">false</ExcludedFromBuild>
@@ -158,7 +153,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\AudioFile\AudioFile.h" />
@@ -167,9 +161,7 @@
     <ClInclude Include="core\Instrument.h" />
     <ClInclude Include="core\SynthStream.h" />
     <ClInclude Include="core\tones.h" />
-    <ClInclude Include="gui.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="core\utility.h" />
     <ClInclude Include="gui\Button.h" />
     <ClInclude Include="gui\events.h" />
     <ClInclude Include="gui\Frame.h" />
@@ -183,15 +175,13 @@
     <ClInclude Include="gui\SynthKeyboard.h" />
     <ClInclude Include="gui\TextDisplay.h" />
     <ClInclude Include="gui\Window.h" />
-    <ClInclude Include="synthMain.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="synthMain\gui.h" />
+    <ClInclude Include="synthMain\synthMain.h" />
     <ClInclude Include="test\test.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="utility.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gui\Configurable.h" />

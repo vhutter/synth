@@ -2,7 +2,7 @@
 #define GUIELEMENT_H_INCLUDED
 
 #include <sfml/Graphics.hpp>
-#include "../utility.h"
+#include "../core/utility.h"
 #include "events.h"
 
 class GuiElement : public sf::Drawable, public sf::Transformable, public std::enable_shared_from_this<GuiElement>

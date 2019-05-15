@@ -1,7 +1,7 @@
 #include "SynthKeyboard.h"
 
 #include <optional>
-#include "../utility.h"
+#include "../core/utility.h"
 
 SynthVec2 SynthKey::whiteSizeDefault()
 {

@@ -1,8 +1,9 @@
 #include "gui.h"
-#include "gui/GuiElement.h"
-#include "gui/Window.h"
-#include "gui/Slider.h"
-#include "core/Instrument.h"
+
+#include "../gui/GuiElement.h"
+#include "../gui/Window.h"
+#include "../gui/Slider.h"
+#include "../core/Instrument.h"
 
 #include <unordered_map>
 #include <optional>

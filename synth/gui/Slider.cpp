@@ -1,6 +1,6 @@
 #include "Slider.h"
 #include "TextDisplay.h"
-#include "../utility.h"
+#include "../core/utility.h"
 
 #include <string>
 #include <sstream>

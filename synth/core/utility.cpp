@@ -1,5 +1,5 @@
 #include "utility.h"
-#include "core/generators.h"
+#include "../core/generators.h"
 
 #include <unordered_set>
 #include <fstream>

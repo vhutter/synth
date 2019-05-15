@@ -4,8 +4,8 @@
 #include "test/test.h"
 #else
 #include <exception>
-#include "utility.h"
-#include "synthMain.h"
+#include "core/utility.h"
+#include "synthMain/synthMain.h"
 #endif
 
 int main(int argc, char** argv)

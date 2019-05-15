@@ -3,7 +3,7 @@
 
 #include <variant>
 #include "Button.h"
-#include "../utility.h"
+#include "../core/utility.h"
 
 class Window;
 

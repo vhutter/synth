@@ -1,5 +1,5 @@
 #include "Instrument.h"
-#include "../utility.h"
+#include "utility.h"
 
 Instrument::Instrument(const std::string& title)
 	:title(title),

@@ -1,6 +1,6 @@
 #include "synthMain.h"
 
-#include "gui/GuiElements.h"
+#include "../gui/GuiElements.h"
 
 #include "gui.h"
 

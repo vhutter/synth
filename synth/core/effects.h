@@ -11,7 +11,7 @@
 #include "../gui/Oscilloscope.h"
 #include "../gui/Window.h"
 #include "../gui/events.h"
-#include "../utility.h"
+#include "utility.h"
 
 class EffectBase
 {

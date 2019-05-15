@@ -1,86 +1,64 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Tests">
-      <UniqueIdentifier>{78cd687e-4c68-4196-b697-40778d30abb9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="gui">
-      <UniqueIdentifier>{0c409f2c-ea1c-49e0-8af0-43dbda359ce3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Main">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="gui\RtMidi">
-      <UniqueIdentifier>{effe7dda-01d4-4123-9624-dedbd2f522f3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{b8115da6-46bc-4414-9896-be0172be9820}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\AudioFile">
       <UniqueIdentifier>{aa171bf5-235b-4d06-a1c0-9dc3728ec4a7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Gui">
+      <UniqueIdentifier>{0c409f2c-ea1c-49e0-8af0-43dbda359ce3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gui\RtMidi">
+      <UniqueIdentifier>{effe7dda-01d4-4123-9624-dedbd2f522f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SynthMain">
+      <UniqueIdentifier>{f4bb2d05-df10-4485-b466-225b93475cf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Test">
+      <UniqueIdentifier>{42dfbc99-e3dc-4765-9d98-3d955ae30438}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="gui.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
     <ClCompile Include="gui\Button.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\Oscilloscope.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\Slider.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\SynthKeyboard.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\TextDisplay.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\Window.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\GuiElement.cpp">
-      <Filter>gui</Filter>
-    </ClCompile>
-    <ClCompile Include="utility.cpp">
-      <Filter>Main</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\events.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\MenuOption.cpp">
-      <Filter>gui</Filter>
-    </ClCompile>
-    <ClCompile Include="synthMain.cpp">
-      <Filter>Main</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\Frame.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\RtMidi\RtMidi.cpp">
-      <Filter>gui\RtMidi</Filter>
-    </ClCompile>
-    <ClCompile Include="test\testMain.cpp">
-      <Filter>Tests</Filter>
+      <Filter>Gui\RtMidi</Filter>
     </ClCompile>
     <ClCompile Include="gui\Configurable.cpp">
-      <Filter>gui</Filter>
-    </ClCompile>
-    <ClCompile Include="test\testGenerator.cpp">
-      <Filter>Tests</Filter>
-    </ClCompile>
-    <ClCompile Include="test\testGui.cpp">
-      <Filter>Tests</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="gui\Input.cpp">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClCompile>
     <ClCompile Include="core\effects.cpp">
       <Filter>Core</Filter>
@@ -100,58 +78,65 @@
     <ClCompile Include="core\AudioFile\AudioFile.cpp">
       <Filter>Core\AudioFile</Filter>
     </ClCompile>
+    <ClCompile Include="core\utility.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="synthMain\gui.cpp">
+      <Filter>SynthMain</Filter>
+    </ClCompile>
+    <ClCompile Include="synthMain\synthMain.cpp">
+      <Filter>SynthMain</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="test\testMain.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\testGui.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="test\testGenerator.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gui\Button.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\Oscilloscope.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\Slider.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\SynthKeyboard.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\TextDisplay.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\Window.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\GuiElement.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\events.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\MenuOption.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\Frame.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\GuiElements.h">
-      <Filter>gui</Filter>
-    </ClInclude>
-    <ClInclude Include="gui.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="synthMain.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="utility.h">
-      <Filter>Main</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="gui\RtMidi\RtMidi.h">
-      <Filter>gui\RtMidi</Filter>
-    </ClInclude>
-    <ClInclude Include="test\test.h">
-      <Filter>Tests</Filter>
+      <Filter>Gui\RtMidi</Filter>
     </ClInclude>
     <ClInclude Include="gui\Input.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </ClInclude>
     <ClInclude Include="core\effects.h">
       <Filter>Core</Filter>
@@ -171,10 +156,22 @@
     <ClInclude Include="core\AudioFile\AudioFile.h">
       <Filter>Core\AudioFile</Filter>
     </ClInclude>
+    <ClInclude Include="core\utility.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="synthMain\gui.h">
+      <Filter>SynthMain</Filter>
+    </ClInclude>
+    <ClInclude Include="synthMain\synthMain.h">
+      <Filter>SynthMain</Filter>
+    </ClInclude>
+    <ClInclude Include="test\test.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="gui\Configurable.h">
-      <Filter>gui</Filter>
+      <Filter>Gui</Filter>
     </None>
   </ItemGroup>
 </Project>
