@@ -73,11 +73,14 @@ void VolumeControl::effectImpl(double t, double & sample) const
 	sample *= impl->amp.getValue(t);
 }
 
-DelayEffect::DelayEffect(unsigned sampleRate, double echoLength, double coeffArg)
-	:impl{ std::make_shared<Impl>() }
+DelayEffect::DelayEffect(unsigned sampleRate, double echoLength, double coeffArg, unsigned nChannels)
+	:impl{ std::make_shared<Impl>() },
+	nChannels(nChannels)
 {
 	auto& _impl = *impl;
 	
+	sampleRate *= nChannels;
+
 	_impl.coeff = coeffArg;
 	_impl.length = echoLength;
 	_impl.sampleRate = sampleRate;
@@ -102,11 +105,10 @@ DelayEffect::DelayEffect(unsigned sampleRate, double echoLength, double coeffArg
 void DelayEffect::effectImpl(double t, double & sample) const
 {
 	auto& _impl = *impl;
-	static unsigned sampleId{ 0 };
-	unsigned idx = sampleId % unsigned(_impl.sampleRate * _impl.length);
+	unsigned idx = _impl.sampleId % unsigned(_impl.sampleRate * _impl.length);
 	sample += _impl.echoBuf[idx] * _impl.coeff;
 	_impl.echoBuf[idx] = sample;
-	++sampleId;
+	++_impl.sampleId;
 }
 
 Glider::Impl::Impl(const TimbreModel& model) 

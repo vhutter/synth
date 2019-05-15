@@ -83,6 +83,7 @@ Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, Sy
 Slider::Slider(const std::string& str, double from, double to, SynthFloat sx, SynthFloat sy, unsigned titleSize, Orientation ori, std::atomic<double>& val)
 	: Slider(str, from, to, sx, sy, titleSize, ori, [&]() {val = getValue(); })
 {
+	setValue(val);
 }
 
 bool Slider::needsEvent(const SynthEvent & event) const

@@ -109,7 +109,8 @@ public:
 	DelayEffect( 
 		unsigned sampleRate, 
 		double echoLength,
-		double echoCoeff
+		double echoCoeff,
+		unsigned nChannels = 2
 	);
 	void effectImpl(double t, double& sample) const;
 
@@ -118,13 +119,14 @@ private:
 	{
 		std::atomic<double> coeff;
 		std::atomic<double> length;
-		unsigned sampleRate;
+		unsigned sampleRate, sampleId{ 0 };
 		std::vector<double> echoBuf;
 		std::shared_ptr<Slider> sliderCoeff;
 		std::shared_ptr<Slider> sliderTime;
 	};
 
 	std::shared_ptr<Impl> impl;
+	const unsigned nChannels;
 };
 
 class Glider : public PostSampleEffect<Glider>
