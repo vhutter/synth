@@ -71,63 +71,6 @@ std::vector<Note> generateNotes(int from, int to)
 	return notes;
 }
 
-bool isAlpha(const sf::Keyboard::Key& key)
-{
-	using K = sf::Keyboard::Key;
-	static std::unordered_set<sf::Keyboard::Key> set{
-		K::A,
-		K::B,
-		K::C,
-		K::D,
-		K::E,
-		K::F,
-		K::G,
-		K::H,
-		K::I,
-		K::J,
-		K::K,
-		K::L,
-		K::M,
-		K::N,
-		K::O,
-		K::P,
-		K::Q,
-		K::R,
-		K::S,
-		K::T,
-		K::U,
-		K::V,
-		K::W,
-		K::X,
-		K::Y,
-		K::Z,
-	};
-	return set.find(key) != set.end();
-}
-
-bool isNumeric(const sf::Keyboard::Key& key)
-{
-	using K = sf::Keyboard::Key;
-	static std::unordered_set<sf::Keyboard::Key> set{
-		K::Num0,
-		K::Num1,
-		K::Num2,
-		K::Num3,
-		K::Num4,
-		K::Num5,
-		K::Num6,
-		K::Num7,
-		K::Num8,
-		K::Num9,
-	};
-	return set.find(key) != set.end();
-}
-
-bool isAlnum(const sf::Keyboard::Key& key)
-{
-	return isNumeric(key) || isAlpha(key);
-}
-
 void log(const std::string& str)
 {
 	static std::ofstream log("Logs.txt", std::ios_base::app);
@@ -138,28 +81,34 @@ void log(const std::string& str)
 	}
 }
 
-//https://stackoverflow.com/questions/28054528/overloading-ifstream-iterator-for-pairs
-struct P : std::pair<std::string, unsigned>
+namespace
 {
-	using std::pair<std::string, unsigned>::pair;
-};
+	//https://stackoverflow.com/questions/28054528/overloading-ifstream-iterator-for-pairs
+	struct P : std::pair<std::string, unsigned>
+	{
+		using std::pair<std::string, unsigned>::pair;
+	};
 
-std::istream& operator>> (std::istream& in, P& p)
-{
-	std::string tmp;
-	in >> p.first >> tmp;
-	std::istringstream iss(tmp);
-	if (tmp.rfind("0x", 0) == 0) {
-		iss >> std::hex >> p.second;
+	std::istream& operator>> (std::istream& in, P& p)
+	{
+		std::string tmp;
+		in >> p.first >> tmp;
+		std::istringstream iss(tmp);
+		if (tmp.rfind("0x", 0) == 0) {
+			iss >> std::hex >> p.second;
+		}
+		else {
+			iss >> std::dec >> p.second;
+		}
+		return in;
 	}
-	else {
-		iss >> std::dec >> p.second;
-	}
-	return in;
-}
+};
 
 unsigned getConfig(const std::string& str)
 {
+	static std::mutex mtx;
+	std::lock_guard lock(mtx);
+
 	static std::ifstream cfgFile("Config.txt");
 	static std::unordered_map<std::string, unsigned> cfg{
 		std::istream_iterator<P>(cfgFile),
