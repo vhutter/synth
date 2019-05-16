@@ -4,6 +4,8 @@
 *.exe
 *.a
 *.so
+*.tlog
+*.cd
 
 synth/Logs.txt
 

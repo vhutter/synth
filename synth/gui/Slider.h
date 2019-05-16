@@ -95,36 +95,4 @@ private:
 	SynthVec2 sliderRectSize;
 };
 
-class TimedSlider : public Slider
-{
-public:
-	TimedSlider(
-		const std::string& name,
-		double from, double to,
-		SynthFloat sx, SynthFloat sy,
-		unsigned titleSize,
-		Orientation ori,
-		std::atomic<double>& val
-	)
-		:Slider(name, from, to, sx, sy, titleSize, ori, val)
-	{}
-
-	static std::unique_ptr<Slider> DefaultSlider(
-		const std::string& name, 
-		double from, double to, 
-		std::atomic<double>& val,
-		std::mutex& mtx)
-	{
-
-	}
-
-	double getValue(double t) const {
-		return value.getValue(t);
-	}
-
-private:
-
-	ContinuousFunction value;
-};
-
 #endif //SLIDER_H_INCLUDED
