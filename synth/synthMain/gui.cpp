@@ -45,14 +45,22 @@ namespace
 		static auto& inst3 = getInputInstrument();
 
 		static KeyboardInstrument inst4{
-			"Synth 2",
+			"Slow ADSR",
 			SinesTriangles(),
 			ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
 			generateNotes(2, 5),
 			getConfig("maxNoteCount")
 		};
 
-		static auto instruments = std::forward_as_tuple(inst1, inst2, inst3);
+		static KeyboardInstrument inst5{
+			"Sawtooth",
+			Saw(),
+			ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
+			generateNotes(2, 5),
+			getConfig("maxNoteCount")
+		};
+
+		static auto instruments = std::forward_as_tuple(inst1, inst2, inst3, inst4, inst5); 
 		return instruments;
 	}
 

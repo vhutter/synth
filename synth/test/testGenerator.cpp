@@ -2,72 +2,63 @@
 
 #include "test.h"
 
-void testGenerator()
+template<class Instrument_t, class Arr_t>
+void test(
+	Instrument_t& inst,
+	const unsigned sampleRate,
+	const double seconds,
+	const Arr_t& keys
+)
 {
-	static KeyboardInstrument inst(
-		"Sdfasd",
-		Sines1(),
-		ADSREnvelope(),
-		generateNotes(2, 5),
-		15
-	);
+	static unsigned testId = 0;
+	++testId;
+	std::cout << "Running test " << testId << " ...\n";
+
+	// Record 
 	auto& gen = inst.getGenerator();
-	
-	const unsigned sampleRate = 44100;
-	auto save = SaveToFile("Test", 44100, 2);
+
+	auto save = SaveToFile("Test"s + std::to_string(testId), sampleRate, 2);
 
 	gen.addAfterCallback(save);
-	gen[5].start(0.);
+	for (auto key : keys) gen[key].start(0.);
 	save.start();
 	double dt = 1. / double(sampleRate);
 	double t = 0.;
-	for (unsigned i = 0; i < sampleRate * 2; ++i) {
+	for (unsigned i = 0; i < sampleRate * seconds; ++i) {
 		gen.getSample(t);
 		t += dt;
 	}
 	save.stop();
-	
+	std::cout << "Test " << testId << " ended.\n";
+}
 
-
-
-	//AudioFile<double> audioFile;
-	//AudioFile<double>::AudioBuffer buffer;
-	//
-	//// 2. Set to (e.g.) two channels
-	//buffer.resize(2);
-	//
-	//// 3. Set number of samples per channel
-	//buffer[0].resize(100000);
-	//buffer[1].resize(100000);
-	//
-	//
-	//int numChannels = 1;
-	//int numSamplesPerChannel = 100000;
-	//float sampleRate = 44100.f;
-	//float frequency = 440.f;
-	//
-	//for (int i = 0; i < numSamplesPerChannel; i++)
-	//{
-	//	float sample = sinf(2. * ((float)i / sampleRate) * frequency);
-	//
-	//	for (int channel = 0; channel < numChannels; channel++)
-	//		buffer[channel][i] = sample * 0.5;
-	//}
-	//
-	//// 5. Put into the AudioFile object
-	//bool ok = audioFile.setAudioBuffer(buffer);
-	//
-	//// Set the number of samples per channel
-	//audioFile.setNumSamplesPerChannel(numSamplesPerChannel);
-	//
-	//// Set the number of channels
-	//audioFile.setNumChannels(1); 
-	//audioFile.setBitDepth(24);
-	//audioFile.setSampleRate(44100);
-	//
-	//audioFile.setBitDepth(24);
-	//audioFile.setSampleRate(44100);
-	//
-	//// Wave file (explicit)
-	//audioFile.save("test.wav", AudioFileFormat::Wave);
+void testGenerator()
+{
+	static KeyboardInstrument inst1(
+		"Test",
+		Sines1(),
+		ADSREnvelope(.5, .1),
+		generateNotes(2, 5),
+		15
+	);
+	static KeyboardInstrument inst2(
+		"Test",
+		SinesTriangles(),
+		ADSREnvelope(.5, .1),
+		generateNotes(4, 5),
+		15
+	);
+	static KeyboardInstrument inst3(
+		"Test",
+		SinesTriangles(),
+		ADSREnvelope(),
+		generateNotes(1, 6),
+		15
+	);
+	auto maj79 = { 0, 4, 7, 10, 14 };
+	auto dim7  = { 0, 3, 6, 9 };
+	auto big   = { 0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42 };
+	//test(inst1, 44100, 2., maj79);
+	//test(inst2, 44100, 2., dim7);
+	test(inst3, 96000, 5., big);
 }

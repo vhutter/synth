@@ -37,10 +37,10 @@ public:
 	ADSREnvelope(const ADSREnvelope& rhs) = default;
     ~ADSREnvelope() = default;
 
-    void start(double t);
-    void stop(double t);
+    void   start(double t);
+    void   stop(double t);
     double getAmplitude(double t) const;
-    bool isNonZero() const {return nonzero;}
+    bool   isNonZero() const {return nonzero;}
 
 private:
 	void calculateTimePoints();
@@ -110,10 +110,6 @@ public:
 
 	static const std::array<Note, 12> baseNotes();
 };
-
-
-class WaveGenerator;
-
 template<class T>
 class SampleGenerator
 {
@@ -140,6 +136,8 @@ protected:
 	double getMainFreqImpl() const { return 1.; }
 	constexpr double getIntensityImpl(double t) { return 0.; }
 };
+
+class WaveGenerator;
 
 class SumGenerator : public SampleGenerator<SumGenerator>
 {
@@ -176,24 +174,21 @@ private:
 	afterSample_t afterSample;
 };
 
-template<class T>
 class DynamicAmp
 {
 public:
 	DynamicAmp(double intensity):
 		intensityFunction { intensity }
 	{}
-
 	void modifyIntensity(double t, double to)
 	{
 		intensityFunction.setValueLinear(to, t, 0.01);
 	}
-
 protected:
 	ContinuousFunction intensityFunction;
 };
 
-class WaveGenerator : public SampleGenerator<WaveGenerator>, public DynamicAmp<WaveGenerator>
+class WaveGenerator : public SampleGenerator<WaveGenerator>, public DynamicAmp
 {
 	friend class SampleGenerator<WaveGenerator>;
 
@@ -210,7 +205,7 @@ public:
 	);
 
 private:
-	void modifyMainPitchImpl(double t, double dest);
+	void modifyMainPitchImpl(double t, double f2);
     double getSampleImpl(double t);
 	double getMainFreqImpl() const;
 	constexpr double getIntensityImpl() const;
@@ -397,8 +392,6 @@ public:
 	void unlock() const;
 
 private:
-
-	//using base_t::operator[];
 
 	template<class T>
 	struct give_id
