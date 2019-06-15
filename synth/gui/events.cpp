@@ -1,4 +1,5 @@
 #include "events.h"
+#include "../core/utility.h"
 
 #include <exception>
 
@@ -101,6 +102,9 @@ MidiContext::~MidiContext()
 
 MidiContext::MidiContext(std::optional<unsigned> port)
 {
+	midiInput.setErrorCallback([](RtMidiError::Type type, const std::string & errorText, void* userData) {
+		log("MidiError: "s + errorText);
+	});
 	unsigned portCount = midiInput.getPortCount();
 	if (portCount > 0){
 		if (!port) {

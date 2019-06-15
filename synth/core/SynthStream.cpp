@@ -73,7 +73,7 @@ SynthStream::SynthStream(
                          paNoFlag,         /* Automatically clip samples out of [-1, 1] */
                          PaStreamCallbackData::callbackFunction,
                          &callbackData );
-    ErrorCheck(Pa_Initialize());
+    ErrorCheck(err);
 }
 
 SynthStream::~SynthStream()
@@ -81,7 +81,7 @@ SynthStream::~SynthStream()
 	if (running) {
 		stop();
 	}
-    Pa_Terminate();
+    ErrorCheck(Pa_Terminate());
 }
 
 void SynthStream::play()
