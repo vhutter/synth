@@ -14,6 +14,7 @@
 #include <mutex>
 #include <array>
 #include <optional>
+#include <unordered_set>
 #include <SFML/System.hpp>
 
 #include "../gui/SynthKeyboard.h"
@@ -437,8 +438,8 @@ private:
 		}
 	}
 
+	std::unordered_set<unsigned> pressedKeys;
 	const unsigned maxTones;
-	int pressedKeys{ 0 };
 	mutable std::atomic<double> lastTime{ 0 };
 	mutable std::mutex mtx;
 	std::vector<give_id<after_t>> afterSampleCallbacks;

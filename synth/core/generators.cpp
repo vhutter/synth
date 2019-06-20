@@ -173,11 +173,6 @@ void WaveGenerator::modifyMainPitchImpl(double t, double f2)
 	this->freq = f2;
 }
 
-void DynamicToneSum::releaseKeys()
-{
-	pressedKeys = 0;
-}
-
 double WaveGenerator::getSampleImpl(double t)
 {
 	intensity = intensityFunction.getValue(t);
@@ -221,11 +216,16 @@ double DynamicToneSum::getSample(double t)
 	if (beforeSample) beforeSample(t, *const_cast<DynamicToneSum*>(this));
 	double result{ 0. };
 	std::size_t count{ 0 };
-	for (auto& c : components) {
+	for (auto i = pressedKeys.begin(); i != pressedKeys.end();) {
+		auto& c = components[*i];
 		if (count >= maxTones) break;
 		if (auto sample = c.getSample(t)) {
 			++count;
 			result += sample.value();
+			++i;
+		}
+		else {
+			i = pressedKeys.erase(i);
 		}
 	}
 	result /= maxTones;
@@ -277,15 +277,19 @@ void DynamicToneSum::removeBeforeCallback(unsigned id)
 void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 {
 	if (keyState == SynthKey::State::Pressed) {
-		if (++pressedKeys <= maxTones) {
+		if (pressedKeys.size() < maxTones) {
+			pressedKeys.insert(keyIdx);
 			components.at(keyIdx).start(this->time());
 		}
 	}
 	else {
-		--pressedKeys;
 		components.at(keyIdx).stop(this->time());
 	}
-	if (pressedKeys < 0) pressedKeys = 0;
+}
+
+void DynamicToneSum::releaseKeys()
+{
+	pressedKeys.clear();
 }
 
 TimbreModel::TimbreModel(
