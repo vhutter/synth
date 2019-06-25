@@ -7,7 +7,7 @@
 int synthMain(int argc, char** argv)
 {
 	const unsigned wWidth{ 1100 }, wHeight{ 600 }, menuHeight{ getConfig("defaultHeaderSize") };
-	sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "Basic synth");
+	sf::RenderWindow window(sf::VideoMode(wWidth, wHeight), "Synth");
 	std::shared_ptr mainWindow = std::make_shared<Window>(0, menuHeight, sf::Color::Black);
 	mainWindow->setSize({ SynthFloat(wWidth), SynthFloat(wHeight - menuHeight) });
 	mainWindow->setMenuBar(menuHeight);
