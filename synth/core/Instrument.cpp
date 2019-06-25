@@ -66,7 +66,7 @@ KeyboardInstrument::KeyboardInstrument(
 		
 		auto cValueInput = std::make_shared<InputField>(InputField::Double, 100, getConfig("defaultTextHeight"));
 		cValueInput->setTextCentered(std::to_string(timbre.components[i].relativeFreq));
-		cValueInput->setOnEnd([this, cValueInput, i]() {
+		cValueInput->setOnEnd([this, cValueInput, i, &timbre]() {
 			std::string valStr = cValueInput->getText();
 			double val;
 			if (i == 0) {
@@ -74,13 +74,18 @@ KeyboardInstrument::KeyboardInstrument(
 			}
 			else try {
 				val = std::stod(valStr);
+				if (val == 0) {
+					throw std::runtime_error("0 is not allowed for this input");
+				}
 				std::lock_guard lock(generator);
 				for (std::size_t j = 0; j < generator.size(); ++j) {
 					auto& g = generator[j];
 					g[i].modifyMainPitch(generator.time(), g[0].getMainFreq() * val);
 				}
 			}
-			catch (...) {}
+			catch (...) {
+				cValueInput->setTextCentered(std::to_string(timbre.components[i].relativeFreq));
+			}
 		});
 
 		cFrame->setChildAlignment(2);
