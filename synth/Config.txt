@@ -1,6 +1,6 @@
 sampleRate 44100
 bufferSize 64
-maxNoteCount 3
+maxNoteCount 5
 
 defaultWindowColor 0x333333cc
 defaultHeaderSize 30

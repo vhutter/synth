@@ -277,7 +277,7 @@ void DynamicToneSum::removeBeforeCallback(unsigned id)
 void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 {
 	if (keyState == SynthKey::State::Pressed) {
-		if (pressedKeys.size() < maxTones) {
+		if (pressedKeys.size() < maxTones && !pressedKeys.count(keyIdx)) {
 			pressedKeys.insert(keyIdx);
 			components.at(keyIdx).start(this->time());
 		}

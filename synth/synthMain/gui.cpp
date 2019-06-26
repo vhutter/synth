@@ -55,7 +55,7 @@ namespace
 		static KeyboardInstrument inst5{
 			"Sawtooth",
 			Saw(),
-			ADSREnvelope(0.5, 0.2, 0.5, 1., 0.5),
+			ADSREnvelope(0.01, 0.01, 0.5, 0.06, 0.01),
 			generateNotes(2, 5),
 			getConfig("maxNoteCount")
 		};
