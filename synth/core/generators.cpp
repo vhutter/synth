@@ -276,6 +276,7 @@ void DynamicToneSum::removeBeforeCallback(unsigned id)
 
 void DynamicToneSum::onKeyEvent(unsigned keyIdx, SynthKey::State keyState)
 {
+	std::lock_guard lock(*this);
 	if (keyState == SynthKey::State::Pressed) {
 		if (pressedKeys.size() < maxTones && !pressedKeys.count(keyIdx)) {
 			pressedKeys.insert(keyIdx);
